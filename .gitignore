@@ -43,3 +43,6 @@ next-env.d.ts
 # dev docs
 AirMilesCalc-ProjectSpec.md
 CLAUDE_CODE_PROMPT.md
+
+# devcontainer
+.devcontainer/port
