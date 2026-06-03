@@ -10,7 +10,7 @@ import { slugify } from '@/lib/slug';
 import { displayCountryName } from '@/lib/country';
 import AirportMap from '@/components/maps/AirportMap';
 import { InternalLinks, Callout } from '@/components/content/blocks';
-import { ogImageMeta, twitterMeta } from '@/lib/og';
+import { ogDefaults, ogImageMeta, twitterMeta } from '@/lib/og';
 
 type AirportTier =
   | { label: 'Major hub'; tone: 'major' }
@@ -281,8 +281,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const isThin = countryAirports.length < MIN_AIRPORTS_FOR_INDEX;
 
   return {
-    title: `Airports in ${name} — Full IATA Code List & Distance Calculator`,
-    description: `Complete list of airports in ${name}: every IATA code, city, coordinates, and route network on one page. Calculate flight distance from any ${name} airport to anywhere in the world.`,
+    // Title trimmed: was 84ch ("Airports in United States — Full IATA Code
+    // List & Distance Calculator") plus the layout's " | AirMilesCalc" suffix
+    // pushed past Google's ~60ch SERP truncation. Shorter form fits the
+    // budget even for long country names like Bosnia and Herzegovina.
+    title: `Airports in ${name} — IATA codes & distances`,
+    description: `All ${name} airports with IATA codes, coordinates, and route counts. Calculate flight distance from any ${name} airport to anywhere worldwide.`,
     keywords: [
       `airports in ${name}`,
       `${name} airports`,
@@ -294,7 +298,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: { canonical: `/airports/${slug}` },
     ...(isThin && { robots: { index: false, follow: true } }),
     openGraph: {
-      title: `Airports in ${name} — AirMilesCalc`,
+      ...ogDefaults(),
+      title: `Airports in ${name}`,
       description: `Every airport in ${name} with IATA code, city, coordinates, and one-click distance calculations.`,
       url: `/airports/${slug}`,
       type: 'website',
@@ -326,10 +331,12 @@ export default async function CountryAirportsPage({ params }: PageProps) {
   const withRoutes = airports.filter((a) => a.routeCount > 0).length;
   const totalRoutes = airports.reduce((sum, a) => sum + a.routeCount, 0);
 
-  // ItemList structured data — each airport is a list item
+  // ItemList structured data — each airport is a list item. @id matches the
+  // hasPart reference on the CollectionPage above so both schemas join.
   const itemListSchema = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
+    '@id': `https://airmilescalc.com/airports/${slug}#itemlist`,
     name: `Airports in ${countryName}`,
     numberOfItems: airports.length,
     itemListElement: airports.slice(0, 50).map((a, i) => ({
@@ -340,22 +347,24 @@ export default async function CountryAirportsPage({ params }: PageProps) {
     })),
   };
 
-  // CollectionPage schema wrapping the country directory
+  // CollectionPage schema wrapping the country directory. Joins the site
+  // graph via isPartOf → WebSite @id, and points at the ItemList emitted in
+  // its own <script> block via hasPart → ItemList @id (the previous version
+  // declared an empty inline ItemList that didn't reference the real one).
   const collectionPageSchema = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
+    '@id': `https://airmilescalc.com/airports/${slug}#collection`,
     name: `Airports in ${countryName}`,
     description: `Complete list of commercial airports in ${countryName}, with IATA codes, coordinates, and route networks.`,
     url: `https://airmilescalc.com/airports/${slug}`,
     inLanguage: 'en',
+    isPartOf: { '@id': 'https://airmilescalc.com/#website' },
     about: {
       '@type': 'Country',
       name: countryName,
     },
-    hasPart: {
-      '@type': 'ItemList',
-      numberOfItems: airports.length,
-    },
+    hasPart: { '@id': `https://airmilescalc.com/airports/${slug}#itemlist` },
   };
 
   const breadcrumbSchema = {

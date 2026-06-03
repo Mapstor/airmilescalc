@@ -1,5 +1,24 @@
 import React from "react";
 import Link from "next/link";
+import { ogImageUrl } from "@/lib/og";
+
+// Earliest date any of these content pages were first published. Used as the
+// floor for Article datePublished when an MDX file does not declare its own
+// publication date — preferable to omitting datePublished entirely, which
+// Google's Rich Results check flags on Article-class markup.
+const CONTENT_FIRST_PUBLISHED = "2026-01-26";
+
+// Page-type override. Default is TechArticle (most methodology/learn pages);
+// policy pages (privacy, terms, accessibility) and meta pages (about, contact)
+// pass a different value so their structured data joins the right Schema.org
+// hierarchy. AboutPage and ContactPage are recognised rich-result types;
+// WebPage is the safe generic for policy content.
+export type ContentPageType =
+  | "TechArticle"
+  | "Article"
+  | "AboutPage"
+  | "ContactPage"
+  | "WebPage";
 
 export type ContentMeta = {
   title: string;
@@ -9,6 +28,7 @@ export type ContentMeta = {
   category?: string;
   breadcrumbs: { name: string; href: string }[];
   readingTime?: string;
+  pageType?: ContentPageType;
 };
 
 // AuthorBio renders below the article on every MDX content page. Provides the
@@ -85,22 +105,71 @@ export function ContentPageLayout({
   meta: ContentMeta;
   children: React.ReactNode;
 }) {
-  const ldArticle = {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    headline: meta.title,
-    description: meta.description,
-    url: `https://airmilescalc.com${meta.url}`,
-    ...(meta.updated && { dateModified: meta.updated }),
-    author: {
-      "@type": "Organization",
-      "@id": "https://airmilescalc.com/#organization",
-    },
-    publisher: {
-      "@id": "https://airmilescalc.com/#organization",
-    },
-    inLanguage: "en",
-  };
+  const pageUrl = `https://airmilescalc.com${meta.url}`;
+  const pageType = meta.pageType ?? "TechArticle";
+  const datePublished = meta.updated ?? CONTENT_FIRST_PUBLISHED;
+  const dateModified = meta.updated ?? CONTENT_FIRST_PUBLISHED;
+  const imageUrl = `https://airmilescalc.com${ogImageUrl({
+    title: meta.title,
+    subtitle: meta.description.slice(0, 120),
+    category: meta.category ?? "AirMilesCalc",
+  })}`;
+
+  // For Article-class pages (TechArticle, Article) emit the full Article
+  // shape Google Rich Results requires: headline, datePublished, dateModified,
+  // author, publisher, image, mainEntityOfPage. For non-article page types
+  // (WebPage, AboutPage, ContactPage) emit a simpler WebPage-class block that
+  // still joins the graph via isPartOf and about.
+  const isArticleType = pageType === "TechArticle" || pageType === "Article";
+  const ldArticle = isArticleType
+    ? {
+        "@context": "https://schema.org",
+        "@type": pageType,
+        headline: meta.title,
+        description: meta.description,
+        url: pageUrl,
+        datePublished,
+        dateModified,
+        author: {
+          "@type": "Person",
+          "@id": "https://airmilescalc.com/about#sam-k",
+          name: "Sam K.",
+        },
+        publisher: {
+          "@id": "https://airmilescalc.com/#organization",
+        },
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": pageUrl,
+        },
+        image: {
+          "@type": "ImageObject",
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+        },
+        isPartOf: { "@id": "https://airmilescalc.com/#website" },
+        inLanguage: "en",
+      }
+    : {
+        "@context": "https://schema.org",
+        "@type": pageType,
+        name: meta.title,
+        headline: meta.title,
+        description: meta.description,
+        url: pageUrl,
+        datePublished,
+        dateModified,
+        about: { "@id": "https://airmilescalc.com/#organization" },
+        isPartOf: { "@id": "https://airmilescalc.com/#website" },
+        primaryImageOfPage: {
+          "@type": "ImageObject",
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+        },
+        inLanguage: "en",
+      };
   const ldBreadcrumb = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

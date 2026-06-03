@@ -23,7 +23,7 @@ import AirportMap from '@/components/maps/AirportMap';
 import { displayCountryName } from '@/lib/country';
 import { slugify } from '@/lib/slug';
 import { InternalLinks, Sources, Callout } from '@/components/content/blocks';
-import { ogImageMeta, twitterMeta } from '@/lib/og';
+import { ogDefaults, ogImageMeta, twitterMeta } from '@/lib/og';
 
 interface PageProps {
   params: Promise<{ iata: string }>;
@@ -54,12 +54,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const isThin = routeCount < MIN_ROUTES_FOR_INDEX;
 
   return {
-    title: `${airport.name} (${airport.iata.toUpperCase()}) - ${airport.city}, ${displayedCountry}`,
-    description: `Airport information for ${airport.name} (${airport.iata.toUpperCase()}) in ${airport.city}, ${displayedCountry}. Find flight distances, routes, and more.`,
+    // Title trimmed: was 83ch ("Heathrow (LHR) - London, United Kingdom"
+    // already nudged 60ch raw, plus the long airport name pushed past the
+    // SERP truncation budget when the layout template appends "| AirMilesCalc").
+    // New form drops the long airport name from the title (it stays in the H1
+    // and OG subtitle) and leads with the city + IATA.
+    title: `${airport.city} (${airport.iata.toUpperCase()}) airport — distances, routes, CO₂`,
+    description: `${airport.name} (${airport.iata.toUpperCase()}) in ${airport.city}, ${displayedCountry}. Distances to every airport, scheduled routes, CO₂ by cabin class.`,
     alternates: { canonical: `/airport/${airport.iata.toLowerCase()}` },
     ...(isThin && { robots: { index: false, follow: true } }),
     openGraph: {
-      title: `${airport.iata.toUpperCase()} — ${airport.city} — AirMilesCalc`,
+      ...ogDefaults(),
+      title: `${airport.iata.toUpperCase()} — ${airport.city}`,
       description: `${airport.name} in ${airport.city}, ${displayedCountry}. Flight distances, routes, and CO₂.`,
       url: `/airport/${airport.iata.toLowerCase()}`,
       type: 'website',
@@ -171,25 +177,73 @@ export default async function AirportPage({ params }: PageProps) {
     },
   ];
 
-  // Airport schema
+  // Airport schema. Three Schema.org corrections from the previous version:
+  //   1. iataCode is the only Schema.org-defined airport-code property. The
+  //      previous `icaoCode` field was not defined in the vocabulary; Google
+  //      silently drops unknown properties. ICAO is now exposed via the
+  //      generic `identifier` PropertyValue pattern, paired with IATA. Both
+  //      codes are now first-class machine-readable identifiers.
+  //   2. addressCountry uses `displayCountryName()` (modernised, UN-form name).
+  //      Schema.org accepts either ISO 3166-1 alpha-2 or a country name; we
+  //      use the canonical name to stay consistent with the rendered UI.
+  //   3. elevation is now numeric metres (Schema.org canonical) instead of
+  //      a string "13 feet" (which Schema.org's spec does not accept).
+  const elevationMetres = airport.altitude
+    ? Math.round(airport.altitude * 0.3048)
+    : undefined;
   const airportSchema = {
     '@context': 'https://schema.org',
     '@type': 'Airport',
+    '@id': `https://airmilescalc.com/airport/${airport.iata.toLowerCase()}#airport`,
     name: airport.name,
+    url: `https://airmilescalc.com/airport/${airport.iata.toLowerCase()}`,
     iataCode: airport.iata.toUpperCase(),
-    icaoCode: airport.icao?.toUpperCase(),
+    identifier: [
+      {
+        '@type': 'PropertyValue',
+        propertyID: 'IATA',
+        value: airport.iata.toUpperCase(),
+      },
+      ...(airport.icao
+        ? [
+            {
+              '@type': 'PropertyValue',
+              propertyID: 'ICAO',
+              value: airport.icao.toUpperCase(),
+            },
+          ]
+        : []),
+    ],
     address: {
       '@type': 'PostalAddress',
       addressLocality: airport.city,
-      addressCountry: displayedCountry
+      addressCountry: displayedCountry,
     },
     geo: {
       '@type': 'GeoCoordinates',
       latitude: airport.latitude,
       longitude: airport.longitude,
-      elevation: airport.altitude ? `${airport.altitude} feet` : undefined
-    }
+      ...(elevationMetres !== undefined && { elevation: elevationMetres }),
+    },
   };
+
+  // ItemList of popular outbound routes from this airport. Exposes the
+  // already-rendered UI table as structured data so the route list is
+  // machine-readable and reachable from a Place / Airport pivot in SERPs.
+  const routesItemList = routesWithDistance.length > 0
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: `Popular routes from ${airport.iata.toUpperCase()}`,
+        numberOfItems: routesWithDistance.length,
+        itemListElement: routesWithDistance.map((r, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          url: `https://airmilescalc.com/distance/${airport.iata.toLowerCase()}-to-${r!.dest_iata.toLowerCase()}`,
+          name: `${airport.iata.toUpperCase()} → ${r!.dest_iata.toUpperCase()}: ${r!.distance.miles.toLocaleString()} mi`,
+        })),
+      }
+    : null;
 
   // FAQ schema
   const faqSchema = {
@@ -254,6 +308,12 @@ export default async function AirportPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(airportSchema) }}
       />
+      {routesItemList && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(routesItemList) }}
+        />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}

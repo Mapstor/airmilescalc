@@ -23,7 +23,13 @@ import {
 } from '@/lib/calculations';
 import GlobeWrapper from '@/components/globe/GlobeWrapper';
 import { Sources, InternalLinks, Callout } from '@/components/content/blocks';
-import { ogImageMeta, twitterMeta } from '@/lib/og';
+import { ogDefaults, ogImageMeta, ogImageUrl, twitterMeta } from '@/lib/og';
+
+// Project-wide constants for Article schema dates. Distance pages are
+// computed on every request, but the underlying methodology and data
+// snapshots were first published / last verified on these dates.
+const DISTANCE_FIRST_PUBLISHED = '2026-01-26';
+const DISTANCE_LAST_REVIEWED = '2026-06-01';
 
 interface PageProps {
   params: Promise<{ route: string }>;
@@ -64,11 +70,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const ogSubtitle = `${fromAirport.city} to ${toAirport.city} · ${distance.km.toLocaleString()} km · ${flightTime.display}`;
 
   return {
-    title: `${fromAirport.city} to ${toAirport.city} — Flight Distance ${distance.miles.toLocaleString()} miles · AirMilesCalc`,
-    description: `Flight distance from ${fromAirport.name} (${fromAirport.iata.toUpperCase()}) to ${toAirport.name} (${toAirport.iata.toUpperCase()}) is ${distance.miles.toLocaleString()} miles (${distance.km.toLocaleString()} km). Estimated flight time: ${flightTime.display}. Calculate CO2 emissions, view airlines, and plan your journey.`,
+    // Title trimmed to fit ~50ch budget so the brand template ("%s | AirMilesCalc")
+    // can append without truncation in SERPs. Drops the prior hand-baked
+    // "· AirMilesCalc" suffix that produced doubled branding.
+    title: `${fromAirport.city} to ${toAirport.city} — ${distance.miles.toLocaleString()} mile flight distance`,
+    // Description ≤160ch — Google truncates beyond ~160 on desktop, ~120 on
+    // mobile. Leads with city pair + distance so the head survives truncation.
+    description: `${fromAirport.city} (${fromAirport.iata.toUpperCase()}) → ${toAirport.city} (${toAirport.iata.toUpperCase()}): ${distance.miles.toLocaleString()} miles, ${distance.km.toLocaleString()} km. Flight time ~${flightTime.display}. CO₂ by cabin class and airlines.`,
     alternates: { canonical: `/distance/${routeSlug}` },
     openGraph: {
-      title: `${ogTitle} flight distance — AirMilesCalc`,
+      ...ogDefaults(),
+      title: `${ogTitle} flight distance`,
       description: `${ogSubtitle}. Distance, time, per-cabin CO₂, jet lag, and a 3D globe.`,
       url: `/distance/${routeSlug}`,
       type: 'article',
@@ -280,6 +292,63 @@ export default async function DistancePage({ params }: PageProps) {
     })),
   };
 
+  // Article schema — distance pages were missing any Article-class block, so
+  // Google had nothing to attach the Article rich-result signals to. Now each
+  // route emits a TechArticle with the full required field set (headline,
+  // datePublished, dateModified, author, publisher, image, mainEntityOfPage).
+  const routeSlug = `${fromAirport.iata.toLowerCase()}-to-${toAirport.iata.toLowerCase()}`;
+  const articleUrl = `https://airmilescalc.com/distance/${routeSlug}`;
+  const articleHeadline = `${fromAirport.city} to ${toAirport.city}: ${distance.miles.toLocaleString()} mile flight distance, time, and CO₂`;
+  const articleImageUrl = `https://airmilescalc.com${ogImageUrl({
+    title: `${fromAirport.iata.toUpperCase()} → ${toAirport.iata.toUpperCase()}`,
+    subtitle: `${fromAirport.city} to ${toAirport.city} · ${distance.km.toLocaleString()} km`,
+    category: 'Route',
+  })}`;
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: articleHeadline,
+    description: `Flight distance from ${fromAirport.name} (${fromAirport.iata.toUpperCase()}) to ${toAirport.name} (${toAirport.iata.toUpperCase()}) computed on the WGS-84 ellipsoid via Vincenty 1975; CO₂ via DESNZ 2024.`,
+    url: articleUrl,
+    datePublished: DISTANCE_FIRST_PUBLISHED,
+    dateModified: DISTANCE_LAST_REVIEWED,
+    author: {
+      '@type': 'Person',
+      '@id': 'https://airmilescalc.com/about#sam-k',
+      name: 'Sam K.',
+    },
+    publisher: { '@id': 'https://airmilescalc.com/#organization' },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
+    image: {
+      '@type': 'ImageObject',
+      url: articleImageUrl,
+      width: 1200,
+      height: 630,
+    },
+    isPartOf: { '@id': 'https://airmilescalc.com/#website' },
+    inLanguage: 'en',
+    about: [
+      {
+        '@type': 'Place',
+        name: `${fromAirport.name} (${fromAirport.iata.toUpperCase()})`,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: fromAirport.city,
+          addressCountry: fromAirport.country,
+        },
+      },
+      {
+        '@type': 'Place',
+        name: `${toAirport.name} (${toAirport.iata.toUpperCase()})`,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: toAirport.city,
+          addressCountry: toAirport.country,
+        },
+      },
+    ],
+  };
+
   // Calculate route category percentage for visual bar
   const maxUltraLongDistance = 18000; // km - longest commercial routes
   const distancePercentage = Math.min((distance.km / maxUltraLongDistance) * 100, 100);
@@ -287,6 +356,10 @@ export default async function DistancePage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-slate-50 py-8 print:bg-white print:py-4">
       {/* JSON-LD Schemas */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}

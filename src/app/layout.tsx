@@ -18,10 +18,26 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  // Explicit robots directive. Next.js omits the <meta name="robots"> tag when
+  // no override is set; some bots (Diffbot, CommonCrawl, parts of the AI bot
+  // ecosystem) check the tag explicitly. Per-route metadata can override to
+  // noindex (see thin-page logic in /airport/[iata] and /airports/[country]).
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
     siteName: "AirMilesCalc",
+    url: "https://airmilescalc.com/",
     title: "AirMilesCalc — Flight Distance Calculator",
     description: "Calculate flight distances between airports worldwide with precise Vincenty geodesic + DEFRA 2024 emissions.",
     images: [

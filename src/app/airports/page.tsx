@@ -5,14 +5,15 @@ import AirportDirectorySearch from '@/components/airports/AirportDirectorySearch
 import { slugify } from '@/lib/slug';
 import { displayCountryName } from '@/lib/country';
 import { InternalLinks, Sources, Lede } from '@/components/content/blocks';
-import { ogImageMeta, twitterMeta } from '@/lib/og';
+import { ogDefaults, ogImageMeta, twitterMeta } from '@/lib/og';
 
 export const metadata: Metadata = {
   title: 'Airport directory',
-  description: 'Browse 3,000+ commercial airports worldwide by country. IATA / ICAO codes, coordinates, route counts, and direct links to per-airport distance and CO₂ pages.',
+  description: 'Browse 3,000+ commercial airports worldwide by country. IATA / ICAO codes, coordinates, route counts, and links to per-airport distance and CO₂ pages.',
   alternates: { canonical: '/airports' },
   openGraph: {
-    title: 'Airport directory — AirMilesCalc',
+    ...ogDefaults(),
+    title: 'Airport directory',
     description: 'Browse 3,000+ commercial airports worldwide by country, with IATA codes and route counts.',
     url: '/airports',
     type: 'website',
@@ -105,11 +106,32 @@ export default function AirportsPage() {
   const collectionPageSchema = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
+    '@id': 'https://airmilescalc.com/airports#collection',
     name: 'Airport directory',
     description: 'Browse 3,000+ commercial airports worldwide by country, with IATA codes and route counts.',
     url: 'https://airmilescalc.com/airports',
     inLanguage: 'en',
-    isPartOf: { '@type': 'WebSite', name: 'AirMilesCalc', url: 'https://airmilescalc.com' },
+    // Reference the WebSite by @id so this CollectionPage joins the site
+    // graph defined in src/app/layout.tsx, instead of declaring an inline
+    // duplicate (which Schema.org consumers cannot deduplicate).
+    isPartOf: { '@id': 'https://airmilescalc.com/#website' },
+    about: { '@id': 'https://airmilescalc.com/#organization' },
+  };
+
+  // ItemList of the top airports (by route count) on the directory page so
+  // the previously-orphaned `/airports` collection has a machine-readable
+  // index of its primary entities. Caps at the first 20 to stay focused.
+  const topAirportsItemList = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Top 20 busiest airports by destinations',
+    numberOfItems: topAirports.length,
+    itemListElement: topAirports.map((entry, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `https://airmilescalc.com/airport/${entry.airport.iata.toLowerCase()}`,
+      name: `${entry.airport.name} (${entry.airport.iata.toUpperCase()})`,
+    })),
   };
 
   return (
@@ -119,6 +141,10 @@ export default function AirportsPage() {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(topAirportsItemList) }}
         />
         <script
           type="application/ld+json"
