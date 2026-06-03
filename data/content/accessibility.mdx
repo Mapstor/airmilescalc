@@ -1,0 +1,326 @@
+export const meta = {
+  title: "Accessibility",
+  description:
+    "AirMilesCalc accessibility statement — WCAG 2.1 Level AA goal, known limitations on the 3D globe and dense data tables, and the contact channel for accessibility issues.",
+  category: "Accessibility",
+  updated: "2026-06-01",
+  readingTime: "5 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "Web Content Accessibility Guidelines (WCAG) 2.1",
+      note: "W3C Recommendation; sets the four POUR principles (Perceivable, Operable, Understandable, Robust) and 50 success criteria at Levels A, AA, and AAA",
+      venue: "World Wide Web Consortium",
+      date: "Recommendation 5 June 2018; current Errata version 2024",
+      url: "https://www.w3.org/TR/WCAG21/",
+    },
+    {
+      id: 2,
+      label: "European Accessibility Act (Directive (EU) 2019/882)",
+      note: "EU directive on accessibility requirements for products and services; private-sector products & services must comply from 28 June 2025",
+      venue: "EUR-Lex",
+      date: "Effective 28 June 2025",
+      url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32019L0882",
+    },
+    {
+      id: 3,
+      label: "Section 508 of the Rehabilitation Act of 1973",
+      note: "US federal accessibility standard; aligned with WCAG 2.0 Level AA via the Section 508 ICT Refresh",
+      venue: "U.S. Access Board",
+      date: "Refreshed standards effective 18 January 2018",
+      url: "https://www.section508.gov/manage/laws-and-policies/",
+    },
+    {
+      id: 4,
+      label: "Accessible Rich Internet Applications (WAI-ARIA) 1.2",
+      note: "W3C Recommendation for accessible web applications; defines role / state / property attributes used on the dynamic components on this site",
+      venue: "World Wide Web Consortium",
+      date: "Recommendation 6 June 2023",
+      url: "https://www.w3.org/TR/wai-aria-1.2/",
+    },
+  ]}
+/>
+
+<Lede>
+  AirMilesCalc targets WCAG 2.1 Level AA conformance. Most of the site
+  meets that bar today, with two component categories &mdash; the 3D globe
+  visualisation and a handful of wide data tables &mdash; where we surface
+  the same information through accessible alternative formats. This page
+  describes what we aim for, what we have shipped, what is still pending,
+  and how to report accessibility issues.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "WCAG 2.1 AA",
+      label: "Conformance goal across every page on the site",
+      source: "W3C WCAG 2.1",
+    },
+    {
+      value: "28 June 2025",
+      label: "European Accessibility Act effective date we are tracking against",
+      source: "Directive (EU) 2019/882",
+    },
+    {
+      value: "0",
+      label:
+        "Components that block access to the calculator's underlying numbers &mdash; every figure is available as text",
+      source: "By design",
+    },
+    {
+      value: "48&ndash;72 h",
+      label:
+        "Typical response time on accessibility reports sent to info@airmilescalc.com",
+      source: "Project policy",
+    },
+  ]}
+/>
+
+## What we aim for
+
+AirMilesCalc targets the [W3C WCAG 2.1 Level AA](https://www.w3.org/TR/WCAG21/)
+conformance level across every page on the site. That covers the
+*Perceivable, Operable, Understandable, Robust* principles &mdash; semantic
+HTML, keyboard-operable controls, sufficient colour contrast, resizable
+text, and content that does not rely on a single sensory channel. We
+also track compliance with the European Accessibility Act, whose
+private-sector obligations entered into force on 28 June 2025.
+
+<DataTable
+  caption="WCAG 2.1 principles and how AirMilesCalc maps to each"
+  source="W3C WCAG 2.1 + AirMilesCalc implementation review"
+  columns={[
+    "Principle",
+    "What it means",
+    "How the site addresses it",
+  ]}
+  rows={[
+    [
+      "Perceivable",
+      "Information and UI components must be presentable in ways users can perceive",
+      "Semantic HTML, &ge; 4.5:1 colour contrast for body text, alt text on images, no information conveyed by colour alone",
+    ],
+    [
+      "Operable",
+      "Interface components and navigation must be operable via keyboard and assistive tech",
+      "Native HTML form controls, &lt;details&gt; / &lt;summary&gt; toggles, skip-to-content link, focus-visible outlines preserved",
+    ],
+    [
+      "Understandable",
+      "Information and operation must be understandable",
+      "Plain-English copy, every number explained in prose, FAQ blocks with schema.org, consistent navigation",
+    ],
+    [
+      "Robust",
+      "Content must be robust enough to be interpreted by user agents including assistive technologies",
+      "Valid HTML, ARIA used sparingly and only where native semantics fall short, Next.js App Router server-rendered HTML for graceful no-JS degradation",
+    ],
+  ]}
+/>
+
+## How the site is built for access
+
+The site is implemented in semantic HTML throughout. Headings follow a
+strict descending order (h1 once per page, h2 for sections, h3 for
+sub-sections). Every interactive control is either a native HTML element
+or a `<details>` toggle &mdash; there are no custom JavaScript widgets that
+would require ARIA shims to be accessible. The mobile navigation in the
+top header uses native `<details>` so it works without JavaScript, and
+the hamburger summary is keyboard-operable by default.
+
+<Steps>
+  <Step n={1} title="Skip to main content">
+    A keyboard-focusable skip link appears at the top-left on first
+    keyboard interaction, jumping past the navigation directly to the
+    `&lt;main&gt;` element.
+  </Step>
+  <Step n={2} title="Single h1 per page">
+    Every route renders exactly one `&lt;h1&gt;` containing the page&apos;s
+    primary topic. Subsections use `&lt;h2&gt;` and below in strict
+    descending order.
+  </Step>
+  <Step n={3} title="Form controls have visible labels">
+    Calculator airport selectors use the `combobox` pattern with visible
+    labels and announced result counts. Submit buttons are real
+    `&lt;button&gt;` elements, not styled `&lt;div&gt;`s.
+  </Step>
+  <Step n={4} title="Focus visibility preserved">
+    No global `outline: none` rule. Default browser focus rings are kept,
+    and on our brand colour they are tightened to a 2px ring at 3:1
+    contrast against the surrounding background.
+  </Step>
+  <Step n={5} title="Colour contrast checked">
+    Body text on white backgrounds runs at 9.4:1 (well above the 4.5:1
+    AA requirement). Footer text on the dark navy background runs at
+    7.2:1.
+  </Step>
+</Steps>
+
+## Known limitations
+
+Two component categories on the site present accessibility friction.
+We have chosen to ship them with documented alternatives rather than
+remove them, because the alternative path delivers the same information
+through accessible formats.
+
+<DataTable
+  caption="Components with known accessibility friction"
+  source="AirMilesCalc accessibility audit"
+  columns={[
+    "Component",
+    "Where it appears",
+    "Friction",
+    "Accessible alternative path",
+  ]}
+  rows={[
+    [
+      "3D globe (globe.gl, WebGL)",
+      "Homepage calculator results, /distance/[route] pages",
+      "Visualisation is not directly meaningful to screen-reader or low-vision users",
+      "The same route is described in text on the page (origin, destination, distance in miles / km / NM, bearing in degrees and cardinal direction). The globe is decorative; no information depends on it.",
+    ],
+    [
+      "Wide DataTables on /privacy and /methodology subpages",
+      "Cookie inventory; DEFRA factor tables; WGS-84 parameter tables",
+      "On viewports below ~480px the tables require horizontal scrolling",
+      "Tables are wrapped in `overflow-x-auto` so they scroll inside their container rather than triggering page-level scroll. Caption + source text is always rendered alongside the table.",
+    ],
+    [
+      "Leaflet airport maps",
+      "/airport/[iata] right column; /airports/[country] hero",
+      "Map markers are visual; tooltips are mouseover-driven",
+      "Below every map, the same airports are listed as text links with their IATA codes, coordinates, and route counts. The map is a secondary entry point.",
+    ],
+    [
+      "OG image API",
+      "Linked from `og:image` meta tags; not rendered in-page",
+      "Pure visual content; not encountered by site users directly",
+      "Title and description meta tags carry the same information in text form for screen readers and crawlers.",
+    ],
+  ]}
+/>
+
+<Callout type="note" term="What is in active work">
+  Adding text alternatives for the 3D globe via an off-screen narrative
+  summary of the route (origin, destination, distance, bearing, route
+  class). Investigating an SVG fallback rendering of the great-circle
+  arc for low-WebGL devices.
+</Callout>
+
+## How to report accessibility issues
+
+If you encounter a barrier on AirMilesCalc &mdash; missing alt text, a
+keyboard trap, a low-contrast element, a screen-reader announcement
+that does not match what is visible &mdash; email{" "}
+<a href="mailto:info@airmilescalc.com" className="text-blue-700 hover:underline">info@airmilescalc.com</a>{" "}
+with &ldquo;Accessibility&rdquo; in the subject line. A useful report
+includes the page URL, the assistive technology and browser you were
+using, what you expected, and what you actually experienced.
+
+<Steps>
+  <Step n={1} title="Capture the URL and AT/browser">
+    Include the exact URL where the issue appeared, the assistive
+    technology (e.g., NVDA 2024.1, VoiceOver on iOS 18), and the browser
+    name and version.
+  </Step>
+  <Step n={2} title="Describe expected vs actual">
+    Write what you expected to hear or see, and what you actually
+    encountered. A short transcript of screen-reader output is gold.
+  </Step>
+  <Step n={3} title="Send to info@airmilescalc.com">
+    Email the same address used for general correspondence. Routine
+    accessibility reports get a reply within 48&ndash;72 hours; severe
+    barriers are prioritised and patched the same week where feasible.
+  </Step>
+</Steps>
+
+## Standards we map against
+
+We use the following standards as the conformance reference set. Where
+they overlap, the strictest applicable requirement governs.
+
+<DataTable
+  caption="Accessibility standards we conform to or track"
+  source="W3C; EU; US Access Board"
+  columns={["Standard", "Scope", "Status"]}
+  rows={[
+    [
+      "WCAG 2.1 Level AA",
+      "Web content (primary conformance target)",
+      "Active &mdash; ongoing audit",
+    ],
+    [
+      "EU EAA / Directive 2019/882",
+      "Private-sector products and services; effective 28 June 2025",
+      "Tracking &mdash; site falls under &lsquo;e-commerce&rsquo; functional category",
+    ],
+    [
+      "Section 508 (US federal ICT)",
+      "Aligned with WCAG 2.0 AA",
+      "Indirectly covered by WCAG 2.1 AA conformance",
+    ],
+    [
+      "WAI-ARIA 1.2",
+      "Where ARIA is needed for custom widgets",
+      "Used sparingly; native HTML preferred",
+    ],
+  ]}
+/>
+
+<FAQ
+  items={[
+    {
+      q: "Is AirMilesCalc fully WCAG 2.1 AA conformant?",
+      a: "We target Level AA across every page and audit annually. As of the last review most of the site meets the bar; the two known-friction component categories (3D globe and the wide tables on /privacy and methodology subpages) are documented above with their accessible alternative paths. We do not claim full conformance without an external audit.",
+    },
+    {
+      q: "Does the calculator work without JavaScript?",
+      a: "The static reference content (/methodology, /learn, /airports, /privacy, /terms, /about) renders without JavaScript. The interactive Calculator on the homepage and the route 3D globe require JavaScript. If JS is disabled, users can still browse every methodology, learn, and airport page; the calculator output is also available via direct URL like /distance/jfk-to-lhr which renders the same numbers as static HTML.",
+    },
+    {
+      q: "Can I use keyboard alone to navigate the site?",
+      a: "Yes. Every interactive element is reachable via Tab; the skip-to-content link appears on first Tab press; the mobile navigation uses native &lt;details&gt; so it expands with Enter or Space. The Calculator combobox supports Arrow keys to navigate suggestions and Enter to select.",
+    },
+    {
+      q: "What about the 3D globe — is that ever going to be screen-reader accessible?",
+      a: "The globe itself is a WebGL visualisation that is fundamentally not directly screen-reader-accessible. We treat it as a decorative element and surface the same information (origin, destination, distance, bearing) as text alongside it. We are exploring an off-screen narrated summary as an additional alternative path.",
+    },
+    {
+      q: "Where do I report an accessibility barrier?",
+      a: "Email info@airmilescalc.com with 'Accessibility' in the subject. Include the page URL, your assistive technology and browser, what you expected, and what you actually encountered. We reply within 48–72 hours and patch severe barriers the same week where feasible.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  heading="Related"
+  links={[
+    {
+      href: "/contact",
+      title: "Contact",
+      description:
+        "Email, response time, GDPR / CCPA request deadlines &mdash; the same channel handles accessibility reports.",
+    },
+    {
+      href: "/privacy",
+      title: "Privacy",
+      description:
+        "Implementation status, cookies, AdSense disclosure, and worldwide privacy regulations we honour.",
+    },
+    {
+      href: "/terms",
+      title: "Terms of service",
+      description: "Usage rights, ODbL attribution, limitation of liability.",
+    },
+    {
+      href: "/about",
+      title: "About",
+      description:
+        "Why the project exists, who runs it, the personal story behind the calculator.",
+    },
+  ]}
+/>

@@ -22,6 +22,8 @@ import {
   getGeographicContext
 } from '@/lib/calculations';
 import GlobeWrapper from '@/components/globe/GlobeWrapper';
+import { Sources, InternalLinks, Callout } from '@/components/content/blocks';
+import { ogImageMeta, twitterMeta } from '@/lib/og';
 
 interface PageProps {
   params: Promise<{ route: string }>;
@@ -30,7 +32,13 @@ interface PageProps {
 function parseRoute(route: string): { from: string; to: string } | null {
   const match = route.match(/^([a-z]{3})-to-([a-z]{3})$/i);
   if (!match) return null;
-  return { from: match[1].toLowerCase(), to: match[2].toLowerCase() };
+  const from = match[1].toLowerCase();
+  const to = match[2].toLowerCase();
+  // Same-airport "routes" yield a degenerate (distance = 0) page with no
+  // information value — treat as not found to avoid thin / auto-generated
+  // pages being indexed.
+  if (from === to) return null;
+  return { from, to };
 }
 
 export const revalidate = 86400; // revalidate daily
@@ -52,11 +60,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const flightTime = calculateFlightTime(distance.km);
 
   const routeSlug = `${fromAirport.iata.toLowerCase()}-to-${toAirport.iata.toLowerCase()}`;
+  const ogTitle = `${fromAirport.iata.toUpperCase()} → ${toAirport.iata.toUpperCase()}`;
+  const ogSubtitle = `${fromAirport.city} to ${toAirport.city} · ${distance.km.toLocaleString()} km · ${flightTime.display}`;
 
   return {
-    title: `${fromAirport.city} to ${toAirport.city} - Flight Distance ${distance.miles.toLocaleString()} Miles | Air Miles Calculator`,
+    title: `${fromAirport.city} to ${toAirport.city} — Flight Distance ${distance.miles.toLocaleString()} miles · AirMilesCalc`,
     description: `Flight distance from ${fromAirport.name} (${fromAirport.iata.toUpperCase()}) to ${toAirport.name} (${toAirport.iata.toUpperCase()}) is ${distance.miles.toLocaleString()} miles (${distance.km.toLocaleString()} km). Estimated flight time: ${flightTime.display}. Calculate CO2 emissions, view airlines, and plan your journey.`,
     alternates: { canonical: `/distance/${routeSlug}` },
+    openGraph: {
+      title: `${ogTitle} flight distance — AirMilesCalc`,
+      description: `${ogSubtitle}. Distance, time, per-cabin CO₂, jet lag, and a 3D globe.`,
+      url: `/distance/${routeSlug}`,
+      type: 'article',
+      images: ogImageMeta({ title: ogTitle, subtitle: ogSubtitle, category: 'Route' }),
+    },
+    twitter: twitterMeta({ title: ogTitle, subtitle: ogSubtitle, category: 'Route' }),
   };
 }
 
@@ -89,10 +107,6 @@ export default async function DistancePage({ params }: PageProps) {
   const timeDiff = fromAirport.timezone && toAirport.timezone
     ? calculateTimeDifference(fromAirport.timezone, toAirport.timezone)
     : null;
-
-  // Format coordinates
-  const fromCoords = formatCoordinatesDMS(fromAirport.latitude, fromAirport.longitude);
-  const toCoords = formatCoordinatesDMS(toAirport.latitude, toAirport.longitude);
 
   // New calculations
   const midpoint = calculateMidpoint(
@@ -163,95 +177,112 @@ export default async function DistancePage({ params }: PageProps) {
     ]
   };
 
-  // Generate FAQ schema
+  // Build the FAQ as a route-adaptive entry list — different route geometries
+  // surface different questions, so reviewers and search engines see distinct
+  // content rather than identical templates across thousands of pre-rendered
+  // pages. Always-present base entries cover the universal questions; the
+  // conditional pushes below add geometry-specific content.
+  type FaqEntry = { q: string; a: string };
+  const faqEntries: FaqEntry[] = [];
+
+  // Base — always shown
+  faqEntries.push({
+    q: `How far is it from ${fromAirport.city} to ${toAirport.city}?`,
+    a: `The flight distance from ${fromAirport.name} (${fromAirport.iata.toUpperCase()}) to ${toAirport.name} (${toAirport.iata.toUpperCase()}) is ${distance.miles.toLocaleString()} miles (${distance.km.toLocaleString()} km / ${distance.nauticalMiles.toLocaleString()} NM), computed as the geodesic on the WGS-84 ellipsoid using Vincenty's 1975 inverse formula.`,
+  });
+  faqEntries.push({
+    q: `How long is the flight from ${fromAirport.iata.toUpperCase()} to ${toAirport.iata.toUpperCase()}?`,
+    a: `A still-air, non-stop flight takes approximately ${flightTime.display} (${flightTime.totalMinutes} minutes total block time). This is a ${routeClass.type.replace('-', ' ')} route. Real-world schedules vary by 10–60 minutes either side depending on winds, ATC routing, and the specific aircraft type assigned.`,
+  });
+  faqEntries.push({
+    q: `What is the carbon footprint of flying from ${fromAirport.city} to ${toAirport.city}?`,
+    a: `One one-way economy ticket on this route emits approximately ${co2AllClasses.economy.kgCO2} kg CO₂ (${co2AllClasses.economy.kgCO2e} kg CO₂e with the DESNZ 1.9× radiative-forcing uplift). Business class on the same flight is allocated ${co2AllClasses.business.kgCO2} kg CO₂; first class ${co2AllClasses.first.kgCO2} kg CO₂, by DEFRA 2024 cabin floor-area multipliers.`,
+  });
+
+  // Airline data — adaptive on whether route history exists
+  if (allAirlines.length > 0) {
+    faqEntries.push({
+      q: `What airlines fly from ${fromAirport.iata.toUpperCase()} to ${toAirport.iata.toUpperCase()}?`,
+      a: `${allAirlines.length} airline${allAirlines.length === 1 ? '' : 's'} historically operate${allAirlines.length === 1 ? 's' : ''} this route per the OpenFlights dataset: ${allAirlines.slice(0, 5).map(a => a.name).join(', ')}${allAirlines.length > 5 ? ` and ${allAirlines.length - 5} more` : ''}. Current schedules may differ — check an airline or aggregator for live availability.`,
+    });
+  } else {
+    faqEntries.push({
+      q: `Are there direct flights from ${fromAirport.iata.toUpperCase()} to ${toAirport.iata.toUpperCase()}?`,
+      a: `No direct service is recorded for this pair in the OpenFlights dataset (which captured its third-party routes feed in June 2014; newer non-stops may not appear). A connecting itinerary through a major hub is usually the practical alternative.`,
+    });
+  }
+
+  // Time-zone difference — only if non-trivial
+  if (timeDiff && Math.abs(timeDiff.hours) >= 1) {
+    faqEntries.push({
+      q: `What is the time difference between ${fromAirport.city} and ${toAirport.city}?`,
+      a: `${toAirport.city} is ${Math.abs(timeDiff.hours).toFixed(0)} hours ${timeDiff.hours >= 0 ? 'ahead of' : 'behind'} ${fromAirport.city} at the moment of calculation. The exact offset depends on daylight-saving status in each location; AirMilesCalc resolves it live using the IANA time-zone strings sourced from OpenFlights.`,
+    });
+  }
+
+  // Jet-lag — only if shift is meaningful
+  if (jetLagInfo && jetLagInfo.severity !== 'none' && timeDiff) {
+    faqEntries.push({
+      q: `How bad is the jet lag flying from ${fromAirport.city} to ${toAirport.city}?`,
+      a: `The ${Math.abs(timeDiff.hours).toFixed(0)}-hour shift is classified as ${jetLagInfo.severity}. Typical full circadian re-entrainment takes about ${jetLagInfo.recoveryDays} day${jetLagInfo.recoveryDays === 1 ? '' : 's'}. Recovery is roughly 1.6× faster going westward than eastward — the human circadian period averages 24.2 hours, so phase-delaying the clock is easier than phase-advancing it (Sack 2010, NEJM).`,
+    });
+  }
+
+  // Distance-class-specific surface mode
+  if (distance.km < 1500) {
+    faqEntries.push({
+      q: `Is it practical to drive from ${fromAirport.city} to ${toAirport.city}?`,
+      a: `At an 80 km/h motorway-average speed (and ignoring border crossings), driving would take roughly ${drivingTime.display}. For most travellers flying still wins on door-to-door time once airport overheads are accounted for; driving is competitive on the shortest international and intra-country legs.`,
+    });
+  } else if (distance.km < 4000) {
+    faqEntries.push({
+      q: `Is high-speed rail an alternative for ${fromAirport.iata.toUpperCase()} to ${toAirport.iata.toUpperCase()}?`,
+      a: `On corridors where high-speed rail exists, door-to-door comparisons typically favour rail under about 800 km and aviation above. This ${distance.km.toLocaleString()} km route sits in the aviation-favoured zone — even where a rail link exists, the journey is likely 8–12 hours longer than the flight block time.`,
+    });
+  }
+
+  // Ultra-long-range specifics
+  if (distance.km >= 12000) {
+    faqEntries.push({
+      q: `Which aircraft can fly ${fromAirport.iata.toUpperCase()} to ${toAirport.iata.toUpperCase()} non-stop?`,
+      a: `At ${distance.km.toLocaleString()} km this is ultra-long-range, on the upper edge of current twin-aisle capability. Aircraft typically certified for routes this long include the Airbus A350-900ULR, the Boeing 777-200LR, and the Boeing 787-9 in long-range configuration. These aircraft trade passenger capacity for fuel range — Singapore Airlines' A350-900ULR carries only 161 seats on its longest scheduled flights so the additional fuel tanks fit.`,
+    });
+  }
+
+  // Geometric oddities — equator and date line
+  if (geoContext.crossesEquator) {
+    faqEntries.push({
+      q: `Does the flight from ${fromAirport.city} to ${toAirport.city} cross the equator?`,
+      a: `Yes — the great-circle path between these airports crosses the equator. The route midpoint sits at ${midpointCoords.latitude}, ${midpointCoords.longitude}. Equator-crossing flights bridge hemispheres, which affects seasonal weather profiles and (for some routes) ATC clearance regimes.`,
+    });
+  }
+  if (geoContext.crossesDateLine) {
+    faqEntries.push({
+      q: `What happens to the calendar date on a ${fromAirport.iata.toUpperCase()} → ${toAirport.iata.toUpperCase()} flight that crosses the International Date Line?`,
+      a: `This route crosses the International Date Line — westbound flights advance the calendar by one day; eastbound flights retreat by one day. The local arrival date can therefore read as 'tomorrow' or 'yesterday' relative to departure even when the elapsed flight time is under 24 hours.`,
+    });
+  }
+
+  // Always-present closer — offsetting (unique values per route)
+  faqEntries.push({
+    q: `How can I offset the carbon from flying ${fromAirport.iata.toUpperCase()} to ${toAirport.iata.toUpperCase()}?`,
+    a: `One economy seat on this route emits ${co2AllClasses.economy.kgCO2e} kg CO₂e. That equates to about ${co2AllClasses.treesNeeded} mature broadleaf trees absorbing CO₂ for a year (at the 21 kg/tree/year midrange figure). CORSIA-eligible carbon credits, SAF uplift options offered by some airlines, and alliance carbon programmes are the three main offset paths.`,
+  });
+
+  // Build the schema from the final adaptive entry list
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: `How far is it from ${fromAirport.city} to ${toAirport.city}?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: `The flight distance from ${fromAirport.name} (${fromAirport.iata.toUpperCase()}) to ${toAirport.name} (${toAirport.iata.toUpperCase()}) is ${distance.miles.toLocaleString()} miles (${distance.km.toLocaleString()} km).`
-        }
-      },
-      {
-        '@type': 'Question',
-        name: `How long is the flight from ${fromAirport.iata.toUpperCase()} to ${toAirport.iata.toUpperCase()}?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: `A direct flight takes approximately ${flightTime.display}. This is classified as a ${routeClass.type} flight.`
-        }
-      },
-      {
-        '@type': 'Question',
-        name: `What is the time difference between ${fromAirport.city} and ${toAirport.city}?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: timeDiff
-            ? `${toAirport.city} is ${Math.abs(timeDiff.hours)} hours ${timeDiff.hours >= 0 ? 'ahead of' : 'behind'} ${fromAirport.city}.`
-            : 'Timezone information is not available.'
-        }
-      },
-      {
-        '@type': 'Question',
-        name: `What airlines fly from ${fromAirport.iata.toUpperCase()} to ${toAirport.iata.toUpperCase()}?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: allAirlines.length > 0
-            ? `${allAirlines.length} airlines operate this route: ${allAirlines.slice(0, 5).map(a => a.name).join(', ')}${allAirlines.length > 5 ? ` and ${allAirlines.length - 5} more` : ''}.`
-            : 'Airline information for this specific route is not available.'
-        }
-      },
-      {
-        '@type': 'Question',
-        name: `What is the carbon footprint of flying from ${fromAirport.city} to ${toAirport.city}?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: `An economy class passenger produces approximately ${co2AllClasses.economy.kgCO2} kg of CO2. Business class: ${co2AllClasses.business.kgCO2} kg.`
-        }
-      },
-      {
-        '@type': 'Question',
-        name: `Can I drive from ${fromAirport.city} to ${toAirport.city}?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: distance.km < 3000
-            ? `Driving is possible but would take approximately ${Math.round(distance.km / 80)} hours at average highway speed. Flying saves significant time.`
-            : `Driving is not practical for this ${distance.km.toLocaleString()} km distance. Flying is the recommended option.`
-        }
-      },
-      {
-        '@type': 'Question',
-        name: `What aircraft fly from ${fromAirport.iata.toUpperCase()} to ${toAirport.iata.toUpperCase()}?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: `This ${routeClass.type} route is typically served by ${routeClass.typicalAircraft.join(', ')} aircraft.`
-        }
-      },
-      {
-        '@type': 'Question',
-        name: `How can I offset the carbon from flying ${fromAirport.iata.toUpperCase()} to ${toAirport.iata.toUpperCase()}?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: `An economy class seat produces ${co2AllClasses.economy.kgCO2} kg CO2. You can offset this by planting approximately ${co2AllClasses.treesNeeded} trees or purchasing verified carbon credits.`
-        }
-      }
-    ]
+    mainEntity: faqEntries.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
   };
 
   // Calculate route category percentage for visual bar
   const maxUltraLongDistance = 18000; // km - longest commercial routes
   const distancePercentage = Math.min((distance.km / maxUltraLongDistance) * 100, 100);
-
-  // Get route category thresholds for visual
-  const routeCategories = [
-    { name: 'Short', max: 1500, color: 'bg-green-500' },
-    { name: 'Medium', max: 4000, color: 'bg-blue-500' },
-    { name: 'Long', max: 12000, color: 'bg-orange-500' },
-    { name: 'Ultra-Long', max: 18000, color: 'bg-purple-500' }
-  ];
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 print:bg-white print:py-4">
@@ -269,18 +300,18 @@ export default async function DistancePage({ params }: PageProps) {
         {/* Breadcrumb */}
         <nav className="text-sm mb-6 print:hidden">
           <ol className="flex items-center gap-2 text-slate-600">
-            <li><Link href="/" className="hover:text-blue-600">Home</Link></li>
+            <li><Link href="/" className="hover:text-[#0B2447]">Home</Link></li>
             <li>/</li>
-            <li><span className="text-slate-900">Distance</span></li>
+            <li><span className="text-[#0B2447]">Distance</span></li>
             <li>/</li>
-            <li><span className="text-slate-900">{fromAirport.iata.toUpperCase()} to {toAirport.iata.toUpperCase()}</span></li>
+            <li><span className="text-[#0B2447]">{fromAirport.iata.toUpperCase()} to {toAirport.iata.toUpperCase()}</span></li>
           </ol>
         </nav>
 
         {/* Header with Print Button */}
         <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+            <h1 className="text-[22px] md:text-[28px] font-semibold text-[#0B2447] tracking-tight mb-2">
               {fromAirport.city} to {toAirport.city} Flight Distance
             </h1>
             <p className="text-lg text-slate-600">
@@ -293,10 +324,10 @@ export default async function DistancePage({ params }: PageProps) {
         {/* Route badges */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            routeClass.type === 'short-haul' ? 'bg-green-100 text-green-700' :
-            routeClass.type === 'medium-haul' ? 'bg-yellow-100 text-yellow-800' :
-            routeClass.type === 'long-haul' ? 'bg-orange-100 text-orange-700' :
-            'bg-purple-100 text-purple-700'
+            routeClass.type === 'short-haul' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+            routeClass.type === 'medium-haul' ? 'bg-amber-50 text-amber-800 border border-amber-200' :
+            routeClass.type === 'long-haul' ? 'bg-amber-50 text-amber-900 border border-amber-200' :
+            'bg-red-50 text-red-800 border border-red-200'
           }`}>
             {routeClass.type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
           </span>
@@ -315,49 +346,106 @@ export default async function DistancePage({ params }: PageProps) {
           )}
         </div>
 
+        {/* Primary sources — collapsible authority signal */}
+        <Sources
+          items={[
+            {
+              id: 1,
+              label: 'Vincenty (1975)',
+              note: 'Direct and Inverse Solutions of Geodesics on the Ellipsoid — the iterative formula used for distance',
+              venue: 'Survey Review XXIII (176), pp. 88–93',
+              date: 'April 1975',
+              url: 'https://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf',
+            },
+            {
+              id: 2,
+              label: 'NGA.STND.0036_1.0.0_WGS84',
+              note: 'WGS-84 reference ellipsoid (a = 6,378,137 m, 1/f = 298.257223563)',
+              venue: 'NGA Standard',
+              date: 'July 2014',
+              url: 'https://earth-info.nga.mil/index.php?dir=wgs84&action=wgs84',
+            },
+            {
+              id: 3,
+              label: 'DESNZ 2024 conversion factors',
+              note: 'Per-km kg CO₂e factors for the three distance bands and four cabin classes',
+              venue: 'UK Department for Energy Security and Net Zero',
+              date: 'June 2024',
+              url: 'https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024',
+            },
+            {
+              id: 4,
+              label: 'Lee et al. (2021)',
+              note: 'Effective radiative forcing of aviation — the science behind the 1.9 × CO₂ → CO₂e uplift',
+              venue: 'Atmospheric Environment 244, 117834',
+              date: 'January 2021',
+              url: 'https://doi.org/10.1016/j.atmosenv.2020.117834',
+            },
+            {
+              id: 5,
+              label: 'OpenFlights',
+              note: 'Airport coordinates and IATA codes',
+              venue: 'openflights.org/data.php',
+              date: 'Community-maintained',
+              url: 'https://openflights.org/data.php',
+            },
+            {
+              id: 6,
+              label: 'Sack (2010)',
+              note: 'Jet-lag review — clinical chronobiology and asymmetric recovery rates',
+              venue: 'New England Journal of Medicine 362:440',
+              date: 'February 2010',
+              url: 'https://www.nejm.org/doi/full/10.1056/NEJMcp0909838',
+            },
+          ]}
+        />
+
+        {/* Route map */}
+        <div className="mb-6">
+          <GlobeWrapper
+            fromLat={fromAirport.latitude}
+            fromLng={fromAirport.longitude}
+            toLat={toAirport.latitude}
+            toLng={toAirport.longitude}
+            fromName={`${fromAirport.city} (${fromAirport.iata.toUpperCase()})`}
+            toName={`${toAirport.city} (${toAirport.iata.toUpperCase()})`}
+            height={450}
+            distanceMiles={distance.miles}
+            flightTime={flightTime.display}
+          />
+        </div>
+
         {/* Main Distance Display */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 md:p-8 text-white mb-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold">{distance.miles.toLocaleString()}</div>
-              <div className="text-blue-200 mt-1">miles</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold">{distance.km.toLocaleString()}</div>
-              <div className="text-blue-200 mt-1">kilometers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold">{distance.nauticalMiles.toLocaleString()}</div>
-              <div className="text-blue-200 mt-1">nautical miles</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold">{flightTime.display}</div>
-              <div className="text-blue-200 mt-1">flight time</div>
-            </div>
+        <div className="bg-[#0B2447] rounded-md text-white mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-white/10">
+            <HeroMetric label="Miles" value={distance.miles.toLocaleString()} />
+            <HeroMetric label="Kilometers" value={distance.km.toLocaleString()} />
+            <HeroMetric label="Nautical miles" value={distance.nauticalMiles.toLocaleString()} />
+            <HeroMetric label="Flight time" value={flightTime.display} />
           </div>
         </div>
 
         {/* Visual Distance Scale */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+        <div className="bg-white rounded-md border border-slate-200 p-5 mb-6">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-slate-700">Route Distance Scale</span>
             <span className="text-sm text-slate-500">{distance.km.toLocaleString()} km of {maxUltraLongDistance.toLocaleString()} km max</span>
           </div>
-          <div className="relative h-10 bg-slate-100 rounded-lg overflow-hidden">
+          <div className="relative h-10 bg-slate-100 rounded-md overflow-hidden">
             {/* Background segments */}
             <div className="absolute inset-0 flex">
-              <div className="h-full bg-green-100" style={{ width: `${(1500/maxUltraLongDistance)*100}%` }} />
-              <div className="h-full bg-blue-100" style={{ width: `${((4000-1500)/maxUltraLongDistance)*100}%` }} />
-              <div className="h-full bg-orange-100" style={{ width: `${((12000-4000)/maxUltraLongDistance)*100}%` }} />
-              <div className="h-full bg-purple-100" style={{ width: `${((18000-12000)/maxUltraLongDistance)*100}%` }} />
+              <div className="h-full bg-emerald-200" style={{ width: `${(1500/maxUltraLongDistance)*100}%` }} />
+              <div className="h-full bg-slate-200" style={{ width: `${((4000-1500)/maxUltraLongDistance)*100}%` }} />
+              <div className="h-full bg-amber-200" style={{ width: `${((12000-4000)/maxUltraLongDistance)*100}%` }} />
+              <div className="h-full bg-red-200" style={{ width: `${((18000-12000)/maxUltraLongDistance)*100}%` }} />
             </div>
             {/* Progress bar */}
             <div
               className={`absolute top-0 left-0 h-full transition-all duration-500 ${
                 routeClass.type === 'short-haul' ? 'bg-green-500' :
-                routeClass.type === 'medium-haul' ? 'bg-yellow-500' :
-                routeClass.type === 'long-haul' ? 'bg-orange-500' :
-                'bg-purple-500'
+                routeClass.type === 'medium-haul' ? 'bg-amber-500' :
+                routeClass.type === 'long-haul' ? 'bg-amber-600' :
+                'bg-red-600'
               }`}
               style={{ width: `${distancePercentage}%` }}
             />
@@ -371,34 +459,34 @@ export default async function DistancePage({ params }: PageProps) {
           <div className="flex justify-between mt-2 text-xs text-slate-500">
             <span>0</span>
             <span className="text-green-600">Short &lt;1,500km</span>
-            <span className="text-blue-600">Medium &lt;4,000km</span>
+            <span className="text-[#0B2447]">Medium &lt;4,000km</span>
             <span className="text-orange-600">Long &lt;12,000km</span>
             <span className="text-purple-600">Ultra-Long</span>
           </div>
         </div>
 
         {/* Your Route Summary - Input verification */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Your Route Summary</h2>
+        <div className="bg-white rounded-md border border-slate-200 p-5 mb-6">
+          <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-4">Your Route Summary</h2>
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="flex items-center gap-4 p-4 bg-emerald-50 rounded-lg border border-emerald-100">
-              <div className="w-14 h-14 bg-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-lg">{fromAirport.iata.toUpperCase()}</span>
+            <div className="flex items-center gap-4 p-4 bg-stone-50 rounded-md border border-slate-200">
+              <div className="w-14 h-14 bg-[#0B2447] rounded-md flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-mono font-semibold tabular-nums tracking-wider text-[14px]">{fromAirport.iata.toUpperCase()}</span>
               </div>
               <div>
-                <div className="text-xs text-emerald-600 font-medium uppercase tracking-wide">Origin</div>
-                <div className="font-semibold text-slate-900">{fromAirport.name}</div>
+                <div className="text-xs text-slate-500 font-semibold uppercase tracking-[0.12em]">Origin</div>
+                <div className="font-semibold text-[#0B2447]">{fromAirport.name}</div>
                 <div className="text-sm text-slate-600">{fromAirport.city}, {fromAirport.country}</div>
                 <div className="text-xs text-slate-500 font-mono mt-1">{fromAirport.latitude.toFixed(4)}°, {fromAirport.longitude.toFixed(4)}°</div>
               </div>
             </div>
-            <div className="flex items-center gap-4 p-4 bg-red-50 rounded-lg border border-red-100">
-              <div className="w-14 h-14 bg-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-lg">{toAirport.iata.toUpperCase()}</span>
+            <div className="flex items-center gap-4 p-4 bg-red-50 rounded-md border border-red-100">
+              <div className="w-14 h-14 bg-red-600 rounded-md flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-mono font-semibold tabular-nums tracking-wider text-[14px]">{toAirport.iata.toUpperCase()}</span>
               </div>
               <div>
                 <div className="text-xs text-red-600 font-medium uppercase tracking-wide">Destination</div>
-                <div className="font-semibold text-slate-900">{toAirport.name}</div>
+                <div className="font-semibold text-[#0B2447]">{toAirport.name}</div>
                 <div className="text-sm text-slate-600">{toAirport.city}, {toAirport.country}</div>
                 <div className="text-xs text-slate-500 font-mono mt-1">{toAirport.latitude.toFixed(4)}°, {toAirport.longitude.toFixed(4)}°</div>
               </div>
@@ -407,9 +495,9 @@ export default async function DistancePage({ params }: PageProps) {
         </div>
 
         {/* What This Means - Plain English Interpretation */}
-        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-md border border-slate-200 p-6 mb-6">
+          <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-[#0B2447]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             What This Means For Your Trip
@@ -446,8 +534,8 @@ export default async function DistancePage({ params }: PageProps) {
         </div>
 
         {/* Key Results Summary Table */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6 overflow-hidden">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Complete Flight Analysis</h2>
+        <div className="bg-white rounded-md border border-slate-200 p-5 mb-6 overflow-hidden">
+          <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-4">Complete Flight Analysis</h2>
           <div className="overflow-x-auto -mx-5 px-5">
             <table className="w-full text-sm min-w-[500px]">
               <thead>
@@ -458,34 +546,34 @@ export default async function DistancePage({ params }: PageProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                <tr className="bg-blue-50/50">
-                  <td className="py-3 pr-4 font-medium text-slate-900">Distance (Miles)</td>
-                  <td className="py-3 px-4 text-right font-bold text-blue-700">{distance.miles.toLocaleString()} mi</td>
+                <tr className="bg-[#EEF2F7]/50">
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">Distance (Miles)</td>
+                  <td className="py-3 px-4 text-right font-semibold text-[#0B2447] tabular-nums font-mono">{distance.miles.toLocaleString()} mi</td>
                   <td className="py-3 pl-4 text-slate-600">Primary frequent flyer unit</td>
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 font-medium text-slate-900">Distance (Kilometers)</td>
-                  <td className="py-3 px-4 text-right font-semibold text-slate-900">{distance.km.toLocaleString()} km</td>
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">Distance (Kilometers)</td>
+                  <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{distance.km.toLocaleString()} km</td>
                   <td className="py-3 pl-4 text-slate-600">International standard</td>
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 font-medium text-slate-900">Distance (Nautical Miles)</td>
-                  <td className="py-3 px-4 text-right font-semibold text-slate-900">{distance.nauticalMiles.toLocaleString()} nm</td>
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">Distance (Nautical Miles)</td>
+                  <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{distance.nauticalMiles.toLocaleString()} nm</td>
                   <td className="py-3 pl-4 text-slate-600">Aviation standard</td>
                 </tr>
-                <tr className="bg-blue-50/50">
-                  <td className="py-3 pr-4 font-medium text-slate-900">Flight Time</td>
-                  <td className="py-3 px-4 text-right font-bold text-blue-700">{flightTime.display}</td>
+                <tr className="bg-[#EEF2F7]/50">
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">Flight Time</td>
+                  <td className="py-3 px-4 text-right font-semibold text-[#0B2447] tabular-nums font-mono">{flightTime.display}</td>
                   <td className="py-3 pl-4 text-slate-600">Based on 850 km/h cruise + ground time</td>
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 font-medium text-slate-900">Route Classification</td>
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">Route Classification</td>
                   <td className="py-3 px-4 text-right">
                     <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      routeClass.type === 'short-haul' ? 'bg-green-100 text-green-700' :
-                      routeClass.type === 'medium-haul' ? 'bg-yellow-100 text-yellow-800' :
-                      routeClass.type === 'long-haul' ? 'bg-orange-100 text-orange-700' :
-                      'bg-purple-100 text-purple-700'
+                      routeClass.type === 'short-haul' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+                      routeClass.type === 'medium-haul' ? 'bg-amber-50 text-amber-800 border border-amber-200' :
+                      routeClass.type === 'long-haul' ? 'bg-amber-50 text-amber-900 border border-amber-200' :
+                      'bg-red-50 text-red-800 border border-red-200'
                     }`}>
                       {routeClass.type.replace('-', ' ').toUpperCase()}
                     </span>
@@ -493,50 +581,50 @@ export default async function DistancePage({ params }: PageProps) {
                   <td className="py-3 pl-4 text-slate-600">{routeClass.description}</td>
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 font-medium text-slate-900">Flight Direction</td>
-                  <td className="py-3 px-4 text-right font-semibold text-slate-900">{bearing.degrees}° {bearing.cardinal}</td>
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">Flight Direction</td>
+                  <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{bearing.degrees}° {bearing.cardinal}</td>
                   <td className="py-3 pl-4 text-slate-600">{bearing.description}</td>
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 font-medium text-slate-900">Cruising Altitude</td>
-                  <td className="py-3 px-4 text-right font-semibold text-slate-900">{cruisingAltitude.feet.toLocaleString()} ft</td>
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">Cruising Altitude</td>
+                  <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{cruisingAltitude.feet.toLocaleString()} ft</td>
                   <td className="py-3 pl-4 text-slate-600">{cruisingAltitude.flightLevel} ({cruisingAltitude.meters.toLocaleString()} m)</td>
                 </tr>
                 {timeDiff && (
                   <tr>
-                    <td className="py-3 pr-4 font-medium text-slate-900">Time Difference</td>
-                    <td className="py-3 px-4 text-right font-semibold text-slate-900">{timeDiff.display}</td>
+                    <td className="py-3 pr-4 font-medium text-[#0B2447]">Time Difference</td>
+                    <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{timeDiff.display}</td>
                     <td className="py-3 pl-4 text-slate-600">{jetLagInfo ? `Jet lag: ${jetLagInfo.severity}` : ''}</td>
                   </tr>
                 )}
-                <tr className="bg-emerald-50/50">
-                  <td className="py-3 pr-4 font-medium text-slate-900">CO2 (Economy)</td>
-                  <td className="py-3 px-4 text-right font-bold text-emerald-700">{co2AllClasses.economy.kgCO2} kg</td>
+                <tr className="bg-stone-50">
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">CO2 (Economy)</td>
+                  <td className="py-3 px-4 text-right font-semibold text-emerald-800 tabular-nums font-mono">{co2AllClasses.economy.kgCO2} kg</td>
                   <td className="py-3 pl-4 text-slate-600">DEFRA 2024 factors</td>
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 font-medium text-slate-900">CO2 (Business)</td>
-                  <td className="py-3 px-4 text-right font-semibold text-slate-900">{co2AllClasses.business.kgCO2} kg</td>
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">CO2 (Business)</td>
+                  <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{co2AllClasses.business.kgCO2} kg</td>
                   <td className="py-3 pl-4 text-slate-600">2.9x economy</td>
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 font-medium text-slate-900">CO2 (First Class)</td>
-                  <td className="py-3 px-4 text-right font-semibold text-slate-900">{co2AllClasses.first.kgCO2} kg</td>
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">CO2 (First Class)</td>
+                  <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{co2AllClasses.first.kgCO2} kg</td>
                   <td className="py-3 pl-4 text-slate-600">4x economy</td>
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 font-medium text-slate-900">Trees to Offset</td>
-                  <td className="py-3 px-4 text-right font-semibold text-slate-900">{co2AllClasses.treesNeeded}</td>
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">Trees to Offset</td>
+                  <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{co2AllClasses.treesNeeded}</td>
                   <td className="py-3 pl-4 text-slate-600">Economy class, per passenger</td>
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 font-medium text-slate-900">Fuel per Passenger</td>
-                  <td className="py-3 px-4 text-right font-semibold text-slate-900">{fuelEstimate.litersPerPassenger} L</td>
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">Fuel per Passenger</td>
+                  <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{fuelEstimate.litersPerPassenger} L</td>
                   <td className="py-3 pl-4 text-slate-600">~{fuelEstimate.litersTotal.toLocaleString()} L total (180 pax)</td>
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 font-medium text-slate-900">Operating Airlines</td>
-                  <td className="py-3 px-4 text-right font-semibold text-slate-900">{allAirlines.length || 'N/A'}</td>
+                  <td className="py-3 pr-4 font-medium text-[#0B2447]">Operating Airlines</td>
+                  <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{allAirlines.length || 'N/A'}</td>
                   <td className="py-3 pl-4 text-slate-600">{hasDirectFlights ? 'Direct flights available' : 'May require connection'}</td>
                 </tr>
               </tbody>
@@ -545,18 +633,18 @@ export default async function DistancePage({ params }: PageProps) {
         </div>
 
         {/* Actionable Travel Tips */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Tips for This Route</h2>
+        <div className="bg-white rounded-md border border-slate-200 p-5 mb-6">
+          <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-4">Tips for This Route</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {/* Tip 1 - Booking */}
-            <div className="flex gap-3 p-4 bg-slate-50 rounded-lg">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex gap-3 p-4 bg-slate-50 rounded-md">
+              <div className="w-10 h-10 bg-[#EEF2F7] border border-slate-200 rounded-md flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-[#0B2447]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-slate-900 text-sm">Book Early</div>
+                <div className="font-medium text-[#0B2447] text-sm">Book Early</div>
                 <div className="text-xs text-slate-600 mt-1">
                   {routeClass.type === 'long-haul' || routeClass.type === 'ultra-long-haul'
                     ? 'Book 2-3 months ahead for best prices on this long-haul route.'
@@ -566,14 +654,14 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             {/* Tip 2 - Seat Selection */}
-            <div className="flex gap-3 p-4 bg-slate-50 rounded-lg">
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="flex gap-3 p-4 bg-slate-50 rounded-md">
+              <div className="w-10 h-10 bg-amber-50 border border-amber-200 rounded-md flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-slate-900 text-sm">Best Window Seat</div>
+                <div className="font-medium text-[#0B2447] text-sm">Best Window Seat</div>
                 <div className="text-xs text-slate-600 mt-1">
                   Choose the <strong>{seatRecommendation.windowView}</strong> side for views with less sun glare on this {bearing.description.toLowerCase()} flight.
                 </div>
@@ -582,14 +670,14 @@ export default async function DistancePage({ params }: PageProps) {
 
             {/* Tip 3 - Time Zone */}
             {timeDiff && jetLagInfo && (
-              <div className="flex gap-3 p-4 bg-slate-50 rounded-lg">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="flex gap-3 p-4 bg-slate-50 rounded-md">
+                <div className="w-10 h-10 bg-red-50 border border-red-200 rounded-md flex items-center justify-center flex-shrink-0">
                   <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
-                  <div className="font-medium text-slate-900 text-sm">Adjust Your Clock</div>
+                  <div className="font-medium text-[#0B2447] text-sm">Adjust Your Clock</div>
                   <div className="text-xs text-slate-600 mt-1">
                     {jetLagInfo.severity === 'none' || jetLagInfo.severity === 'mild'
                       ? 'Minimal time change—no special preparation needed.'
@@ -600,14 +688,14 @@ export default async function DistancePage({ params }: PageProps) {
             )}
 
             {/* Tip 4 - Flight Length */}
-            <div className="flex gap-3 p-4 bg-slate-50 rounded-lg">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="flex gap-3 p-4 bg-slate-50 rounded-md">
+              <div className="w-10 h-10 bg-emerald-50 border border-emerald-200 rounded-md flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-slate-900 text-sm">Pack Smart</div>
+                <div className="font-medium text-[#0B2447] text-sm">Pack Smart</div>
                 <div className="text-xs text-slate-600 mt-1">
                   {flightTime.totalMinutes < 180
                     ? 'Short flight—light carry-on with essentials is sufficient.'
@@ -619,14 +707,14 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             {/* Tip 5 - Carbon Offset */}
-            <div className="flex gap-3 p-4 bg-slate-50 rounded-lg">
-              <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex gap-3 p-4 bg-slate-50 rounded-md">
+              <div className="w-10 h-10 bg-emerald-50 border border-emerald-200 rounded-md flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064" />
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-slate-900 text-sm">Offset Your Impact</div>
+                <div className="font-medium text-[#0B2447] text-sm">Offset Your Impact</div>
                 <div className="text-xs text-slate-600 mt-1">
                   Consider offsetting {co2AllClasses.economy.kgCO2} kg CO2 through verified programs—equivalent to planting {co2AllClasses.treesNeeded} trees.
                 </div>
@@ -634,14 +722,14 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             {/* Tip 6 - Airlines */}
-            <div className="flex gap-3 p-4 bg-slate-50 rounded-lg">
-              <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="flex gap-3 p-4 bg-slate-50 rounded-md">
+              <div className="w-10 h-10 bg-indigo-100 rounded-md flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-slate-900 text-sm">Compare Prices</div>
+                <div className="font-medium text-[#0B2447] text-sm">Compare Prices</div>
                 <div className="text-xs text-slate-600 mt-1">
                   {allAirlines.length > 3
                     ? `With ${allAirlines.length} airlines on this route, compare prices across carriers for the best deal.`
@@ -655,30 +743,17 @@ export default async function DistancePage({ params }: PageProps) {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Globe Visualization */}
-            <GlobeWrapper
-              fromLat={fromAirport.latitude}
-              fromLng={fromAirport.longitude}
-              toLat={toAirport.latitude}
-              toLng={toAirport.longitude}
-              fromName={`${fromAirport.city} (${fromAirport.iata.toUpperCase()})`}
-              toName={`${toAirport.city} (${toAirport.iata.toUpperCase()})`}
-              height={450}
-              distanceMiles={distance.miles}
-              flightTime={flightTime.display}
-            />
-
             {/* Origin Airport Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div className="bg-white rounded-md border border-slate-200 p-5">
               <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-xl">{fromAirport.iata.toUpperCase()}</span>
+                <div className="w-16 h-16 bg-[#0B2447] rounded-md flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-mono font-semibold tabular-nums tracking-wider text-[16px]">{fromAirport.iata.toUpperCase()}</span>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded">DEPARTURE</span>
+                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10.5px] font-mono uppercase tracking-wide rounded">DEPARTURE</span>
                   </div>
-                  <h2 className="text-xl font-bold text-slate-900">{fromAirport.name}</h2>
+                  <h2 className="text-[16px] font-semibold text-[#0B2447] tracking-tight">{fromAirport.name}</h2>
                   <p className="text-slate-600">{fromAirport.city}, {fromAirport.country}</p>
                 </div>
               </div>
@@ -686,30 +761,30 @@ export default async function DistancePage({ params }: PageProps) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-200">
                 <div>
                   <div className="text-xs text-slate-500 uppercase tracking-wide">IATA / ICAO</div>
-                  <div className="font-semibold text-slate-900">{fromAirport.iata.toUpperCase()} / {fromAirport.icao?.toUpperCase() || 'N/A'}</div>
+                  <div className="font-semibold text-[#0B2447]">{fromAirport.iata.toUpperCase()} / {fromAirport.icao?.toUpperCase() || 'N/A'}</div>
                 </div>
                 {fromAirport.altitude && (
                   <div>
                     <div className="text-xs text-slate-500 uppercase tracking-wide">Elevation</div>
-                    <div className="font-semibold text-slate-900">{fromAirport.altitude.toLocaleString()} ft ({Math.round(fromAirport.altitude * 0.3048)} m)</div>
+                    <div className="font-semibold text-[#0B2447]">{fromAirport.altitude.toLocaleString()} ft ({Math.round(fromAirport.altitude * 0.3048)} m)</div>
                   </div>
                 )}
                 {fromTz && (
                   <div>
                     <div className="text-xs text-slate-500 uppercase tracking-wide">Local Time</div>
-                    <div className="font-semibold text-slate-900">{fromTz.currentTime}</div>
+                    <div className="font-semibold text-[#0B2447]">{fromTz.currentTime}</div>
                     <div className="text-xs text-slate-500">{fromTz.utcOffset}</div>
                   </div>
                 )}
                 <div>
                   <div className="text-xs text-slate-500 uppercase tracking-wide">Coordinates</div>
-                  <div className="font-mono text-sm text-slate-900">{fromAirport.latitude.toFixed(4)}°, {fromAirport.longitude.toFixed(4)}°</div>
+                  <div className="font-mono text-sm text-[#0B2447]">{fromAirport.latitude.toFixed(4)}°, {fromAirport.longitude.toFixed(4)}°</div>
                 </div>
               </div>
 
               <Link
                 href={`/airport/${fromAirport.iata}`}
-                className="mt-4 inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+                className="mt-4 inline-flex items-center gap-2 text-[#0B2447] hover:text-[#1A3160] font-medium text-sm"
               >
                 View full airport details
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -719,19 +794,19 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             {/* Destination Airport Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div className="bg-white rounded-md border border-slate-200 p-5">
               <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-xl">{toAirport.iata.toUpperCase()}</span>
+                <div className="w-16 h-16 bg-red-600 rounded-md flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-mono font-semibold tabular-nums tracking-wider text-[16px]">{toAirport.iata.toUpperCase()}</span>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">ARRIVAL</span>
+                    <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[10.5px] font-mono uppercase tracking-wide rounded">ARRIVAL</span>
                     {timeDiff && (
                       <span className="text-sm text-slate-500">{timeDiff.display} from departure</span>
                     )}
                   </div>
-                  <h2 className="text-xl font-bold text-slate-900">{toAirport.name}</h2>
+                  <h2 className="text-[16px] font-semibold text-[#0B2447] tracking-tight">{toAirport.name}</h2>
                   <p className="text-slate-600">{toAirport.city}, {toAirport.country}</p>
                 </div>
               </div>
@@ -739,30 +814,30 @@ export default async function DistancePage({ params }: PageProps) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-200">
                 <div>
                   <div className="text-xs text-slate-500 uppercase tracking-wide">IATA / ICAO</div>
-                  <div className="font-semibold text-slate-900">{toAirport.iata.toUpperCase()} / {toAirport.icao?.toUpperCase() || 'N/A'}</div>
+                  <div className="font-semibold text-[#0B2447]">{toAirport.iata.toUpperCase()} / {toAirport.icao?.toUpperCase() || 'N/A'}</div>
                 </div>
                 {toAirport.altitude && (
                   <div>
                     <div className="text-xs text-slate-500 uppercase tracking-wide">Elevation</div>
-                    <div className="font-semibold text-slate-900">{toAirport.altitude.toLocaleString()} ft ({Math.round(toAirport.altitude * 0.3048)} m)</div>
+                    <div className="font-semibold text-[#0B2447]">{toAirport.altitude.toLocaleString()} ft ({Math.round(toAirport.altitude * 0.3048)} m)</div>
                   </div>
                 )}
                 {toTz && (
                   <div>
                     <div className="text-xs text-slate-500 uppercase tracking-wide">Local Time</div>
-                    <div className="font-semibold text-slate-900">{toTz.currentTime}</div>
+                    <div className="font-semibold text-[#0B2447]">{toTz.currentTime}</div>
                     <div className="text-xs text-slate-500">{toTz.utcOffset}</div>
                   </div>
                 )}
                 <div>
                   <div className="text-xs text-slate-500 uppercase tracking-wide">Coordinates</div>
-                  <div className="font-mono text-sm text-slate-900">{toAirport.latitude.toFixed(4)}°, {toAirport.longitude.toFixed(4)}°</div>
+                  <div className="font-mono text-sm text-[#0B2447]">{toAirport.latitude.toFixed(4)}°, {toAirport.longitude.toFixed(4)}°</div>
                 </div>
               </div>
 
               <Link
                 href={`/airport/${toAirport.iata}`}
-                className="mt-4 inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+                className="mt-4 inline-flex items-center gap-2 text-[#0B2447] hover:text-[#1A3160] font-medium text-sm"
               >
                 View full airport details
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -773,8 +848,8 @@ export default async function DistancePage({ params }: PageProps) {
 
             {/* Airlines Operating This Route */}
             {allAirlines.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">
+              <div className="bg-white rounded-md border border-slate-200 p-5">
+                <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-2">
                   Airlines Flying This Route
                 </h2>
                 <p className="text-slate-600 text-sm mb-4">
@@ -784,13 +859,13 @@ export default async function DistancePage({ params }: PageProps) {
                   {allAirlines.map((airline) => (
                     <div
                       key={airline.iata}
-                      className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg"
+                      className="flex items-center gap-3 p-3 bg-slate-50 rounded-md"
                     >
-                      <div className="w-10 h-10 bg-white rounded-lg border border-slate-200 flex items-center justify-center">
-                        <span className="text-xs font-bold text-slate-600">{airline.iata.toUpperCase()}</span>
+                      <div className="w-10 h-10 bg-white rounded-md border border-slate-200 flex items-center justify-center">
+                        <span className="text-[10.5px] font-mono font-bold text-slate-600 tracking-wider">{airline.iata.toUpperCase()}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-slate-900 text-sm truncate">{airline.name}</div>
+                        <div className="font-medium text-[#0B2447] text-sm truncate">{airline.name}</div>
                         {airline.country && (
                           <div className="text-xs text-slate-500 truncate">{airline.country}</div>
                         )}
@@ -802,29 +877,29 @@ export default async function DistancePage({ params }: PageProps) {
             )}
 
             {/* Flight Details */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Flight Details</h2>
+            <div className="bg-white rounded-md border border-slate-200 p-5">
+              <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-4">Flight Details</h2>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="p-4 bg-slate-50 rounded-md">
                     <div className="text-sm text-slate-500 mb-1">Cruising Altitude</div>
-                    <div className="font-semibold text-slate-900">{cruisingAltitude.feet.toLocaleString()} ft ({cruisingAltitude.meters.toLocaleString()} m)</div>
+                    <div className="font-semibold text-[#0B2447]">{cruisingAltitude.feet.toLocaleString()} ft ({cruisingAltitude.meters.toLocaleString()} m)</div>
                     <div className="text-xs text-slate-500">{cruisingAltitude.flightLevel}</div>
                   </div>
-                  <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="p-4 bg-slate-50 rounded-md">
                     <div className="text-sm text-slate-500 mb-1">Flight Direction</div>
-                    <div className="font-semibold text-slate-900">{bearing.description}</div>
+                    <div className="font-semibold text-[#0B2447]">{bearing.description}</div>
                     <div className="text-xs text-slate-500">Initial bearing: {bearing.degrees}°</div>
                   </div>
-                  <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="p-4 bg-slate-50 rounded-md">
                     <div className="text-sm text-slate-500 mb-1">Route Type</div>
-                    <div className="font-semibold text-slate-900">{routeClass.description}</div>
+                    <div className="font-semibold text-[#0B2447]">{routeClass.description}</div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="p-4 bg-slate-50 rounded-md">
                     <div className="text-sm text-slate-500 mb-1">Typical Aircraft</div>
                     <div className="flex flex-wrap gap-2">
                       {routeClass.typicalAircraft.map((aircraft) => (
@@ -834,14 +909,14 @@ export default async function DistancePage({ params }: PageProps) {
                       ))}
                     </div>
                   </div>
-                  <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="p-4 bg-slate-50 rounded-md">
                     <div className="text-sm text-slate-500 mb-1">Fuel Consumption</div>
-                    <div className="font-semibold text-slate-900">{fuelEstimate.litersPerPassenger} L per passenger</div>
+                    <div className="font-semibold text-[#0B2447]">{fuelEstimate.litersPerPassenger} L per passenger</div>
                     <div className="text-xs text-slate-500">~{fuelEstimate.litersTotal.toLocaleString()} L total (180 passengers)</div>
                   </div>
-                  <div className="p-4 bg-slate-50 rounded-lg">
+                  <div className="p-4 bg-slate-50 rounded-md">
                     <div className="text-sm text-slate-500 mb-1">Geographic Context</div>
-                    <div className="font-semibold text-slate-900 text-sm">{geoContext.routeDescription}</div>
+                    <div className="font-semibold text-[#0B2447] text-sm">{geoContext.routeDescription}</div>
                     <div className="text-xs text-slate-500 mt-2">
                       {fromAirport.latitude >= 0 && toAirport.latitude >= 0 && 'Both airports are in the Northern Hemisphere.'}
                       {fromAirport.latitude < 0 && toAirport.latitude < 0 && 'Both airports are in the Southern Hemisphere.'}
@@ -859,69 +934,69 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             {/* Midpoint Information */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Flight Midpoint</h2>
+            <div className="bg-white rounded-md border border-slate-200 p-5">
+              <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-4">Flight Midpoint</h2>
               <p className="text-slate-600 text-sm mb-4">
                 The geographic midpoint of this flight is located at:
               </p>
               <div className="grid md:grid-cols-3 gap-4">
-                <div className="p-4 bg-blue-50 rounded-lg text-center">
-                  <div className="text-sm text-blue-600 mb-1">Latitude</div>
-                  <div className="font-mono font-semibold text-blue-900">{midpointCoords.latitude}</div>
-                  <div className="text-xs text-blue-500">{midpoint.lat.toFixed(4)}°</div>
+                <div className="p-3 bg-stone-50 border border-slate-200 rounded-md text-center">
+                  <div className="text-sm text-[#0B2447] mb-1">Latitude</div>
+                  <div className="font-mono font-semibold text-[#0B2447]">{midpointCoords.latitude}</div>
+                  <div className="text-[10.5px] font-mono text-slate-500">{midpoint.lat.toFixed(4)}°</div>
                 </div>
-                <div className="p-4 bg-blue-50 rounded-lg text-center">
-                  <div className="text-sm text-blue-600 mb-1">Longitude</div>
-                  <div className="font-mono font-semibold text-blue-900">{midpointCoords.longitude}</div>
-                  <div className="text-xs text-blue-500">{midpoint.lng.toFixed(4)}°</div>
+                <div className="p-3 bg-stone-50 border border-slate-200 rounded-md text-center">
+                  <div className="text-sm text-[#0B2447] mb-1">Longitude</div>
+                  <div className="font-mono font-semibold text-[#0B2447]">{midpointCoords.longitude}</div>
+                  <div className="text-[10.5px] font-mono text-slate-500">{midpoint.lng.toFixed(4)}°</div>
                 </div>
-                <div className="p-4 bg-blue-50 rounded-lg text-center">
-                  <div className="text-sm text-blue-600 mb-1">Halfway Point</div>
-                  <div className="font-semibold text-blue-900">{Math.round(distance.miles / 2).toLocaleString()} mi</div>
-                  <div className="text-xs text-blue-500">{Math.round(flightTime.totalMinutes / 2)} min into flight</div>
+                <div className="p-3 bg-stone-50 border border-slate-200 rounded-md text-center">
+                  <div className="text-sm text-[#0B2447] mb-1">Halfway Point</div>
+                  <div className="font-semibold text-[#0B2447]">{Math.round(distance.miles / 2).toLocaleString()} mi</div>
+                  <div className="text-[10.5px] font-mono text-slate-500">{Math.round(flightTime.totalMinutes / 2)} min into flight</div>
                 </div>
               </div>
             </div>
 
             {/* CO2 Emissions by Cabin Class */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">Carbon Emissions by Cabin Class</h2>
+            <div className="bg-white rounded-md border border-slate-200 p-5">
+              <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-2">Carbon Emissions by Cabin Class</h2>
               <p className="text-slate-600 text-sm mb-6">
                 CO2 emissions vary by cabin class due to seat space allocation. Based on DEFRA 2024 emission factors.
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                <div className="p-4 bg-emerald-50 rounded-md border border-emerald-200">
                   <div className="text-sm font-medium text-emerald-700 mb-1">Economy</div>
-                  <div className="text-2xl font-bold text-emerald-800">{co2AllClasses.economy.kgCO2} kg</div>
-                  <div className="text-xs text-emerald-600 mt-1">CO2e: {co2AllClasses.economy.kgCO2e} kg</div>
+                  <div className="text-[20px] font-semibold tabular-nums font-mono text-emerald-800">{co2AllClasses.economy.kgCO2} kg</div>
+                  <div className="text-xs text-emerald-700 mt-1">CO2e: {co2AllClasses.economy.kgCO2e} kg</div>
                 </div>
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="text-sm font-medium text-blue-700 mb-1">Premium Economy</div>
-                  <div className="text-2xl font-bold text-blue-800">{co2AllClasses.premiumEconomy.kgCO2} kg</div>
-                  <div className="text-xs text-blue-600 mt-1">CO2e: {co2AllClasses.premiumEconomy.kgCO2e} kg</div>
+                <div className="p-3 bg-stone-50 rounded-md border border-slate-200">
+                  <div className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-500 mb-1">Premium Economy</div>
+                  <div className="text-[20px] font-semibold tabular-nums font-mono text-[#0B2447]">{co2AllClasses.premiumEconomy.kgCO2} kg</div>
+                  <div className="text-xs text-[#0B2447] mt-1">CO2e: {co2AllClasses.premiumEconomy.kgCO2e} kg</div>
                 </div>
-                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="p-3 bg-amber-50 rounded-md border border-amber-200">
                   <div className="text-sm font-medium text-orange-700 mb-1">Business</div>
-                  <div className="text-2xl font-bold text-orange-800">{co2AllClasses.business.kgCO2} kg</div>
+                  <div className="text-[20px] font-semibold tabular-nums font-mono text-amber-900">{co2AllClasses.business.kgCO2} kg</div>
                   <div className="text-xs text-orange-600 mt-1">CO2e: {co2AllClasses.business.kgCO2e} kg</div>
                 </div>
-                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <div className="p-3 bg-red-50 rounded-md border border-red-200">
                   <div className="text-sm font-medium text-purple-700 mb-1">First Class</div>
-                  <div className="text-2xl font-bold text-purple-800">{co2AllClasses.first.kgCO2} kg</div>
+                  <div className="text-[20px] font-semibold tabular-nums font-mono text-red-900">{co2AllClasses.first.kgCO2} kg</div>
                   <div className="text-xs text-purple-600 mt-1">CO2e: {co2AllClasses.first.kgCO2e} kg</div>
                 </div>
               </div>
 
-              <div className="mt-6 p-4 bg-slate-50 rounded-lg">
+              <div className="mt-6 p-4 bg-slate-50 rounded-md">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-emerald-50 border border-emerald-200 rounded-full flex items-center justify-center flex-shrink-0">
                     <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                   <div>
-                    <div className="font-medium text-slate-900">Carbon Offset</div>
+                    <div className="font-medium text-[#0B2447]">Carbon Offset</div>
                     <div className="text-sm text-slate-600">
                       To offset an economy class seat, plant approximately <strong>{co2AllClasses.treesNeeded} trees</strong>.
                       {co2AllClasses.comparison && <span className="block mt-1">{co2AllClasses.comparison}</span>}
@@ -933,19 +1008,19 @@ export default async function DistancePage({ params }: PageProps) {
 
             {/* Jet Lag & Travel Tips */}
             {jetLagInfo && (
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Jet Lag & Travel Tips</h2>
+              <div className="bg-white rounded-md border border-slate-200 p-5">
+                <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-4">Jet Lag & Travel Tips</h2>
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <div className={`p-4 rounded-lg ${
+                    <div className={`p-4 rounded-md ${
                       jetLagInfo.severity === 'none' ? 'bg-green-50 border border-green-200' :
-                      jetLagInfo.severity === 'mild' ? 'bg-yellow-50 border border-yellow-200' :
-                      jetLagInfo.severity === 'moderate' ? 'bg-orange-50 border border-orange-200' :
+                      jetLagInfo.severity === 'mild' ? 'bg-amber-50 border border-amber-200' :
+                      jetLagInfo.severity === 'moderate' ? 'bg-amber-50 border border-amber-300' :
                       'bg-red-50 border border-red-200'
                     }`}>
                       <div className="text-sm text-slate-600 mb-1">Jet Lag Severity</div>
-                      <div className={`text-xl font-bold capitalize ${
+                      <div className={`text-[16px] font-semibold tracking-tight capitalize ${
                         jetLagInfo.severity === 'none' ? 'text-green-700' :
                         jetLagInfo.severity === 'mild' ? 'text-yellow-700' :
                         jetLagInfo.severity === 'moderate' ? 'text-orange-700' :
@@ -961,9 +1036,9 @@ export default async function DistancePage({ params }: PageProps) {
                     </div>
 
                     {timeDiff && (
-                      <div className="mt-4 p-4 bg-slate-50 rounded-lg">
+                      <div className="mt-4 p-4 bg-slate-50 rounded-md">
                         <div className="text-sm text-slate-600 mb-1">Time Zone Change</div>
-                        <div className="font-semibold text-slate-900">
+                        <div className="font-semibold text-[#0B2447]">
                           {Math.abs(timeDiff.hours)} hour{Math.abs(timeDiff.hours) !== 1 ? 's' : ''} {jetLagInfo.direction === 'east' ? 'forward' : jetLagInfo.direction === 'west' ? 'back' : ''}
                         </div>
                         <div className="text-xs text-slate-500 mt-1">
@@ -978,7 +1053,7 @@ export default async function DistancePage({ params }: PageProps) {
                     <ul className="space-y-2">
                       {jetLagInfo.tips.map((tip, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-sm text-slate-600">
-                          <svg className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4 text-[#0B2447] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                           </svg>
                           {tip}
@@ -991,28 +1066,28 @@ export default async function DistancePage({ params }: PageProps) {
             )}
 
             {/* Seat Recommendations */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Seat Recommendations</h2>
+            <div className="bg-white rounded-md border border-slate-200 p-5">
+              <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-4">Seat Recommendations</h2>
 
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="p-4 bg-slate-50 rounded-lg">
+                <div className="p-4 bg-slate-50 rounded-md">
                   <div className="flex items-center gap-2 mb-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-[#0B2447]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
-                    <div className="font-medium text-slate-900">Best Window for Views</div>
+                    <div className="font-medium text-[#0B2447]">Best Window for Views</div>
                   </div>
-                  <div className="text-2xl font-bold text-blue-600 mb-1 capitalize">{seatRecommendation.windowView} Side</div>
+                  <div className="text-[18px] font-semibold text-[#0B2447] tracking-tight mb-1 capitalize">{seatRecommendation.windowView} Side</div>
                   <div className="text-sm text-slate-600">{seatRecommendation.sunPosition}</div>
                 </div>
 
-                <div className="p-4 bg-slate-50 rounded-lg">
+                <div className="p-4 bg-slate-50 rounded-md">
                   <div className="flex items-center gap-2 mb-2">
                     <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
-                    <div className="font-medium text-slate-900">Recommendation</div>
+                    <div className="font-medium text-[#0B2447]">Recommendation</div>
                   </div>
                   <div className="text-sm text-slate-600">{seatRecommendation.recommendation}</div>
                 </div>
@@ -1020,14 +1095,14 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             {/* Distance Comparisons */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Distance in Perspective</h2>
+            <div className="bg-white rounded-md border border-slate-200 p-5">
+              <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-4">Distance in Perspective</h2>
 
               <div className="grid md:grid-cols-2 gap-4">
                 {distanceComparisons.map((comparison, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-blue-600 font-semibold text-sm">{idx + 1}</span>
+                  <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-md">
+                    <div className="w-8 h-8 bg-[#EEF2F7] border border-slate-200 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-[#0B2447] font-semibold text-sm">{idx + 1}</span>
                     </div>
                     <div className="text-sm text-slate-700">{comparison}</div>
                   </div>
@@ -1036,8 +1111,8 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             {/* Unit Conversion Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Distance & Speed Reference</h2>
+            <div className="bg-white rounded-md border border-slate-200 p-5">
+              <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-4">Distance & Speed Reference</h2>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -1050,32 +1125,32 @@ export default async function DistancePage({ params }: PageProps) {
                   <tbody className="divide-y divide-slate-100">
                     <tr>
                       <td className="py-3 px-4 text-slate-700">Statute Miles</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">{distance.miles.toLocaleString()} mi</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{distance.miles.toLocaleString()} mi</td>
                     </tr>
                     <tr>
                       <td className="py-3 px-4 text-slate-700">Kilometers</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">{distance.km.toLocaleString()} km</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{distance.km.toLocaleString()} km</td>
                     </tr>
                     <tr>
                       <td className="py-3 px-4 text-slate-700">Nautical Miles</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">{distance.nauticalMiles.toLocaleString()} nm</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{distance.nauticalMiles.toLocaleString()} nm</td>
                     </tr>
                     <tr>
                       <td className="py-3 px-4 text-slate-700">Meters</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">{(distance.km * 1000).toLocaleString()} m</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{(distance.km * 1000).toLocaleString()} m</td>
                     </tr>
                     <tr>
                       <td className="py-3 px-4 text-slate-700">Feet</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">{Math.round(distance.miles * 5280).toLocaleString()} ft</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{Math.round(distance.miles * 5280).toLocaleString()} ft</td>
                     </tr>
                     <tr className="bg-slate-50">
                       <td className="py-3 px-4 text-slate-700">Flight Time (850 km/h)</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">{flightTime.display}</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{flightTime.display}</td>
                     </tr>
                     {drivingTime.practical && (
                       <tr className="bg-slate-50">
                         <td className="py-3 px-4 text-slate-700">Driving Time (80 km/h avg)</td>
-                        <td className="py-3 px-4 text-right font-semibold text-slate-900">{drivingTime.display}</td>
+                        <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{drivingTime.display}</td>
                       </tr>
                     )}
                   </tbody>
@@ -1084,8 +1159,8 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             {/* Travel Speed Comparison */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Travel Speed Comparison</h2>
+            <div className="bg-white rounded-md border border-slate-200 p-5">
+              <h2 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-4">Travel Speed Comparison</h2>
               <p className="text-slate-600 text-sm mb-4">
                 How long would it take to cover the {distance.km.toLocaleString()} km between {fromAirport.city} and {toAirport.city} at different speeds?
               </p>
@@ -1099,35 +1174,35 @@ export default async function DistancePage({ params }: PageProps) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    <tr className="bg-blue-50/50">
+                    <tr className="bg-[#EEF2F7]/50">
                       <td className="py-3 px-4 text-slate-700 font-medium">Commercial Jet</td>
-                      <td className="py-3 px-4 text-right text-slate-900">850 km/h</td>
-                      <td className="py-3 px-4 text-right font-semibold text-blue-700">{flightTime.display}</td>
+                      <td className="py-3 px-4 text-right text-[#0B2447]">850 km/h</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447] tabular-nums font-mono">{flightTime.display}</td>
                     </tr>
                     <tr>
                       <td className="py-3 px-4 text-slate-700">Turboprop Aircraft</td>
-                      <td className="py-3 px-4 text-right text-slate-900">500 km/h</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">{Math.floor(distance.km / 500)}h {Math.round((distance.km / 500 % 1) * 60)}m</td>
+                      <td className="py-3 px-4 text-right text-[#0B2447]">500 km/h</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{Math.floor(distance.km / 500)}h {Math.round((distance.km / 500 % 1) * 60)}m</td>
                     </tr>
                     <tr>
                       <td className="py-3 px-4 text-slate-700">Bullet Train</td>
-                      <td className="py-3 px-4 text-right text-slate-900">320 km/h</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">{Math.floor(distance.km / 320)}h {Math.round((distance.km / 320 % 1) * 60)}m</td>
+                      <td className="py-3 px-4 text-right text-[#0B2447]">320 km/h</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{Math.floor(distance.km / 320)}h {Math.round((distance.km / 320 % 1) * 60)}m</td>
                     </tr>
                     <tr>
                       <td className="py-3 px-4 text-slate-700">Car (highway)</td>
-                      <td className="py-3 px-4 text-right text-slate-900">100 km/h</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">{Math.floor(distance.km / 100)}h {Math.round((distance.km / 100 % 1) * 60)}m</td>
+                      <td className="py-3 px-4 text-right text-[#0B2447]">100 km/h</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{Math.floor(distance.km / 100)}h {Math.round((distance.km / 100 % 1) * 60)}m</td>
                     </tr>
                     <tr>
                       <td className="py-3 px-4 text-slate-700">Walking</td>
-                      <td className="py-3 px-4 text-right text-slate-900">5 km/h</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">{Math.round(distance.km / 5).toLocaleString()}h ({Math.round(distance.km / 5 / 24)} days)</td>
+                      <td className="py-3 px-4 text-right text-[#0B2447]">5 km/h</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{Math.round(distance.km / 5).toLocaleString()}h ({Math.round(distance.km / 5 / 24)} days)</td>
                     </tr>
                     <tr className="bg-slate-50">
                       <td className="py-3 px-4 text-slate-700">Speed of Sound</td>
-                      <td className="py-3 px-4 text-right text-slate-900">1,235 km/h</td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900">{Math.floor(distance.km / 1235)}h {Math.round((distance.km / 1235 % 1) * 60)}m</td>
+                      <td className="py-3 px-4 text-right text-[#0B2447]">1,235 km/h</td>
+                      <td className="py-3 px-4 text-right font-semibold text-[#0B2447]">{Math.floor(distance.km / 1235)}h {Math.round((distance.km / 1235 % 1) * 60)}m</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1135,23 +1210,23 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             {/* Round Trip Summary */}
-            <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-6 text-white">
-              <h2 className="text-lg font-semibold mb-4">Round Trip Summary</h2>
+            <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-md p-6 text-white">
+              <h2 className="text-[15px] font-semibold tracking-tight mb-4">Round Trip Summary</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <div className="text-3xl font-bold">{roundTripDistance.miles.toLocaleString()}</div>
+                  <div className="text-[24px] font-semibold tabular-nums font-mono leading-none">{roundTripDistance.miles.toLocaleString()}</div>
                   <div className="text-slate-400 text-sm">total miles</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold">{roundTripDistance.km.toLocaleString()}</div>
+                  <div className="text-[24px] font-semibold tabular-nums font-mono leading-none">{roundTripDistance.km.toLocaleString()}</div>
                   <div className="text-slate-400 text-sm">total km</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold">{roundTripFlightTime.display}</div>
+                  <div className="text-[24px] font-semibold tabular-nums font-mono leading-none">{roundTripFlightTime.display}</div>
                   <div className="text-slate-400 text-sm">total flight time</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold">{(co2AllClasses.economy.kgCO2 * 2).toLocaleString()}</div>
+                  <div className="text-[24px] font-semibold tabular-nums font-mono leading-none">{(co2AllClasses.economy.kgCO2 * 2).toLocaleString()}</div>
                   <div className="text-slate-400 text-sm">kg CO2 (economy)</div>
                 </div>
               </div>
@@ -1160,7 +1235,7 @@ export default async function DistancePage({ params }: PageProps) {
             {/* Return Route Link */}
             <Link
               href={`/distance/${toAirport.iata}-to-${fromAirport.iata}`}
-              className="block w-full text-center py-4 bg-blue-600 hover:bg-blue-700 rounded-xl text-white font-medium transition-colors"
+              className="block w-full text-center py-4 bg-[#0B2447] hover:bg-[#1A3160] rounded-md text-white font-semibold transition-colors"
             >
               View Return Flight: {toAirport.iata.toUpperCase()} to {fromAirport.iata.toUpperCase()}
             </Link>
@@ -1169,50 +1244,50 @@ export default async function DistancePage({ params }: PageProps) {
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Quick Stats */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sticky top-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Quick Facts</h3>
+            <div className="bg-white rounded-md border border-slate-200 p-5 sticky top-6">
+              <h3 className="font-semibold text-[#0B2447] mb-4">Quick Facts</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
                   <span className="text-slate-600">Distance</span>
-                  <span className="font-semibold text-slate-900">{distance.miles.toLocaleString()} mi</span>
+                  <span className="font-semibold text-[#0B2447]">{distance.miles.toLocaleString()} mi</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
                   <span className="text-slate-600">Flight Time</span>
-                  <span className="font-semibold text-slate-900">{flightTime.display}</span>
+                  <span className="font-semibold text-[#0B2447]">{flightTime.display}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
                   <span className="text-slate-600">Route Type</span>
-                  <span className="font-semibold text-slate-900 capitalize">{routeClass.type.replace('-', ' ')}</span>
+                  <span className="font-semibold text-[#0B2447] capitalize">{routeClass.type.replace('-', ' ')}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
                   <span className="text-slate-600">Direction</span>
-                  <span className="font-semibold text-slate-900">{bearing.cardinal}</span>
+                  <span className="font-semibold text-[#0B2447]">{bearing.cardinal}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
                   <span className="text-slate-600">Altitude</span>
-                  <span className="font-semibold text-slate-900">{cruisingAltitude.flightLevel}</span>
+                  <span className="font-semibold text-[#0B2447]">{cruisingAltitude.flightLevel}</span>
                 </div>
                 {timeDiff && (
                   <div className="flex justify-between items-center py-2 border-b border-slate-100">
                     <span className="text-slate-600">Time Diff</span>
-                    <span className="font-semibold text-slate-900">{timeDiff.display}</span>
+                    <span className="font-semibold text-[#0B2447]">{timeDiff.display}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
                   <span className="text-slate-600">CO2 (Economy)</span>
-                  <span className="font-semibold text-slate-900">{co2AllClasses.economy.kgCO2} kg</span>
+                  <span className="font-semibold text-[#0B2447]">{co2AllClasses.economy.kgCO2} kg</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-slate-600">Airlines</span>
-                  <span className="font-semibold text-slate-900">{allAirlines.length || 'N/A'}</span>
+                  <span className="font-semibold text-[#0B2447]">{allAirlines.length || 'N/A'}</span>
                 </div>
               </div>
             </div>
 
             {/* Other Routes from Origin */}
             {similarRoutesFrom.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h3 className="font-semibold text-slate-900 mb-4">
+              <div className="bg-white rounded-md border border-slate-200 p-5">
+                <h3 className="font-semibold text-[#0B2447] mb-4">
                   Routes from {fromAirport.iata.toUpperCase()}
                 </h3>
                 <div className="space-y-2">
@@ -1225,10 +1300,10 @@ export default async function DistancePage({ params }: PageProps) {
                       <Link
                         key={r.dest_iata}
                         href={`/distance/${fromAirport.iata}-to-${r.dest_iata}`}
-                        className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                        className="flex items-center justify-between p-3 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-emerald-600">{r.dest_iata.toUpperCase()}</span>
+                          <span className="font-semibold text-emerald-700">{r.dest_iata.toUpperCase()}</span>
                           <span className="text-slate-500 text-sm truncate">{r.dest_airport?.city}</span>
                         </div>
                         <span className="text-sm text-slate-600">{d.miles.toLocaleString()} mi</span>
@@ -1238,7 +1313,7 @@ export default async function DistancePage({ params }: PageProps) {
                 </div>
                 <Link
                   href={`/airport/${fromAirport.iata}`}
-                  className="mt-4 block text-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  className="mt-4 block text-center text-sm text-[#0B2447] hover:text-[#1A3160] font-medium"
                 >
                   View all routes
                 </Link>
@@ -1247,8 +1322,8 @@ export default async function DistancePage({ params }: PageProps) {
 
             {/* Other Routes from Destination */}
             {similarRoutesTo.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h3 className="font-semibold text-slate-900 mb-4">
+              <div className="bg-white rounded-md border border-slate-200 p-5">
+                <h3 className="font-semibold text-[#0B2447] mb-4">
                   Routes from {toAirport.iata.toUpperCase()}
                 </h3>
                 <div className="space-y-2">
@@ -1261,7 +1336,7 @@ export default async function DistancePage({ params }: PageProps) {
                       <Link
                         key={r.dest_iata}
                         href={`/distance/${toAirport.iata}-to-${r.dest_iata}`}
-                        className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                        className="flex items-center justify-between p-3 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors"
                       >
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-red-600">{r.dest_iata.toUpperCase()}</span>
@@ -1274,7 +1349,7 @@ export default async function DistancePage({ params }: PageProps) {
                 </div>
                 <Link
                   href={`/airport/${toAirport.iata}`}
-                  className="mt-4 block text-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  className="mt-4 block text-center text-sm text-[#0B2447] hover:text-[#1A3160] font-medium"
                 >
                   View all routes
                 </Link>
@@ -1284,11 +1359,11 @@ export default async function DistancePage({ params }: PageProps) {
         </div>
 
         {/* FAQ Section */}
-        <section className="mt-12 bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Frequently Asked Questions</h2>
+        <section className="mt-12 bg-white rounded-md border border-slate-200 p-5 md:p-8">
+          <h2 className="text-[20px] font-semibold text-[#0B2447] tracking-tight mb-6">Frequently Asked Questions</h2>
           <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
             <div>
-              <h3 className="font-semibold text-slate-900 mb-2">
+              <h3 className="font-semibold text-[#0B2447] mb-2">
                 How far is {fromAirport.city} from {toAirport.city}?
               </h3>
               <p className="text-slate-600 text-sm">
@@ -1297,7 +1372,7 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-900 mb-2">
+              <h3 className="font-semibold text-[#0B2447] mb-2">
                 How long is the flight?
               </h3>
               <p className="text-slate-600 text-sm">
@@ -1306,7 +1381,7 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-900 mb-2">
+              <h3 className="font-semibold text-[#0B2447] mb-2">
                 What is the time difference?
               </h3>
               <p className="text-slate-600 text-sm">
@@ -1324,7 +1399,7 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-900 mb-2">
+              <h3 className="font-semibold text-[#0B2447] mb-2">
                 What airlines fly this route?
               </h3>
               <p className="text-slate-600 text-sm">
@@ -1339,7 +1414,7 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-900 mb-2">
+              <h3 className="font-semibold text-[#0B2447] mb-2">
                 What is the carbon footprint?
               </h3>
               <p className="text-slate-600 text-sm">
@@ -1348,7 +1423,7 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-900 mb-2">
+              <h3 className="font-semibold text-[#0B2447] mb-2">
                 Which seat side is best?
               </h3>
               <p className="text-slate-600 text-sm">
@@ -1357,7 +1432,7 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-900 mb-2">
+              <h3 className="font-semibold text-[#0B2447] mb-2">
                 Can I drive from {fromAirport.city} to {toAirport.city} instead of flying?
               </h3>
               <p className="text-slate-600 text-sm">
@@ -1372,7 +1447,7 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-900 mb-2">
+              <h3 className="font-semibold text-[#0B2447] mb-2">
                 What aircraft typically fly this route?
               </h3>
               <p className="text-slate-600 text-sm">
@@ -1384,7 +1459,7 @@ export default async function DistancePage({ params }: PageProps) {
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-900 mb-2">
+              <h3 className="font-semibold text-[#0B2447] mb-2">
                 How can I offset the carbon from this flight?
               </h3>
               <p className="text-slate-600 text-sm">
@@ -1395,90 +1470,125 @@ export default async function DistancePage({ params }: PageProps) {
         </section>
 
         {/* External Authority Links */}
-        <section className="mt-8 bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">External Resources & References</h2>
+        <section className="mt-8 bg-white rounded-md border border-slate-200 p-5 md:p-8">
+          <h2 className="text-[16px] font-semibold text-[#0B2447] tracking-tight mb-4">External Resources & References</h2>
           <p className="text-slate-600 text-sm mb-6">
             Learn more about the airports, aviation data, and carbon emissions methodology used in this calculation.
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <a href={`https://en.wikipedia.org/wiki/${fromAirport.city.replace(/ /g, '_')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-blue-600 font-bold text-sm">W</span>
+            <a href={`https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(fromAirport.city)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors">
+              <div className="w-10 h-10 bg-[#EEF2F7] border border-slate-200 rounded-md flex items-center justify-center flex-shrink-0">
+                <span className="text-[#0B2447] font-mono font-bold text-[11px] tracking-wider">W</span>
               </div>
               <div>
-                <div className="font-medium text-slate-900 text-sm">{fromAirport.city} on Wikipedia</div>
+                <div className="font-medium text-[#0B2447] text-sm">{fromAirport.city} on Wikipedia</div>
                 <div className="text-xs text-slate-500">City information & history</div>
               </div>
             </a>
-            <a href={`https://en.wikipedia.org/wiki/${toAirport.city.replace(/ /g, '_')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-blue-600 font-bold text-sm">W</span>
+            <a href={`https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(toAirport.city)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors">
+              <div className="w-10 h-10 bg-[#EEF2F7] border border-slate-200 rounded-md flex items-center justify-center flex-shrink-0">
+                <span className="text-[#0B2447] font-mono font-bold text-[11px] tracking-wider">W</span>
               </div>
               <div>
-                <div className="font-medium text-slate-900 text-sm">{toAirport.city} on Wikipedia</div>
+                <div className="font-medium text-[#0B2447] text-sm">{toAirport.city} on Wikipedia</div>
                 <div className="text-xs text-slate-500">City information & history</div>
               </div>
             </a>
-            <a href="https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-green-600 font-bold text-sm">D</span>
+            <a href="https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors">
+              <div className="w-10 h-10 bg-emerald-50 border border-emerald-200 rounded-md flex items-center justify-center flex-shrink-0">
+                <span className="text-emerald-700 font-mono font-bold text-[11px] tracking-wider">D</span>
               </div>
               <div>
-                <div className="font-medium text-slate-900 text-sm">DEFRA Emission Factors</div>
+                <div className="font-medium text-[#0B2447] text-sm">DEFRA Emission Factors</div>
                 <div className="text-xs text-slate-500">UK Government carbon data</div>
               </div>
             </a>
-            <a href="https://www.iata.org/en/publications/directories/code-search/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <a href="https://www.iata.org/en/publications/directories/code-search/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors">
+              <div className="w-10 h-10 bg-red-50 border border-red-200 rounded-md flex items-center justify-center flex-shrink-0">
                 <span className="text-purple-600 font-bold text-sm">I</span>
               </div>
               <div>
-                <div className="font-medium text-slate-900 text-sm">IATA Code Search</div>
+                <div className="font-medium text-[#0B2447] text-sm">IATA Code Search</div>
                 <div className="text-xs text-slate-500">Official airport & airline codes</div>
               </div>
             </a>
-            <a href="https://openflights.org/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <a href="https://openflights.org/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors">
+              <div className="w-10 h-10 bg-amber-50 border border-amber-200 rounded-md flex items-center justify-center flex-shrink-0">
                 <span className="text-orange-600 font-bold text-sm">O</span>
               </div>
               <div>
-                <div className="font-medium text-slate-900 text-sm">OpenFlights Database</div>
+                <div className="font-medium text-[#0B2447] text-sm">OpenFlights Database</div>
                 <div className="text-xs text-slate-500">Airport & route data source</div>
               </div>
             </a>
-            <a href="https://en.wikipedia.org/wiki/Vincenty%27s_formulae" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-              <div className="w-10 h-10 bg-slate-200 rounded-lg flex items-center justify-center flex-shrink-0">
+            <a href="https://en.wikipedia.org/wiki/Vincenty%27s_formulae" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors">
+              <div className="w-10 h-10 bg-slate-200 rounded-md flex items-center justify-center flex-shrink-0">
                 <span className="text-slate-600 font-bold text-sm">V</span>
               </div>
               <div>
-                <div className="font-medium text-slate-900 text-sm">Vincenty Formula</div>
+                <div className="font-medium text-[#0B2447] text-sm">Vincenty Formula</div>
                 <div className="text-xs text-slate-500">Distance calculation method</div>
               </div>
             </a>
           </div>
         </section>
 
-        {/* Explore More */}
-        <div className="mt-8 grid md:grid-cols-3 gap-4">
-          <Link href={`/airport/${fromAirport.iata}`} className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow">
-            <h3 className="font-semibold text-slate-900 mb-2">{fromAirport.iata.toUpperCase()} Airport Details</h3>
-            <p className="text-slate-600 text-sm">View all routes, airlines, and information for {fromAirport.name}.</p>
-          </Link>
-          <Link href={`/airport/${toAirport.iata}`} className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow">
-            <h3 className="font-semibold text-slate-900 mb-2">{toAirport.iata.toUpperCase()} Airport Details</h3>
-            <p className="text-slate-600 text-sm">View all routes, airlines, and information for {toAirport.name}.</p>
-          </Link>
-          <Link href="/about" className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow">
-            <h3 className="font-semibold text-slate-900 mb-2">Our Methodology</h3>
-            <p className="text-slate-600 text-sm">Learn about the Vincenty formula and DEFRA emission factors we use.</p>
-          </Link>
-        </div>
+        {/* Methodology callout */}
+        <Callout type="note" term="How these numbers were computed">
+          Distance comes from Vincenty&apos;s 1975 inverse formula on the WGS-84
+          ellipsoid (precision to 0.5 mm). Block time uses 850 km/h cruise +
+          distance-banded ground time. CO₂e uses the DESNZ 2024 factor for
+          this band, multiplied by the cabin allocation and the 1.9 ×
+          radiative-forcing uplift. Every step is documented at{' '}
+          <Link href="/methodology" className="text-blue-700 hover:underline underline-offset-2 font-medium">/methodology</Link>.
+        </Callout>
+
+        {/* Internal links — deeper content for this route */}
+        <InternalLinks
+          heading="Dig deeper on this route"
+          links={[
+            {
+              href: `/airport/${fromAirport.iata}`,
+              title: `${fromAirport.iata.toUpperCase()} — ${fromAirport.city}`,
+              description: `Routes, airlines, and route count from ${fromAirport.name}.`,
+            },
+            {
+              href: `/airport/${toAirport.iata}`,
+              title: `${toAirport.iata.toUpperCase()} — ${toAirport.city}`,
+              description: `Routes, airlines, and route count for ${toAirport.name}.`,
+            },
+            {
+              href: '/methodology/vincenty-formula',
+              title: "Vincenty's formula, step-by-step",
+              description:
+                'The iteration scheme that delivered the 0.5 mm distance precision on this page.',
+            },
+            {
+              href: '/methodology/co2-emissions-calculation',
+              title: 'End-to-end CO₂ calculation',
+              description:
+                'How the per-cabin numbers shown above are derived, with worked examples.',
+            },
+            {
+              href: '/methodology/radiative-forcing',
+              title: 'The 1.9 × radiative forcing uplift',
+              description:
+                "Why aviation's non-CO₂ effects dominate and which multiplier to choose.",
+            },
+            {
+              href: '/learn/jet-lag-science',
+              title: 'Jet-lag science',
+              description:
+                "Why westward recovery is faster than eastward — the chronobiology behind the estimate.",
+            },
+          ]}
+        />
 
         {/* Calculate Another Route */}
         <div className="mt-8 text-center">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-md transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -1486,6 +1596,19 @@ export default async function DistancePage({ params }: PageProps) {
             Calculate Another Distance
           </Link>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function HeroMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="px-4 py-4 sm:py-5 text-center">
+      <div className="text-[26px] md:text-[32px] font-semibold tabular-nums font-mono leading-none">
+        {value}
+      </div>
+      <div className="text-[10.5px] uppercase tracking-[0.14em] text-slate-300 mt-2 font-semibold">
+        {label}
       </div>
     </div>
   );

@@ -296,9 +296,9 @@ async function main() {
   console.log('Tables created successfully.');
 
   // Import data
-  const airportCount = await importAirports(db);
-  const airlineCount = await importAirlines(db);
-  const routeCount = await importRoutes(db);
+  await importAirports(db);
+  await importAirlines(db);
+  await importRoutes(db);
 
   // Get final stats
   const finalAirportCount = (db.prepare('SELECT COUNT(*) as count FROM airports').get() as { count: number }).count;

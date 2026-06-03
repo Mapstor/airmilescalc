@@ -1,0 +1,277 @@
+export const meta = {
+  title: "Aviation's non-CO₂ climate forcing",
+  description:
+    "The Lee et al. 2021 decomposition: contrail cirrus dominates aviation's effective radiative forcing, CO₂ is one-third, and why no single multiplier captures the full picture.",
+  category: "Methodology",
+  updated: "2026-06-01",
+  readingTime: "8 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "Lee et al. (2021)",
+      note: "The contribution of global aviation to anthropogenic climate forcing for 2000 to 2018 — the authoritative ERF decomposition",
+      venue: "Atmospheric Environment 244, 117834",
+      date: "January 2021",
+      url: "https://doi.org/10.1016/j.atmosenv.2020.117834",
+    },
+    {
+      id: 2,
+      label: "Lee et al. (2009)",
+      note: "Predecessor review on which DESNZ's 1.9 × multiplier was originally based",
+      venue: "Atmospheric Environment 43, 3520–3537",
+      date: "2009",
+      url: "https://doi.org/10.1016/j.atmosenv.2009.04.024",
+    },
+    {
+      id: 3,
+      label: "IPCC AR6 WGI Chapter 7",
+      note: "The Earth's energy budget, climate feedbacks and climate sensitivity — provides ERF framework",
+      venue: "Cambridge University Press",
+      date: "2021",
+      url: "https://www.ipcc.ch/report/ar6/wg1/chapter/chapter-7/",
+    },
+    {
+      id: 4,
+      label: "DESNZ 2024 methodology",
+      note: "UK government source on the 1.9 × uplift as currently applied in corporate reporting",
+      venue: "UK Department for Energy Security and Net Zero",
+      date: "June 2024",
+      url: "https://assets.publishing.service.gov.uk/media/66a9fe4ca3c2a28abb50da4a/2024-greenhouse-gas-conversion-factors-methodology.pdf",
+    },
+    {
+      id: 5,
+      label: "Teoh et al. (2024)",
+      note: "Global aviation contrail climate effects 2019–2021, ACP",
+      venue: "Atmospheric Chemistry and Physics 24, 6071–6093",
+      date: "2024",
+      url: "https://acp.copernicus.org/articles/24/6071/2024/",
+    },
+  ]}
+/>
+
+<Lede>
+  Burning jet fuel at 35,000 feet does two things that make aviation
+  uniquely warming: it releases CO₂, and it triggers contrails and NOₓ
+  chemistry whose climate impact is at least as large as the CO₂ itself.
+  A single multiplier cannot capture the temporal asymmetry, which is why
+  picking the right number depends on what question you are answering.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "100.9 mW m⁻²",
+      label: "Net aviation ERF in 2018",
+      source: "Lee et al. 2021",
+    },
+    {
+      value: "≈ 57 %",
+      label: "Contrail cirrus share of net aviation ERF",
+      source: "Lee et al. 2021",
+    },
+    {
+      value: "≈ 34 %",
+      label: "CO₂ share of net aviation ERF",
+      source: "Lee et al. 2021",
+    },
+    {
+      value: "3.5 %",
+      label: "Aviation share of all anthropogenic ERF (2018)",
+      source: "Lee et al. 2021",
+    },
+  ]}
+/>
+
+## What "radiative forcing" means
+
+Radiative forcing is the change in net energy flux at the top of the
+atmosphere caused by an external perturbation, in watts per square metre.
+A positive number warms the planet; negative cools. Aviation's 100.9
+milliwatts per square metre means it adds about 0.1 W m⁻² to Earth's net
+energy budget — small in absolute terms next to total anthropogenic
+forcing of roughly 2.7 W m⁻², but a measurable 3.5 % share with rapid
+growth.
+
+<Callout type="definition" term="ERF vs RF">
+  Effective Radiative Forcing (ERF) is the IPCC AR6-recommended metric
+  that includes rapid atmospheric adjustments (cloud, lapse rate)
+  triggered by the forcer. Traditional Radiative Forcing (RF) holds
+  surface temperature fixed and ignores these adjustments. ERF is more
+  representative of long-term warming response; this page uses ERF
+  throughout to match Lee 2021.
+</Callout>
+
+## The Lee 2021 decomposition
+
+Lee and co-authors decomposed aviation's net 2018 ERF into eight
+components, the three dominant ones plotted below. Contrail cirrus —
+ice clouds seeded by aircraft exhaust in cold, ice-supersaturated air —
+accounts for slightly more than half of the total. CO₂ is roughly one-
+third. The net NOₓ effect is positive (ozone production warms) but small
+because the methane-sink effect (cooling) and aerosol-induced cloud
+adjustments partly cancel the ozone warming.
+
+<BarChart
+  title="Effective radiative forcing components of global aviation in 2018"
+  source="Lee et al. 2021, Atmospheric Environment 244:117834, Table 2"
+  unit="mW m⁻²"
+  data={[
+    { label: "Contrail cirrus", value: 57.4 },
+    { label: "CO₂ (long-term cumulative)", value: 34.3 },
+    { label: "NOₓ — ozone (warming)", value: 36.0 },
+    { label: "NOₓ — methane (cooling)", value: -21.2 },
+    { label: "Water vapour (stratospheric)", value: 2.0 },
+    { label: "Soot (aerosol direct)", value: 0.94 },
+    { label: "Sulfate (aerosol direct)", value: -7.4 },
+  ]}
+  max={60}
+/>
+
+## Why one multiplier is approximate
+
+CO₂ accumulates in the atmosphere for centuries; one tonne emitted today
+keeps warming the planet for hundreds of years. A contrail forms in
+minutes, lives for a few hours, and disappears. Combining them into a
+single CO₂-equivalent depends on the time horizon you pick: GWP100 is the
+IPCC default, GWP20 weighs short-lived gases more heavily, GWP* tries to
+correct for the temporal mismatch directly.
+
+<DataTable
+  caption="How aviation's non-CO₂ uplift changes with the chosen metric"
+  source="Derived from Lee et al. 2021 components; GWP horizons per IPCC AR6"
+  columns={["Metric", "Aviation non-CO₂ uplift on CO₂", "Use case"]}
+  rows={[
+    [
+      "ERF ratio (instantaneous, 2018)",
+      "≈ 2.94 × (net / CO₂)",
+      "Snapshot of current warming",
+    ],
+    [
+      "GWP100 (DESNZ standard)",
+      "≈ 1.9 ×",
+      "UK SECR, corporate disclosure",
+    ],
+    [
+      "GWP100 (post-Lee-2021 update)",
+      "≈ 1.7 ×",
+      "Some 2024 methodologies",
+    ],
+    [
+      "GWP20",
+      "≈ 2.5 – 3.0 ×",
+      "Near-term temperature focus",
+    ],
+    [
+      "GWP* (Allen / Forster)",
+      "Depends on emission trajectory",
+      "Pathway-based long-term targets",
+    ],
+  ]}
+/>
+
+## Contrails — why they matter so much
+
+A contrail forms when hot, water-saturated engine exhaust mixes with cold,
+ambient air and the resulting plume reaches ice supersaturation. The
+contrail then traps outgoing longwave radiation (warming) while reflecting
+some incoming shortwave (cooling) — net warming on average, because most
+contrails form at night or at high latitudes where the longwave trapping
+dominates.
+
+<Callout type="note" term="The contrail-avoidance opportunity">
+  Recent work (Teoh et al. 2024) suggests that 2 % of flights produce 80 %
+  of contrail warming, because contrail formation depends on local
+  ice-supersaturation conditions that aircraft can sometimes route around.
+  A modest altitude change on a small fraction of flights could cut
+  aviation's net forcing materially without redesigning the aircraft.
+</Callout>
+
+## Why DESNZ still uses 1.9 ×
+
+DESNZ acknowledges in its 2024 methodology paper that the underlying
+science has moved on from 1.9 × — Lee et al. 2021 implies a higher
+instantaneous ratio, ICAO is studying a more granular per-route approach,
+and contrail science is uncertain. DESNZ holds at 1.9 × because changing
+the multiplier annually would destabilise corporate disclosure — the
+number is intentionally conservative and stable rather than scientifically
+optimal.
+
+<DataTable
+  caption="How the multiplier has evolved across major methodologies"
+  source="DESNZ methodology papers 2009–2024; ATAG; ICAO; Atmosfair documentation"
+  columns={["Year / source", "Multiplier", "Notes"]}
+  rows={[
+    ["Lee et al. 2009 base", "1.9 ×", "Adopted by UK CCC, then DEFRA/DESNZ"],
+    ["DESNZ / DEFRA 2010 – 2024", "1.9 ×", "Held stable for reporting continuity"],
+    [
+      "Atmosfair (Germany)",
+      "≈ 2.0 ×",
+      "Per-route model, slightly higher long-haul uplift",
+    ],
+    [
+      "Lee et al. 2021 implied (ERF)",
+      "≈ 2.94 × instantaneous",
+      "Instantaneous ratio, not GWP100",
+    ],
+    [
+      "Some 2024 industry methodologies",
+      "≈ 1.7 ×",
+      "Tightened GWP100 reading of Lee 2021",
+    ],
+  ]}
+/>
+
+<FAQ
+  items={[
+    {
+      q: "Should I trust 1.9 × or use Lee 2021's higher number?",
+      a: "Both are right for different questions. 1.9 × is the right number for UK SECR disclosure and any reporting framework that anchors on DESNZ. Lee 2021's ~2.94 × ratio is the right number for instantaneous climate-impact comparisons and for sensitivity analysis. Our calculator publishes the underlying CO₂ value so you can apply whichever multiplier your framework requires.",
+    },
+    {
+      q: "Are contrails really half of aviation's warming?",
+      a: "Yes, in the central Lee 2021 estimate for 2018 — 57.4 mW m⁻² out of 100.9 mW m⁻² net ERF. The uncertainty range is wide (the paper's 90 % CI spans roughly 17 to 98 mW m⁻²), but the conclusion that contrails are large is robust.",
+    },
+    {
+      q: "Why is the NOx-derived forcing so small if NOx is a known greenhouse gas?",
+      a: "NOx itself is not a greenhouse gas, but it catalyses ozone production (warming) and also breaks down atmospheric methane (cooling). The two effects partly cancel — net ≈ +17.5 mW m⁻² — and aerosol-cloud interactions add further uncertainty.",
+    },
+    {
+      q: "Will sustainable aviation fuel reduce non-CO₂ effects too?",
+      a: "Partially. SAF burns with lower soot, which produces fewer ice nucleation sites and may reduce contrail persistence. Several studies estimate SAF can cut contrail-driven warming by 50–70 % independent of its lifecycle CO₂ benefit.",
+    },
+    {
+      q: "What happens at high latitudes versus the tropics?",
+      a: "Contrail effects are more strongly warming over Arctic and mid-latitude routes (especially night flights) and weaker — sometimes net-cooling — in the tropics. Per-route contrail-aware climate impact modelling is an active research area and is not yet in production calculators.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/methodology",
+      title: "Methodology umbrella",
+      description: "How we apply the 1.9 × uplift in our CO₂e number.",
+    },
+    {
+      href: "/methodology/defra-emission-factors",
+      title: "DEFRA 2024 emission factors",
+      description: "Where the 1.9 × multiplier lives in the published numbers.",
+    },
+    {
+      href: "/learn/sustainable-aviation-fuel",
+      title: "Sustainable aviation fuel",
+      description:
+        "How SAF reduces both CO₂ and contrail formation.",
+    },
+    {
+      href: "/learn/cabin-class-emissions",
+      title: "Cabin class and your CO₂ footprint",
+      description:
+        "What 1.9 × means for an economy versus business ticket.",
+    },
+  ]}
+/>

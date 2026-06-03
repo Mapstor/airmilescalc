@@ -1,0 +1,213 @@
+export const meta = {
+  title: "Jet lag, eastbound vs westbound",
+  description:
+    "The human circadian clock runs roughly 24.2 hours, slightly longer than a solar day — which is why westward travel feels easier than eastward by about a 1.6 × factor.",
+  category: "Learn",
+  updated: "2026-06-01",
+  readingTime: "6 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "Sack (2010)",
+      note: "Jet lag review — clinical chronobiology, recovery rates, light and melatonin interventions",
+      venue: "New England Journal of Medicine 362:440-447",
+      date: "February 2010",
+      url: "https://www.nejm.org/doi/full/10.1056/NEJMcp0909838",
+    },
+    {
+      id: 2,
+      label: "Lu et al. (2016)",
+      note: "Mathematical model that explains the east-west asymmetry of jet-lag recovery — Chaos journal",
+      venue: "Chaos 26:094811",
+      date: "September 2016",
+      url: "https://doi.org/10.1063/1.4954275",
+    },
+    {
+      id: 3,
+      label: "Czeisler et al. (1999)",
+      note: "Foundational paper measuring the free-running human circadian period at 24.18 h",
+      venue: "Science 284:2177-2181",
+      date: "June 1999",
+      url: "https://www.science.org/doi/10.1126/science.284.5423.2177",
+    },
+    {
+      id: 4,
+      label: "AASM clinical practice guidelines",
+      note: "Evidence-based recommendations for jet-lag treatment, including timed light and melatonin",
+      venue: "American Academy of Sleep Medicine",
+      date: "Various editions",
+      url: "https://aasm.org",
+    },
+  ]}
+/>
+
+<Lede>
+  Jet lag is your body's circadian clock disagreeing with the local light
+  cycle. The clock can shift only so fast — about 92 minutes per day when
+  the trip is westward, and only 57 minutes per day when eastward — which
+  is why a Tokyo → London trip feels like one easy day and London → Tokyo
+  feels like a brutal four.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "24.18 h",
+      label: "Free-running human circadian period (Czeisler 1999)",
+      source: "Science 284:2177",
+    },
+    {
+      value: "92 min/day",
+      label: "Phase-delay (westward) recovery rate",
+      source: "Sack 2010 NEJM",
+    },
+    {
+      value: "57 min/day",
+      label: "Phase-advance (eastward) recovery rate",
+      source: "Sack 2010 NEJM",
+    },
+    {
+      value: "≈ 1.6 ×",
+      label: "Eastward / westward recovery-time asymmetry",
+      source: "Derived from the two rates",
+    },
+  ]}
+/>
+
+## The clock runs slow by design
+
+In 1999 the Czeisler group measured the free-running period of the human
+circadian clock — the cycle the body produces when isolated from light
+cues — at 24.18 hours, slightly longer than a solar day. Morning sunlight
+each day advances the clock by the missing 11 minutes to keep it in
+sync. This small bias has a large consequence: shifting the clock to
+align with a later local time (westward travel) is easy, shifting it
+earlier (eastward) is hard.
+
+<Callout type="definition" term="Phase delay vs phase advance">
+  Westward travel means the day gets longer — sunrise comes later, which
+  the body experiences as a **phase delay**. The natural circadian drift
+  already wants to delay, so the body adapts at roughly 92 minutes per
+  day. Eastward travel means the day gets shorter (sunrise earlier),
+  which the body experiences as a **phase advance**. The body resists,
+  shifting at only about 57 minutes per day.
+</Callout>
+
+## Eastward is roughly 1.6 × harder than westward
+
+The simple division — 92 / 57 ≈ 1.6 — gives the recovery-time
+asymmetry. A 6-hour westward flight (say New York → Lisbon) takes about
+4 days to fully resynchronise; the same 6-hour eastward (Lisbon → New
+York) takes about 6.3 days. The asymmetry shows up consistently in
+sleep-lab measurements and in published clinical reviews.
+
+<BarChart
+  title="Jet-lag recovery days vs time-zone shift, by direction"
+  source="Sack 2010 NEJM; Lu et al. 2016 Chaos"
+  unit="days"
+  data={[
+    { label: "3 h west", value: 2 },
+    { label: "3 h east", value: 3.2 },
+    { label: "6 h west", value: 4 },
+    { label: "6 h east", value: 6.3 },
+    { label: "9 h west", value: 5.9 },
+    { label: "9 h east", value: 9.5 },
+    { label: "12 h either way", value: 7.8 },
+  ]}
+/>
+
+The 12-hour case rejoins the directions because at the antipode the
+phase shift wraps — the body can resynchronise either by 12-hour
+advance or by 12-hour delay. Most people end up doing the easier delay,
+which is why a Tokyo → London or London → Tokyo trip feels roughly
+equally hard in either direction, around 7–8 days to full reset.
+
+## AirMilesCalc's jet-lag bands
+
+We split the absolute hour difference between origin and destination
+into four severity bands and give recovery estimates for each. The
+bands match the Sack 2010 clinical framework reasonably well, though
+the published rates only specify the average — individual variation is
+large (some travelers reset in half the time, some in twice).
+
+<DataTable
+  caption="Jet-lag severity and recovery estimates"
+  source="AirMilesCalc bands; recovery rates from Sack 2010"
+  columns={["|hours shift|", "Severity", "Westward recovery", "Eastward recovery"]}
+  rows={[
+    ["≤ 2", "None", "0 days", "0 days"],
+    ["3 – 5", "Mild", "2 – 3 days", "3 – 5 days"],
+    ["6 – 9", "Moderate", "4 – 6 days", "6 – 10 days"],
+    ["10+", "Severe", "6 – 8 days", "10+ days (often delay-strategy)"],
+  ]}
+/>
+
+## What actually helps
+
+Three interventions have rigorous evidence. **Timed light exposure** is
+the most powerful — morning bright light advances the clock for
+eastward trips; evening bright light delays it for westward. **Strategic
+melatonin** (0.5–3 mg, taken 30 minutes before target local bedtime)
+accelerates the shift modestly. **Sleep-schedule pre-adaptation**
+starting 2–3 days before departure can pre-load some of the shift.
+What does not help: in-flight diet adjustments, anti-jet-lag supplements
+other than melatonin, and large amounts of caffeine.
+
+<Callout type="warning" term="Melatonin is not regulated">
+  Over-the-counter melatonin products in the US and UK have shown wildly
+  variable actual doses in independent testing — some products contained
+  10 × the labelled dose. The AASM guidelines recommend pharmacist-
+  sourced product or prescription-only routes for clinical doses.
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "Is jet lag a real medical condition?",
+      a: "Yes. The International Classification of Sleep Disorders recognises 'circadian rhythm sleep-wake disorder, jet lag type' as a clinical diagnosis. It is self-limiting (resolves with re-entrainment) but the AASM treats it with clinical-grade evidence-based interventions.",
+    },
+    {
+      q: "Why is the free-running period 24.18 and not exactly 24?",
+      a: "Evolutionary noise — there is no strong selective pressure for an exact 24-hour clock because morning light easily entrains a 24.2-hour clock to a 24-hour day. People with periods slightly above 24 hours are 'evening chronotypes' (night owls); those slightly below are 'morning chronotypes' (early birds).",
+    },
+    {
+      q: "Do night-shift workers experience permanent jet lag?",
+      a: "Functionally, yes. Shift-work circadian misalignment shares much of jet lag's biology. Long-term consequences include elevated cardiovascular risk and sleep architecture changes. Light therapy and structured sleep timing remain the strongest interventions.",
+    },
+    {
+      q: "What's the worst real-world jet-lag trip?",
+      a: "London → Auckland (12 h east via Asia) and Buenos Aires → Tokyo (12 h either way) sit at the practical maximum. The 18,330 km LHR → AKL polar route is the longest scheduled service that adds the maximum 12-hour shift to the longest possible single sector — roughly 8 days to fully reset.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/methodology",
+      title: "Methodology umbrella",
+      description: "Where time-zone math fits in AirMilesCalc.",
+    },
+    {
+      href: "/learn/longest-flights-in-the-world",
+      title: "The world's longest flights",
+      description:
+        "Where the largest time-zone shifts also occur.",
+    },
+    {
+      href: "/learn/cruising-altitude",
+      title: "Why aircraft cruise so high",
+      description:
+        "Cabin altitude can also affect jet-lag recovery.",
+    },
+    {
+      href: "/methodology/great-circle-distance",
+      title: "Great-circle distance",
+      description:
+        "Why the longest jet-lag trips often follow polar routes.",
+    },
+  ]}
+/>

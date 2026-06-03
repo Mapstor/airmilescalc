@@ -1,0 +1,261 @@
+export const meta = {
+  title: "DEFRA 2024 emission factors in depth",
+  description:
+    "How the UK government's annual greenhouse-gas reporting factors are derived, what assumptions sit behind 0.255, 0.156, and 0.150 kg CO₂e per passenger-km, and how to map them outside the UK.",
+  category: "Methodology",
+  updated: "2026-06-01",
+  readingTime: "9 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "DESNZ 2024 Conversion Factors — condensed set",
+      note: "Spreadsheet of per-activity emission factors for the 2024 reporting year, the table that most reporters actually use",
+      venue: "UK Department for Energy Security and Net Zero",
+      date: "Published June 2024",
+      url: "https://assets.publishing.service.gov.uk/media/6722566a3758e4604742aa1e/ghg-conversion-factors-2024-condensed_set__for_most_users__v1_1.xlsx",
+    },
+    {
+      id: 2,
+      label: "DESNZ 2024 Methodology paper",
+      note: "Full description of how each conversion factor is derived, including air-travel-specific assumptions",
+      venue: "UK Department for Energy Security and Net Zero",
+      date: "Published June 2024",
+      url: "https://assets.publishing.service.gov.uk/media/66a9fe4ca3c2a28abb50da4a/2024-greenhouse-gas-conversion-factors-methodology.pdf",
+    },
+    {
+      id: 3,
+      label: "Greenhouse gas reporting overview",
+      note: "UK government landing page that hosts each year's condensed set, full set, methodology, and flat-file releases",
+      venue: "gov.uk",
+      date: "Updated annually",
+      url: "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
+    },
+    {
+      id: 4,
+      label: "Lee et al. (2021)",
+      note: "Updated effective radiative forcing decomposition that underlies the 1.9 × uplift",
+      venue: "Atmospheric Environment 244, 117834",
+      date: "January 2021",
+      url: "https://doi.org/10.1016/j.atmosenv.2020.117834",
+    },
+  ]}
+/>
+
+<Lede>
+  DESNZ publishes the UK's reference emission factors once a year, and they
+  have become the default citation for corporate carbon disclosure across
+  Europe. The air-travel block has three distance bands, four cabin classes,
+  and a radiative-forcing uplift — five numbers that anchor most flight CO₂
+  reporting in the world.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "0.255",
+      label: "Economy domestic kg CO₂e per pax-km (UK, with RF)",
+      source: "DESNZ 2024 condensed set",
+    },
+    {
+      value: "0.156",
+      label: "Economy short-haul kg CO₂e per pax-km",
+      source: "DESNZ 2024 condensed set",
+    },
+    {
+      value: "0.150",
+      label: "Economy long-haul kg CO₂e per pax-km",
+      source: "DESNZ 2024 condensed set",
+    },
+    {
+      value: "1.9 ×",
+      label: "Radiative forcing uplift on CO₂ to give CO₂e",
+      source: "DESNZ methodology, Lee 2009 base",
+    },
+  ]}
+/>
+
+## What DEFRA / DESNZ publishes each year
+
+The UK Department for Energy Security and Net Zero (DESNZ — the body that
+absorbed BEIS's GHG work in 2023, which in turn took over from DEFRA's
+inventory team) publishes three documents annually: a condensed factor set
+for typical reporters, a full set with every sub-category, and a methodology
+paper describing the derivation. All three are open and downloadable from
+gov.uk under the same publication identifier.
+
+<DataTable
+  caption="DESNZ 2024 air-travel factors, condensed set (kg CO₂e per passenger-km, with RF)"
+  source="DESNZ 2024 Greenhouse gas reporting conversion factors, condensed set v1.1"
+  columns={["Band (UK origin)", "Economy", "Premium economy", "Business", "First"]}
+  rows={[
+    ["Domestic (under ~480 km)", "0.255", "—", "—", "—"],
+    ["Short-haul (~480–3,700 km)", "0.156", "0.250", "0.452", "—"],
+    ["Long-haul (over 3,700 km)", "0.150", "0.240", "0.435", "0.600"],
+  ]}
+/>
+
+## What each band actually means
+
+The UK reporting distance bands are not the same as the aircraft-design
+short-/medium-/long-haul bands. DESNZ uses **domestic** for any flight
+beginning and ending within the UK, **short-haul** for international
+flights up to a great-circle distance of 3,700 km from the UK airport,
+and **long-haul** for anything further. Premium cabins do not exist on
+domestic UK routes, and "first" only exists on long-haul because few
+short-haul jets have a first-class cabin in the DESNZ-recognised sense.
+
+<Callout type="definition" term="Great-circle distance basis">
+  DESNZ's per-km factors apply to the great-circle (geodesic) distance
+  between origin and destination — not the actual flown path. To
+  approximate the real fuel-burn path, the methodology paper applies an
+  8 % "indirect routing" uplift that is baked into the published numbers,
+  so you should not multiply by it again.
+</Callout>
+
+## The cabin-class multipliers, decoded
+
+DESNZ's cabin multipliers reflect floor-area allocation per passenger,
+not actual per-seat fuel consumption — which on a single aircraft cabin is
+roughly equal across classes. Business class typically occupies about 2.9 ×
+the floor area of an economy seat on a long-haul wide-body; first about
+4 ×. The methodology paper acknowledges that this is a deliberate
+allocation choice and not a measurement.
+
+<BarChart
+  title="DESNZ 2024 long-haul economy-baseline multipliers, by cabin"
+  source="DESNZ 2024 methodology, derived from floor-area allocation"
+  unit="×"
+  data={[
+    { label: "Economy", value: 1.0 },
+    { label: "Premium economy", value: 1.6 },
+    { label: "Business", value: 2.9 },
+    { label: "First", value: 4.0 },
+  ]}
+/>
+
+## The 1.9 × radiative-forcing uplift
+
+The DESNZ headline numbers are kg CO₂e — they already include a 1.9 ×
+multiplier that converts the underlying kg CO₂ into a CO₂-equivalent
+intended to reflect aviation's full warming effect. The methodology paper
+cites Lee et al.'s 2009 review as the base evidence and acknowledges
+scientific uncertainty: Lee 2021's updated decomposition pushes some
+analyses toward 1.7 ×, others toward values above 2.0 × depending on
+which time horizon and which GWP metric is used.
+
+<DataTable
+  caption="What 1.9 × actually contains, decomposed from Lee 2021"
+  source="Lee et al. 2021, Atmospheric Environment 244:117834 (ERF, 2018 basis)"
+  columns={["Component", "ERF (mW m⁻²)", "Share of net"]}
+  rows={[
+    ["CO₂", "34.3", "≈ 34 %"],
+    ["Contrail cirrus", "57.4", "≈ 57 %"],
+    ["NOₓ — net (ozone production minus methane sink)", "17.5", "≈ 17 %"],
+    ["Net aviation ERF", "100.9", "100 %"],
+  ]}
+/>
+
+The net ERF in 2018 was 100.9 mW m⁻² and the CO₂ component alone was
+34.3 mW m⁻², so the ratio of total-to-CO₂ is about 2.94 — not 1.9. The
+gap arises because DESNZ uses a **GWP100-based** uplift (long-term
+warming potential), while Lee 2021 reports **ERF at a snapshot in time**.
+Long-term, CO₂ accumulates while contrails decay, so the GWP100 ratio is
+smaller than the instantaneous-ERF ratio.
+
+<Callout type="note" term="Which uplift to choose">
+  For corporate disclosure under the UK SECR scheme, use the DESNZ 1.9 ×
+  number as published. For scientific work or sensitivity analysis, expose
+  both kg CO₂ and kg CO₂e and let the reader pick a multiplier. Our
+  calculator returns both columns explicitly for exactly this reason.
+</Callout>
+
+## Mapping DEFRA factors outside the UK
+
+The DESNZ factors are calibrated to UK aviation fuel mix and average
+load factors, but they are widely applied internationally for two reasons:
+they are open and well-documented, and no other jurisdiction publishes a
+comparable single-source factor set. Care is needed in two places: long-
+haul routes from low-load-factor regions (Africa, parts of Latin America)
+may run 10–20 % higher per pax-km, and very short hops from regional jets
+in the US can be closer to the DESNZ domestic figure than its short-haul.
+
+<DataTable
+  caption="Comparable methodologies in current use"
+  source="Government and intergovernmental publications, 2023–2024"
+  columns={["Source", "Coverage", "RF treatment"]}
+  rows={[
+    [
+      "DESNZ 2024 (UK)",
+      "UK origins, three distance bands, four cabins",
+      "1.9 × built in",
+    ],
+    [
+      "ICAO CarbonEmissionsCalculator",
+      "Origin-destination at airport pair level, ICAO fleet model",
+      "Optional non-CO₂ separate field",
+    ],
+    [
+      "US EPA — Emission Factors for Greenhouse Gas Inventories",
+      "Air travel, US-fleet weighted, three bands",
+      "RF not applied by default",
+    ],
+    [
+      "Atmosfair",
+      "Per-aircraft per-route model, Germany-based offset provider",
+      "RF applied, typically 2 ×",
+    ],
+  ]}
+/>
+
+<FAQ
+  items={[
+    {
+      q: "Is 0.156 kg CO₂e per pax-km the fuel emission or the total?",
+      a: "It is the total CO₂-equivalent emission per passenger-km, with the 1.9 × radiative-forcing uplift already applied. The underlying CO₂-only number is 0.156 / 1.9 ≈ 0.082 kg CO₂ per pax-km.",
+    },
+    {
+      q: "Why are domestic flights more emission-intensive per km than long-haul?",
+      a: "Short flights spend a much larger share of their fuel on climb (where engines run at near-maximum thrust) and descent rather than efficient cruise. A 500-km hop is dominated by climb-out burn; a 9,000-km flight spreads the same climb cost across an order of magnitude more distance.",
+    },
+    {
+      q: "Do these factors include the airport-side carbon (ground equipment, terminal energy)?",
+      a: "No. The DESNZ air-travel block covers only the in-flight CO₂-equivalent allocated to the passenger. Airport-side scope-3 emissions are reported separately under the buildings/transport categories.",
+    },
+    {
+      q: "What changed from the 2023 factors to 2024?",
+      a: "The 2024 factors are slightly lower across all bands as fleet renewal and load-factor recovery from COVID-era operations work through the inventory. The RF multiplier and cabin multipliers were unchanged.",
+    },
+    {
+      q: "Does DESNZ recommend including well-to-tank emissions?",
+      a: "Optionally. A separate well-to-tank uplift of 1.2 × covers fuel extraction and transport. Apply it for full life-cycle accounting; omit it for tank-to-wake (the default under most corporate disclosure regimes).",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/methodology",
+      title: "Methodology umbrella",
+      description: "The complete formula and data picture.",
+    },
+    {
+      href: "/methodology/radiative-forcing",
+      title: "Aviation's non-CO₂ climate forcing",
+      description: "The Lee 2021 decomposition the 1.9 × draws on.",
+    },
+    {
+      href: "/methodology/co2-emissions-calculation",
+      title: "End-to-end CO₂ calculation",
+      description: "Worked example: LHR → JFK by cabin.",
+    },
+    {
+      href: "/learn/cabin-class-emissions",
+      title: "Cabin class and your CO₂ footprint",
+      description: "Why business class emits roughly 2.9 × economy.",
+    },
+  ]}
+/>

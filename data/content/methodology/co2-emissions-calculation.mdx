@@ -1,0 +1,248 @@
+export const meta = {
+  title: "End-to-end CO₂ emissions calculation",
+  description:
+    "From great-circle distance to kg CO₂e per passenger, with a worked example for London → New York in every cabin class, every multiplier exposed, every figure sourced.",
+  category: "Methodology",
+  updated: "2026-06-01",
+  readingTime: "7 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "DESNZ 2024 condensed factors",
+      note: "kg CO₂e per passenger-km by distance band and cabin class",
+      venue: "UK gov.uk",
+      date: "June 2024",
+      url: "https://assets.publishing.service.gov.uk/media/6722566a3758e4604742aa1e/ghg-conversion-factors-2024-condensed_set__for_most_users__v1_1.xlsx",
+    },
+    {
+      id: 2,
+      label: "DESNZ 2024 methodology paper",
+      note: "How each factor is derived, including the cabin allocation rationale",
+      venue: "UK gov.uk",
+      date: "June 2024",
+      url: "https://assets.publishing.service.gov.uk/media/66a9fe4ca3c2a28abb50da4a/2024-greenhouse-gas-conversion-factors-methodology.pdf",
+    },
+    {
+      id: 3,
+      label: "Lee et al. (2021)",
+      note: "The radiative-forcing science behind the 1.9 × uplift",
+      venue: "Atmospheric Environment 244, 117834",
+      date: "January 2021",
+      url: "https://doi.org/10.1016/j.atmosenv.2020.117834",
+    },
+    {
+      id: 4,
+      label: "UK National Travel Survey 2023",
+      note: "Source for the UK per-capita aviation emissions comparator",
+      venue: "Department for Transport",
+      date: "2024",
+      url: "https://www.gov.uk/government/statistics/national-travel-survey-2023",
+    },
+  ]}
+/>
+
+<Lede>
+  AirMilesCalc converts a great-circle distance into a kg CO₂e number in
+  five steps: classify the distance band, pick the base factor, apply the
+  cabin multiplier, apply the radiative-forcing uplift, and convert to
+  comparators. This page walks the full pipeline with a single worked
+  example so every number can be checked.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "1,668 kg",
+      label: "CO₂e for one return economy LHR → JFK (5,555 km × 2)",
+      source: "AirMilesCalc, DESNZ 2024",
+    },
+    {
+      value: "4,837 kg",
+      label: "Same trip in business class — 2.9 × the economy figure",
+      source: "AirMilesCalc, DESNZ 2024",
+    },
+    {
+      value: "79 trees",
+      label: "Trees needed to absorb one return economy LHR-JFK in a year",
+      source: "Derived: 21 kg CO₂/tree/year",
+    },
+    {
+      value: "1.6 months",
+      label: "Of the average UK per-capita carbon footprint",
+      source: "UK NTS / DESNZ 2024",
+    },
+  ]}
+/>
+
+## The five-step pipeline
+
+<Steps>
+  <Step n={1} title="Compute great-circle distance">
+    Vincenty inverse on WGS-84 returns the surface distance in metres,
+    rounded to a whole kilometre on output. For LHR → JFK we get 5,555 km.
+  </Step>
+  <Step n={2} title="Classify the distance band">
+    Our internal bands match DESNZ: short-haul (under 1,500 km),
+    medium-haul (1,500 – 4,000 km), long-haul (over 4,000 km). LHR → JFK
+    at 5,555 km is long-haul. The base factor is 0.150 kg CO₂e per pax-km.
+  </Step>
+  <Step n={3} title="Apply the cabin multiplier">
+    Economy = 1.00 ×, premium economy = 1.60 ×, business = 2.90 ×, first
+    = 4.00 ×. For economy LHR → JFK: 5,555 × 0.150 × 1.00 = 833 kg CO₂e
+    per passenger one-way.
+  </Step>
+  <Step n={4} title="Document the radiative-forcing uplift">
+    The 0.150 figure already includes the DESNZ 1.9 × multiplier — the
+    underlying CO₂-only number is 0.150 / 1.9 ≈ 0.079 kg per pax-km. We
+    surface both kg CO₂ and kg CO₂e in the output so users can choose
+    their reporting basis.
+  </Step>
+  <Step n={5} title="Generate comparators">
+    Trees needed = ceiling(kg CO₂e / 21), where 21 kg/year is the
+    midrange of a mature broadleaf temperate tree's annual sequestration.
+    Personal carbon-budget comparators draw on the UK National Travel
+    Survey baseline of ~12 tonnes CO₂e per capita.
+  </Step>
+</Steps>
+
+## Worked example: London → New York return
+
+<DataTable
+  caption="One return LHR → JFK, all cabins, with each multiplier visible"
+  source="AirMilesCalc, DESNZ 2024 long-haul factor 0.150 kg CO₂e per pax-km"
+  columns={[
+    "Cabin",
+    "Distance (return km)",
+    "Factor × cabin mult.",
+    "kg CO₂e",
+    "Trees / year",
+  ]}
+  rows={[
+    ["Economy", "11,110", "0.150 × 1.00", "1,667", "80"],
+    ["Premium economy", "11,110", "0.150 × 1.60", "2,666", "127"],
+    ["Business", "11,110", "0.150 × 2.90", "4,832", "231"],
+    ["First", "11,110", "0.150 × 4.00", "6,666", "318"],
+  ]}
+/>
+
+The four-row difference is striking: a first-class round-trip on the
+same flight emits 4 × what an economy round-trip does, because the four
+seats consume 4 × the floor area. Operationally, the aircraft burns
+identical fuel regardless of who sits where. The cabin number is an
+allocation choice rather than a physical measurement — it answers the
+question "if everyone in this cabin paid the same per-square-metre rate
+for the trip, what is my share?"
+
+<BarChart
+  title="One return LHR → JFK ticket: kg CO₂e by cabin"
+  source="DESNZ 2024 long-haul factors; AirMilesCalc compute"
+  unit="kg CO₂e"
+  data={[
+    { label: "Economy", value: 1667 },
+    { label: "Premium economy", value: 2666 },
+    { label: "Business", value: 4832 },
+    { label: "First", value: 6666 },
+  ]}
+/>
+
+## Where the comparators come from
+
+We turn the kg CO₂e number into three comparators because raw kilograms
+are abstract. **Trees per year** assumes a mature broadleaf temperate
+tree absorbs 21 kg CO₂ per year — a midrange figure from published forest-
+sequestration studies, intentionally conservative. **Driving km
+equivalent** uses 0.21 kg CO₂e per car-km from DESNZ's 2024 average UK
+passenger-car factor. **Personal carbon-budget months** uses 12 tonnes
+CO₂e per capita per year as the UK baseline.
+
+<DataTable
+  caption="Comparator constants and where they come from"
+  source="DESNZ 2024; UK NTS 2023; forest-sequestration midrange estimates"
+  columns={["Comparator", "Value", "Source"]}
+  rows={[
+    ["kg CO₂ absorbed per mature tree per year", "21", "Midrange of published estimates"],
+    ["kg CO₂e per average UK car-km", "0.21", "DESNZ 2024 passenger car"],
+    ["kg CO₂e per average UK household kWh", "≈ 0.21", "DESNZ 2024 grid average"],
+    ["tonnes CO₂e per UK capita per year", "≈ 12", "UK NTS / Carbon Trust 2024"],
+    ["IPCC 1.5 °C-compatible per-capita target by 2030", "≈ 2", "IPCC AR6 WG3 illustrative"],
+  ]}
+/>
+
+## What we deliberately do not include
+
+The base DESNZ factor is **tank-to-wake** — the emissions from burning
+fuel in flight only. We do not add the 1.2 × well-to-tank uplift for fuel
+extraction and transport because most corporate reporting frameworks
+treat well-to-tank as a separate Scope 3 category. We also do not model
+real-world load factor or fleet-specific efficiency; the published DESNZ
+number is already a UK-fleet weighted average.
+
+<Callout type="warning" term="Where this estimate is not enough">
+  For UK Streamlined Energy and Carbon Reporting (SECR), the CDP Climate
+  Change questionnaire, or any audited corporate disclosure, use the DESNZ
+  spreadsheet directly with your own activity data — not a third-party
+  calculator. Our role is fast comparison and reasoning, not regulated
+  reporting.
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "Why does economy on a 5,555 km flight produce 833 kg CO₂e per passenger?",
+      a: "5,555 km × 0.150 kg CO₂e per pax-km (DESNZ 2024 long-haul, RF-included) = 833 kg. The number scales linearly with distance and cabin multiplier; you can verify it with any spreadsheet.",
+    },
+    {
+      q: "Is 21 kg CO₂/tree/year too low or too high?",
+      a: "It is intentionally conservative. Published estimates for mature broadleaf temperate trees span roughly 10–48 kg CO₂/year depending on species, climate, and age. Using 21 kg gives a slightly higher tree count than optimistic estimates, which we prefer for the 'do not understate the offset commitment' direction.",
+    },
+    {
+      q: "Why is the long-haul factor lower per km than short-haul?",
+      a: "Climb-out burns proportionally more fuel than steady cruise. A 500 km hop spends a much larger fraction of its fuel on climb than a 9,000 km flight does. The DESNZ band structure reflects this — short-haul is roughly 70 % higher per km than long-haul.",
+    },
+    {
+      q: "What if I want kg CO₂ without radiative forcing?",
+      a: "Divide our kg CO₂e output by 1.9. Our API also returns the underlying CO₂-only number in the kgCO2 field, separate from kgCO2e.",
+    },
+    {
+      q: "Does the figure include the airport-side carbon?",
+      a: "No. The DESNZ air-travel block covers in-flight emissions only. Terminal energy, ground equipment, and passenger transport to the airport are reported under their own categories.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/methodology",
+      title: "Methodology umbrella",
+      description: "Where this fits among all our calculations.",
+    },
+    {
+      href: "/methodology/defra-emission-factors",
+      title: "DEFRA / DESNZ 2024 factors in depth",
+      description:
+        "How DESNZ derives 0.255, 0.156, and 0.150.",
+    },
+    {
+      href: "/methodology/radiative-forcing",
+      title: "Aviation's non-CO₂ climate forcing",
+      description:
+        "Why the 1.9 × multiplier exists and when to apply 1.7 × instead.",
+    },
+    {
+      href: "/learn/cabin-class-emissions",
+      title: "Cabin class and your CO₂ footprint",
+      description:
+        "Consumer-facing explanation of the cabin multipliers.",
+    },
+    {
+      href: "/methodology/flight-time-calculation",
+      title: "Flight-time estimation",
+      description:
+        "The 850 km/h cruise reference + ground-time bands that turn distance into the block time CO₂ emissions scale against.",
+    },
+  ]}
+/>

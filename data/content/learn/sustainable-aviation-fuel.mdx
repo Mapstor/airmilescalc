@@ -1,0 +1,240 @@
+export const meta = {
+  title: "Sustainable aviation fuel — where the industry actually is",
+  description:
+    "SAF accounted for 0.3 % of global jet-fuel production in 2024. IATA's net-zero pathway needs that to reach 65 % by 2050. The gap is the story.",
+  category: "Learn",
+  updated: "2026-06-01",
+  readingTime: "6 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "IATA — SAF production analysis",
+      note: "December 2024 release on actual SAF production reaching 1 million tonnes, 0.3 % of jet-fuel demand",
+      venue: "IATA",
+      date: "December 2024",
+      url: "https://www.iata.org/en/pressroom/2024-releases/2024-12-10-03/",
+    },
+    {
+      id: 2,
+      label: "ATAG — Sustainable aviation fuel landing page",
+      note: "Industry overview of SAF production pathways, lifecycle CO₂ reductions, and 2050 targets",
+      venue: "Air Transport Action Group",
+      date: "Current",
+      url: "https://atag.org/industry-topics/sustainable-aviation-fuel",
+    },
+    {
+      id: 3,
+      label: "ReFuelEU Aviation regulation",
+      note: "EU mandate on SAF blending in jet fuel sold at EU airports — 2 % in 2025 rising to 70 % in 2050",
+      venue: "European Commission",
+      date: "Regulation (EU) 2023/2405",
+      url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32023R2405",
+    },
+    {
+      id: 4,
+      label: "IATA Fly Net Zero 2050",
+      note: "Industry resolution targeting 65 % SAF in jet-fuel mix by 2050 (449 billion litres)",
+      venue: "IATA AGM 77, Boston",
+      date: "4 October 2021",
+      url: "https://www.iata.org/en/programs/sustainability/flynetzero/",
+    },
+  ]}
+/>
+
+<Lede>
+  SAF is jet fuel produced from sustainable feedstocks instead of fossil
+  crude. Drop-in compatibility with existing aircraft engines is the
+  technical bright spot; cost and supply are the dark ones. In 2024 the
+  world produced about 1 million tonnes of SAF, less than 1 % of what the
+  industry needs by 2030 to stay on its own net-zero path.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "0.3 %",
+      label: "SAF share of global jet-fuel production in 2024",
+      source: "IATA Dec 2024",
+    },
+    {
+      value: "1 Mt",
+      label: "Actual SAF production in 2024 (≈ 1.3 billion litres)",
+      source: "IATA",
+    },
+    {
+      value: "18 Mt",
+      label: "IATA / ATAG 2030 production target (≈ 22.5 billion litres)",
+      source: "IATA",
+    },
+    {
+      value: "65 %",
+      label: "SAF share of jet fuel required by 2050 in IATA's net-zero pathway",
+      source: "Fly Net Zero 2050",
+    },
+  ]}
+/>
+
+## What counts as SAF
+
+SAF is any liquid fuel that meets ASTM D7566 (the drop-in specification
+for aviation turbine fuel from non-petroleum sources) and demonstrates a
+significant lifecycle CO₂ reduction versus fossil Jet A-1. Current
+commercially produced SAF comes from used cooking oil, animal fats,
+algae, and agricultural residues; emerging pathways include power-to-
+liquid (e-SAF) using captured CO₂ plus green hydrogen.
+
+<DataTable
+  caption="SAF production pathways and their typical lifecycle CO₂ reduction"
+  source="ICAO CORSIA SAF default values; published HEFA pathway data"
+  columns={["Pathway", "Feedstock", "Lifecycle CO₂ vs fossil"]}
+  rows={[
+    [
+      "HEFA (most current SAF)",
+      "Used cooking oil, tallow, vegetable oils",
+      "≈ 70 – 85 % less",
+    ],
+    [
+      "Alcohol-to-Jet (ATJ)",
+      "Ethanol from sugar/cellulose",
+      "≈ 50 – 75 % less",
+    ],
+    [
+      "Fischer-Tropsch (FT)",
+      "Forest/agricultural residue, municipal waste",
+      "≈ 80 – 95 % less",
+    ],
+    [
+      "Power-to-Liquid (e-SAF)",
+      "CO₂ + green hydrogen",
+      "≈ 90 – 99 % less (with renewable power)",
+    ],
+  ]}
+/>
+
+## The production gap
+
+Global SAF production doubled from 2023 to 2024 — from about 0.5 to 1.0
+million tonnes. To stay on the IATA Fly Net Zero pathway, production
+needs to reach about 18 million tonnes by 2030, an 18 × increase in six
+years. Industry analysts (BCG, ICCT) estimate actual 2030 production
+will land closer to 9–12 million tonnes, leaving a 30–50 % shortfall
+against the IATA pathway.
+
+<BarChart
+  title="SAF production: actual vs the IATA Net Zero 2050 pathway"
+  source="IATA Dec 2024 release; BCG 2025; ICCT 2024"
+  unit="million tonnes"
+  data={[
+    { label: "2023 actual", value: 0.5 },
+    { label: "2024 actual", value: 1.0 },
+    { label: "2030 analyst central estimate", value: 10 },
+    { label: "2030 IATA pathway target", value: 18 },
+    { label: "2050 IATA target (≈ 65 % of jet fuel)", value: 350 },
+  ]}
+  max={400}
+/>
+
+The 2050 number reflects the 449 billion litres (about 350 million
+tonnes) IATA targets for net-zero — a 350 × increase over current
+production. Even at the optimistic 2030 estimate the industry would be
+roughly 5 % of where the pathway requires it to be.
+
+## ReFuelEU is the binding mandate
+
+The EU's ReFuelEU Aviation regulation (effective 2025) requires fuel
+suppliers to blend SAF into jet fuel sold at EU airports — starting at
+2 % in 2025 and rising to 70 % in 2050. A specific e-SAF sub-mandate
+starts at 1.2 % in 2030 rising to 35 % in 2050. The UK has a similar
+SAF mandate at 2 % in 2025 rising to 22 % in 2040. These regional
+mandates are the mechanism by which industry-level voluntary pathways
+become legally binding production demand.
+
+<DataTable
+  caption="Major SAF mandates and their trajectories"
+  source="ReFuelEU Aviation Regulation 2023/2405; UK Department for Transport"
+  columns={["Jurisdiction", "2025", "2030", "2040", "2050"]}
+  rows={[
+    ["EU (ReFuelEU)", "2 %", "6 %", "34 %", "70 %"],
+    ["EU e-SAF sub-mandate", "—", "1.2 %", "10 %", "35 %"],
+    ["UK SAF mandate", "2 %", "10 %", "22 %", "—"],
+    ["US — Inflation Reduction Act tax credit", "—", "—", "—", "—"],
+  ]}
+/>
+
+The US approach is different: no blending mandate, instead an Inflation
+Reduction Act production tax credit of up to $1.75 per gallon of SAF.
+The mechanism is supply-side rather than demand-side, and producer
+response is sensitive to credit qualification rules that are still being
+finalised.
+
+## Cost is the binding constraint
+
+SAF costs roughly 2–5 × fossil jet fuel today, depending on pathway and
+region. The cost gap is structural — feedstock supply is constrained
+(HEFA cannot scale beyond the available used-cooking-oil supply
+worldwide), refining capacity is being built incrementally, and e-SAF
+requires green hydrogen at industrial scale, which is itself an
+emerging technology. Most analysts expect the cost gap to close to
+1.5–2 × by 2040 and possibly 1.1–1.5 × by 2050.
+
+<Callout type="warning" term="Why SAF is not a panacea">
+  Even fully scaled SAF leaves aviation's non-CO₂ effects — contrails
+  and NOₓ — only partially addressed. SAF tends to burn cleaner, with
+  fewer soot particles per unit fuel, which reduces contrail-cirrus
+  warming somewhat. But contrail formation depends on water vapour
+  emission, which is similar for SAF and fossil. SAF is necessary but
+  not sufficient for full climate alignment.
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "Why is SAF so expensive?",
+      a: "Feedstock cost dominates HEFA SAF — used cooking oil and tallow have competing markets. Process scale matters too: most existing SAF plants are sized for early-market demand. The cost curve should improve with both larger plants and more diverse feedstock pathways (ATJ, Fischer-Tropsch).",
+    },
+    {
+      q: "Can I buy a SAF-only ticket today?",
+      a: "A handful of airlines (KLM, Lufthansa, SAS) offer SAF-uplift options at booking — a per-ticket fee that funds SAF purchase by the airline. The carbon claim is fungible: your specific flight may or may not use SAF, but the airline's overall SAF purchasing scales with the per-ticket commitments. Verification standards are evolving.",
+    },
+    {
+      q: "Does SAF help with the contrail problem?",
+      a: "Partially. SAF burns with fewer soot particles, which produce fewer ice nucleation sites and may shorten contrail persistence. Several studies estimate contrail-driven warming reduces 50–70 % when SAF is used. The CO₂ benefit and the contrail benefit are independent and additive.",
+    },
+    {
+      q: "What's e-SAF and why does the EU push it specifically?",
+      a: "e-SAF is synthetic jet fuel produced from CO₂ (often direct-air-captured) plus green hydrogen via Fischer-Tropsch or methanol-to-jet. It has the lowest lifecycle carbon of any SAF pathway but is currently the most expensive. The EU's e-SAF sub-mandate is designed to pull e-SAF capacity into existence on a fixed schedule rather than waiting for spontaneous investment.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/learn/corsia",
+      title: "CORSIA, explained",
+      description:
+        "How SAF use generates CORSIA-eligible offsets for airlines.",
+    },
+    {
+      href: "/methodology/radiative-forcing",
+      title: "Aviation's non-CO₂ climate forcing",
+      description:
+        "Why SAF helps with both CO₂ and contrails.",
+    },
+    {
+      href: "/methodology/co2-emissions-calculation",
+      title: "End-to-end CO₂ calculation",
+      description:
+        "How a SAF-using flight is accounted for in CO₂e terms.",
+    },
+    {
+      href: "/learn/cabin-class-emissions",
+      title: "Cabin class and your CO₂ footprint",
+      description:
+        "The cabin-multiplier story is upstream of fuel choice.",
+    },
+  ]}
+/>

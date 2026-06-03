@@ -1,0 +1,224 @@
+export const meta = {
+  title: "Cabin class and your CO₂ footprint",
+  description:
+    "On the same flight, a business-class ticket carries roughly 2.9 × the CO₂e of an economy ticket and first-class roughly 4 ×. The aircraft burns identical fuel — the difference is floor-area allocation.",
+  category: "Learn",
+  updated: "2026-06-01",
+  readingTime: "5 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "DESNZ 2024 conversion factors",
+      note: "Cabin multipliers for premium economy (1.6 ×), business (2.9 ×), first (4.0 ×) on economy baseline",
+      venue: "UK Department for Energy Security and Net Zero",
+      date: "June 2024",
+      url: "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
+    },
+    {
+      id: 2,
+      label: "DESNZ 2024 methodology paper",
+      note: "Explains the floor-area-allocation rationale behind the multipliers",
+      venue: "UK gov.uk",
+      date: "June 2024",
+      url: "https://assets.publishing.service.gov.uk/media/66a9fe4ca3c2a28abb50da4a/2024-greenhouse-gas-conversion-factors-methodology.pdf",
+    },
+    {
+      id: 3,
+      label: "World Bank — Aviation emissions in development",
+      note: "Cross-checks DEFRA multipliers against ICAO modelling for comparable conclusions",
+      venue: "World Bank Development Indicators",
+      date: "2023",
+      url: "https://data.worldbank.org",
+    },
+    {
+      id: 4,
+      label: "International Council on Clean Transportation",
+      note: "ICCT methodology for per-passenger CO₂ allocation, used as cross-check",
+      venue: "ICCT",
+      date: "2023",
+      url: "https://theicct.org",
+    },
+  ]}
+/>
+
+<Lede>
+  When you buy a business-class ticket, the aircraft does not burn more
+  fuel for you specifically. Your seat does occupy more of the cabin
+  floor, though — and the convention for assigning aviation emissions
+  follows the floor area, not the body weight. The math is unintuitive
+  but the conclusion is settled.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "1.0 ×",
+      label: "Economy baseline multiplier (densest cabin)",
+      source: "DESNZ 2024",
+    },
+    {
+      value: "1.6 ×",
+      label: "Premium economy floor-area-share multiplier",
+      source: "DESNZ 2024",
+    },
+    {
+      value: "2.9 ×",
+      label: "Business class — lie-flat suites consume ≈ 3 × economy area",
+      source: "DESNZ 2024",
+    },
+    {
+      value: "4.0 ×",
+      label: "First class — largest seat and amenity area on the aircraft",
+      source: "DESNZ 2024",
+    },
+  ]}
+/>
+
+## Why the aircraft does not burn more for you
+
+A Boeing 777-300ER carrying 350 passengers across the Atlantic burns
+about 95 tonnes of fuel. The fuel burn depends on aircraft weight, drag,
+and engine performance — not on who sits where in the cabin. Whether you
+are flying economy or first, the engines are running at the same thrust
+setting, the wing is producing the same lift, and the airframe is
+generating the same drag.
+
+<Callout type="definition" term="Allocation methodology">
+  When a shared resource has multiple beneficiaries, the cost (here, CO₂)
+  must be divided somehow. Aviation methodologies allocate per-passenger
+  emissions by **floor area** rather than per-passenger or by ticket
+  price. A business-class seat occupies roughly 2.9 × the cabin floor
+  area of an economy seat, so the per-ticket CO₂ allocation is 2.9 ×.
+</Callout>
+
+## Why floor area and not seats
+
+If you allocated emissions by seats rather than floor area, every seat
+on the aircraft would carry the same CO₂. But the aircraft was designed
+to carry, say, 350 economy seats — converting 30 of those slots into 12
+business-class lie-flats removes 30 seats of revenue capacity and
+displaces their emission share. The 12 business passengers are
+responsible for the emissions that the missing 18 economy passengers
+would have carried.
+
+<DataTable
+  caption="Worked example: LHR → JFK return by cabin (5,555 km × 2)"
+  source="DESNZ 2024 long-haul 0.150 kg CO₂e per pax-km, with RF"
+  columns={["Cabin", "Distance (km return)", "Multiplier", "kg CO₂e", "Tonnes/year if 4 trips"]}
+  rows={[
+    ["Economy", "11,110", "1.0 ×", "1,667", "6.7"],
+    ["Premium economy", "11,110", "1.6 ×", "2,666", "10.7"],
+    ["Business", "11,110", "2.9 ×", "4,832", "19.3"],
+    ["First", "11,110", "4.0 ×", "6,666", "26.7"],
+  ]}
+/>
+
+The right-hand column anchors the trip-to-lifestyle comparison: a
+business-class passenger taking the same return route four times a year
+emits about 19 tonnes CO₂e from that travel alone — close to twice the
+UK per-capita annual carbon footprint. Four first-class round-trips put
+the total at 27 tonnes, a level that no realistic individual budget
+absorbs without significant offset.
+
+<BarChart
+  title="One return LHR → JFK by cabin, kg CO₂e per ticket"
+  source="DESNZ 2024 long-haul factor, AirMilesCalc compute"
+  unit="kg CO₂e"
+  data={[
+    { label: "Economy", value: 1667 },
+    { label: "Premium economy", value: 2666 },
+    { label: "Business", value: 4832 },
+    { label: "First", value: 6666 },
+  ]}
+/>
+
+## Does the cabin-class multiplier vary by route?
+
+DESNZ applies the same cabin multipliers (1.0 / 1.6 / 2.9 / 4.0) across
+short-haul, medium-haul, and long-haul routes — they reflect floor-area
+allocation, which is roughly constant across aircraft. The underlying
+per-km emission factor varies by distance band (0.255 short-haul,
+0.156 medium, 0.150 long), so the ratio between cabins is the same on
+every flight but the absolute kg CO₂e scales with distance and band.
+
+<DataTable
+  caption="Multiplier × per-km factor for each cabin and band"
+  source="DESNZ 2024, kg CO₂e per pax-km"
+  columns={["Cabin", "Short-haul", "Medium-haul", "Long-haul"]}
+  rows={[
+    ["Economy", "0.255", "0.156", "0.150"],
+    ["Premium economy", "—", "0.250", "0.240"],
+    ["Business", "—", "0.452", "0.435"],
+    ["First", "—", "—", "0.600"],
+  ]}
+/>
+
+## What this means for your travel decisions
+
+The simplest abatement on a frequent business travel pattern is
+downgrading the cabin where possible. Switching from business to
+economy on a single LHR → JFK return cuts about 3.2 tonnes CO₂e — more
+than three times the carbon saving of switching from a petrol to an
+electric car for a year of typical UK commuting. Carbon-aware travel
+budgeting is far more sensitive to cabin class than to route choice.
+
+<Callout type="note" term="The corporate budgeting angle">
+  Several large companies (Microsoft, Google, Bloomberg) have shifted
+  internal carbon-budget caps toward cabin-class accountability rather
+  than route-blocking. The multiplier math is exactly what makes the
+  policy effective: a 4 × emission penalty for first-class travel
+  changes the per-trip cost calculus.
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "Does emptier cabin mean my economy ticket is responsible for more carbon?",
+      a: "Indirectly, yes — if the airline flies a 350-seat aircraft with 200 passengers, the per-passenger allocation rises proportionally. DESNZ uses fleet-weighted average load factors, so the published number is already adjusted for typical occupancy. A specific flight with much lower load factor would carry more CO₂ per ticket than the published figure.",
+    },
+    {
+      q: "Is premium economy worth it as a compromise?",
+      a: "From a CO₂ standpoint, premium economy is 60 % more emission-intensive than economy and 45 % less than business. It is closer to economy than to business — which is also why airlines price it as a low-end premium product rather than a high-end economy one.",
+    },
+    {
+      q: "What if I take an empty business-class seat with a frequent-flyer upgrade?",
+      a: "The emission allocation is by floor area, not ticket purchased. Whether the upgrade is paid or rewarded with miles, the cabin allocation rule applies — your CO₂ footprint for that flight is the business-class figure.",
+    },
+    {
+      q: "Do private jets fit into this framework?",
+      a: "No — private jets emit on the order of 10–20 × per-passenger compared to commercial first class, depending on aircraft size and load. DESNZ does not publish a private-jet allocation; bespoke methodologies are required.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/methodology/co2-emissions-calculation",
+      title: "End-to-end CO₂ emissions calculation",
+      description:
+        "Where the cabin multipliers come into the full pipeline.",
+    },
+    {
+      href: "/methodology/defra-emission-factors",
+      title: "DEFRA 2024 factors in depth",
+      description:
+        "How DESNZ derives the multipliers and the per-km factors.",
+    },
+    {
+      href: "/methodology/radiative-forcing",
+      title: "Aviation's non-CO₂ climate forcing",
+      description:
+        "Why the 1.9 × uplift is baked into the published numbers.",
+    },
+    {
+      href: "/learn/sustainable-aviation-fuel",
+      title: "Sustainable aviation fuel",
+      description:
+        "Whether SAF changes the cabin-class math (it doesn't — the multiplier is upstream).",
+    },
+  ]}
+/>

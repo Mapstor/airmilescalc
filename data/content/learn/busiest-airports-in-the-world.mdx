@@ -1,0 +1,398 @@
+export const meta = {
+  title: "The world's busiest airports",
+  description:
+    "Atlanta Hartsfield-Jackson held the world's busiest title in 2023 with 104.6 million passengers — half a million people a day. The ACI top-twenty list is dominated by US, Asian, and Middle-East hubs.",
+  category: "Learn",
+  updated: "2026-06-01",
+  readingTime: "5 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "ACI World — Top 10 busiest airports 2023",
+      note: "Authoritative ranking of passenger traffic, released April 2024",
+      venue: "Airports Council International World",
+      date: "April 2024",
+      url: "https://aci.aero/2024/04/14/top-10-busiest-airports-in-the-world-shift-with-the-rise-of-international-air-travel-demand/",
+    },
+    {
+      id: 2,
+      label: "ACI World — Top 20 confirmed",
+      note: "Final top-20 ranking with passenger numbers and YoY change",
+      venue: "Airports Council International World",
+      date: "July 2024",
+      url: "https://aci.aero/2024/07/16/top-20-busiest-airports-in-the-world-confirmed-by-aci-world/",
+    },
+    {
+      id: 3,
+      label: "ACI — Global aviation recovery context",
+      note: "2023 global passenger total of 8.7 billion, 94.3 % of 2019",
+      venue: "Airports Council International",
+      date: "2024",
+      url: "https://aci.aero",
+    },
+    {
+      id: 4,
+      label: "OpenFlights airport database",
+      note: "Coordinates and IATA codes used here",
+      venue: "openflights.org",
+      date: "Community-maintained",
+      url: "https://openflights.org/data.php",
+    },
+  ]}
+/>
+
+<Lede>
+  ACI World tracks passenger traffic at every commercial airport on
+  Earth. The 2023 numbers, released in 2024, returned to roughly 94 % of
+  the 2019 pre-pandemic peak — the top of the list has reshuffled in
+  ways that say more about geopolitics and post-COVID travel patterns
+  than about underlying airport capacity.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "104.6 M",
+      label: "Passengers through Atlanta (ATL) in 2023 — world's busiest",
+      source: "ACI World",
+    },
+    {
+      value: "8.7 B",
+      label: "Total global airport passenger traffic in 2023",
+      source: "ACI World",
+    },
+    {
+      value: "94.3 %",
+      label: "2023 traffic as a share of pre-COVID 2019",
+      source: "ACI World",
+    },
+    {
+      value: "5",
+      label: "US airports in the global top 10",
+      source: "ACI 2023",
+    },
+  ]}
+/>
+
+## ACI World top ten, 2023
+
+<DataTable
+  caption="ACI World top-ten busiest airports in 2023 by total passengers"
+  source="ACI World final 2023 figures, released April 2024"
+  columns={["Rank", "Airport", "Code", "Country", "Passengers (M)"]}
+  rows={[
+    ["1", "Hartsfield-Jackson Atlanta International", "ATL", "United States", "104.6"],
+    ["2", "Dubai International", "DXB", "UAE", "86.9"],
+    ["3", "Dallas/Fort Worth International", "DFW", "United States", "81.8"],
+    ["4", "Tokyo Haneda", "HND", "Japan", "78.7"],
+    ["5", "London Heathrow", "LHR", "United Kingdom", "79.2"],
+    ["6", "Denver International", "DEN", "United States", "77.8"],
+    ["7", "Istanbul Airport", "IST", "Türkiye", "76.0"],
+    ["8", "Los Angeles International", "LAX", "United States", "75.0"],
+    ["9", "Chicago O'Hare", "ORD", "United States", "73.9"],
+    ["10", "Delhi Indira Gandhi", "DEL", "India", "72.2"],
+  ]}
+/>
+
+## 2024 update — released April 2025
+
+ACI World published the 2024 passenger-traffic figures in April 2025.
+Atlanta extended its lead — 108.07 million passengers in 2024, a 3.3 %
+increase on 2023, comfortably ahead of Dubai's 92.33 million. Total
+global passenger traffic across all airports reached approximately 9.5
+billion, fully past the pre-COVID peak.
+
+<DataTable
+  caption="ACI World 2024 top-ten busiest airports by total passengers"
+  source="ACI World 2024 preliminary figures, released April 2025"
+  columns={["Rank", "Airport", "Code", "2024 passengers (M)", "Change vs 2023"]}
+  rows={[
+    ["1", "Hartsfield-Jackson Atlanta", "ATL", "108.07", "+3.3 %"],
+    ["2", "Dubai International", "DXB", "92.33", "+6.2 %"],
+    ["3", "Dallas/Fort Worth", "DFW", "87.8", "+7.4 %"],
+    ["4", "Tokyo Haneda", "HND", "85.9", "+9.1 %"],
+    ["5", "London Heathrow", "LHR", "83.8", "+5.8 %"],
+    ["6", "Denver International", "DEN", "82.4", "+5.9 %"],
+    ["7", "Istanbul Airport", "IST", "80.1", "+5.4 %"],
+    ["8", "Chicago O'Hare", "ORD", "80.0", "+8.3 %"],
+    ["9", "Los Angeles International", "LAX", "76.8", "+2.4 %"],
+    ["10", "Shanghai Pudong", "PVG", "76.8", "Jumped from 21st"],
+  ]}
+/>
+
+The headline 2024 movement is Shanghai Pudong's leap from 21st (2023)
+to 10th (2024) on the back of China's accelerated international
+reopening &mdash; 2024 was the first year since 2019 that Chinese
+outbound and inbound traffic ran at typical seasonal patterns. Dubai
+remains the largest international gateway (Atlanta is largely domestic
+US connecting traffic).
+
+<BarChart
+  title="ACI World 2024 top-ten total-passenger traffic"
+  source="ACI World 2024 preliminary release, April 2025"
+  unit="M passengers"
+  data={[
+    { label: "Atlanta (ATL)", value: 108.07 },
+    { label: "Dubai (DXB)", value: 92.33 },
+    { label: "Dallas (DFW)", value: 87.8 },
+    { label: "Tokyo Haneda (HND)", value: 85.9 },
+    { label: "London Heathrow (LHR)", value: 83.8 },
+    { label: "Denver (DEN)", value: 82.4 },
+    { label: "Istanbul (IST)", value: 80.1 },
+    { label: "Chicago O'Hare (ORD)", value: 80.0 },
+    { label: "Los Angeles (LAX)", value: 76.8 },
+    { label: "Shanghai Pudong (PVG)", value: 76.8 },
+  ]}
+/>
+
+## Atlanta has been #1 for most of the last 25 years
+
+Hartsfield-Jackson Atlanta has held the world-busiest title in every
+year except 2020 since 1998. Two structural reasons sustain that
+dominance: Delta Air Lines' largest hub operation runs through Atlanta,
+and Atlanta is within a 2-hour flight of 80 % of the US population, so
+its connecting-passenger throughput is exceptional. The airport
+processes roughly 296,000 passengers per day under the 2024 numbers
+&mdash; the equivalent of moving the population of Reading or Pittsburgh
+through one facility every 24 hours.
+
+<DataTable
+  caption="World's busiest airport title since 1998"
+  source="ACI World historical rankings; CAAC pre-COVID data"
+  columns={["Period", "Title-holder", "Note"]}
+  rows={[
+    [
+      "1998 – 2019",
+      "Atlanta Hartsfield-Jackson",
+      "Held title every year except briefly displaced by Beijing PEK in some international-only sub-rankings",
+    ],
+    [
+      "2020",
+      "Guangzhou Baiyun (CAN)",
+      "Only year Atlanta lost the title; COVID effectively shut US air travel while domestic-China traffic continued",
+    ],
+    [
+      "2021 – 2024",
+      "Atlanta Hartsfield-Jackson",
+      "Reclaimed and extended the title; 2024 figure (108 M) is the highest annual total for any airport in history",
+    ],
+  ]}
+/>
+
+<BarChart
+  title="ACI World top-ten airports, 2023 passenger traffic"
+  source="ACI World 2023 final figures"
+  unit="M passengers"
+  data={[
+    { label: "Atlanta (ATL)", value: 104.6 },
+    { label: "Dubai (DXB)", value: 86.9 },
+    { label: "Dallas (DFW)", value: 81.8 },
+    { label: "London Heathrow (LHR)", value: 79.2 },
+    { label: "Tokyo Haneda (HND)", value: 78.7 },
+    { label: "Denver (DEN)", value: 77.8 },
+    { label: "Istanbul (IST)", value: 76.0 },
+    { label: "Los Angeles (LAX)", value: 75.0 },
+    { label: "Chicago O'Hare (ORD)", value: 73.9 },
+    { label: "Delhi (DEL)", value: 72.2 },
+  ]}
+/>
+
+## What 2023 said about the post-COVID world
+
+Two patterns stand out. **Asia-Pacific recovered fastest**: Tokyo Haneda
+leapt from 16th in 2022 to 5th in 2023 as Japan reopened to
+international tourism. **The Middle East kept climbing**: Dubai's 86.9
+million is now decisively #2 in the world and remains the largest hub
+for international (versus domestic) travel by any measure. US airports
+fill five of the top ten — a function of the unmatched US domestic
+market — but their share of global traffic continues to fall.
+
+<DataTable
+  caption="2023 ranking changes from 2022 — biggest movers"
+  source="ACI World 2023 vs 2022 comparison"
+  columns={["Airport", "2022 rank", "2023 rank", "Change"]}
+  rows={[
+    ["Tokyo Haneda (HND)", "16", "4", "+12"],
+    ["Delhi (DEL)", "9", "10", "−1"],
+    ["Istanbul (IST)", "5", "7", "−2"],
+    ["Beijing Capital (PEK)", "—", "—", "Below top 10"],
+    ["Pre-COVID #1 Beijing PEK", "—", "—", "Domestic-driven, not in 2023 top 10"],
+  ]}
+/>
+
+## Hub structure vs origin-destination
+
+Atlanta's 108-million-passenger total includes a large connecting share
+&mdash; people who fly into ATL only to change planes and fly out. Dubai's
+92 million is almost entirely international, with a high
+origin-destination share. The two airports lead by different metrics: ATL
+by total throughput, DXB by international throughput, and LHR by
+sustained slot-constrained capacity at the top of the European
+hierarchy.
+
+<DataTable
+  caption="Top-three airports by international-only passengers (2024)"
+  source="ACI World 2024 international-only ranking"
+  columns={["Rank", "Airport", "International passengers (M)", "Why"]}
+  rows={[
+    [
+      "1",
+      "Dubai International (DXB)",
+      "≈ 92.3 (almost entirely international)",
+      "Sixth Freedom hub; UAE has limited domestic market",
+    ],
+    [
+      "2",
+      "London Heathrow (LHR)",
+      "≈ 75",
+      "Slot-constrained gateway for Europe ↔ Atlantic, Europe ↔ Asia traffic",
+    ],
+    [
+      "3",
+      "Hong Kong International (HKG)",
+      "≈ 53",
+      "Recovered to roughly 90 % of pre-COVID international levels in 2024",
+    ],
+  ]}
+/>
+
+## Cargo airports — a separate ranking
+
+Cargo throughput follows a completely different distribution. Three
+airports dominate by tonnage and they are not in the passenger top ten:
+Hong Kong International (HKG), Memphis (MEM, FedEx's super-hub), and
+Shanghai Pudong (PVG, which appears in both rankings).
+
+<DataTable
+  caption="ACI World 2023 top-five cargo airports by tonnage"
+  source="ACI World cargo rankings 2023"
+  columns={["Rank", "Airport", "Tonnes (M)", "Why"]}
+  rows={[
+    [
+      "1",
+      "Hong Kong International (HKG)",
+      "4.33",
+      "Long-time global cargo leader; close to Pearl River Delta manufacturing",
+    ],
+    [
+      "2",
+      "Memphis (MEM)",
+      "3.95",
+      "FedEx Express super-hub; one of the largest single-operator hubs in the world",
+    ],
+    [
+      "3",
+      "Shanghai Pudong (PVG)",
+      "3.45",
+      "China's largest international cargo gateway",
+    ],
+    [
+      "4",
+      "Anchorage (ANC)",
+      "3.20",
+      "Strategic Asia ↔ North America transit point for cargo aircraft requiring tech stops",
+    ],
+    [
+      "5",
+      "Seoul Incheon (ICN)",
+      "2.79",
+      "Korean Air Cargo and Asiana Cargo hub",
+    ],
+  ]}
+/>
+
+## Regional analysis
+
+The top-ten distribution shifts by region. The Americas (North America +
+Latin America) hold five of the ten passenger slots; EMEA (Europe, Middle
+East, Africa) hold three; APAC (Asia-Pacific) hold two, up from one in
+2023. The 2024 jump for Shanghai Pudong is the most visible APAC
+recovery indicator since the COVID era.
+
+<DataTable
+  caption="Regional distribution of the 2024 passenger top ten"
+  source="ACI World 2024 top-10"
+  columns={["Region", "Top-10 airports", "Share of top-10 traffic"]}
+  rows={[
+    [
+      "North America",
+      "ATL, DFW, DEN, ORD, LAX (5)",
+      "≈ 47 %",
+    ],
+    [
+      "EMEA",
+      "DXB, LHR, IST (3)",
+      "≈ 30 %",
+    ],
+    [
+      "APAC",
+      "HND, PVG (2)",
+      "≈ 19 %",
+    ],
+    [
+      "Other",
+      "—",
+      "≈ 0 %",
+    ],
+  ]}
+/>
+
+<Callout type="note" term="Why slot-constrained airports cap out">
+  London Heathrow's two runways operate at over 98 % of declared
+  capacity year-round, so it cannot grow throughput without a new
+  runway. Its passenger growth in 2023 came from larger aircraft and
+  higher load factors, not more movements. Dubai, Istanbul, and Delhi
+  have spare runway capacity and are still expanding terminals.
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "How does ACI count passengers?",
+      a: "ACI counts every passenger boarding or deplaning at an airport. A connecting passenger is counted twice (once on arrival, once on departure). This is the global standard and lets airports be compared on equal terms.",
+    },
+    {
+      q: "Why isn't Beijing or Shanghai in the top 10 anymore?",
+      a: "Both led the pre-COVID world by domestic traffic, but China's slower 2022–2023 international reopening kept their year-on-year recovery behind other regions. ACI's 2024 figures (released 2025) will likely show movement back up.",
+    },
+    {
+      q: "What about cargo airports?",
+      a: "Hong Kong (HKG) and Memphis (MEM) lead the world for cargo throughput by tonnage; both are well outside the passenger top ten. ACI publishes separate cargo rankings.",
+    },
+    {
+      q: "Is the busiest airport always the largest?",
+      a: "By terminal area or runway count, no. Beijing Daxing (PKX) has the largest single-terminal building; Denver (DEN) has the largest land area; Singapore Changi (SIN) has the most awards. Atlanta is the busiest because its two-runway-pair layout is exceptional for throughput.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/airports",
+      title: "Browse all airports",
+      description:
+        "Search the full OpenFlights airport database.",
+    },
+    {
+      href: "/learn/longest-flights-in-the-world",
+      title: "The world's longest flights",
+      description:
+        "Most ULR routes start or end at one of the top-20 hubs.",
+    },
+    {
+      href: "/learn/airline-alliances",
+      title: "Airline alliances",
+      description:
+        "How the big alliances cluster around the busiest hubs.",
+    },
+    {
+      href: "/methodology",
+      title: "Methodology umbrella",
+      description: "How AirMilesCalc handles airport data.",
+    },
+  ]}
+/>

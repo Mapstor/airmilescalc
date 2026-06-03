@@ -1,0 +1,504 @@
+export const meta = {
+  title: "Methodology",
+  description:
+    "Every formula, constant, and data source AirMilesCalc uses — Vincenty geodesic distance on WGS-84, DEFRA 2024 emission factors, Lee et al. 2021 radiative forcing, and the OpenFlights base data.",
+  category: "Reference",
+  updated: "2026-06-01",
+  readingTime: "12 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "Vincenty (1975)",
+      note: "Direct and Inverse Solutions of Geodesics on the Ellipsoid with Application of Nested Equations",
+      venue: "Survey Review XXIII (176), pp. 88–93",
+      date: "April 1975",
+      url: "https://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf",
+    },
+    {
+      id: 2,
+      label: "NGA.STND.0036_1.0.0_WGS84",
+      note: "Department of Defense World Geodetic System 1984: Its Definition and Relationships with Local Geodetic Systems",
+      venue: "National Geospatial-Intelligence Agency Standard",
+      date: "Version 1.0.0, July 2014",
+      url: "https://earth-info.nga.mil/index.php?dir=wgs84&action=wgs84",
+    },
+    {
+      id: 3,
+      label: "DESNZ / DEFRA 2024 conversion factors",
+      note: "Greenhouse gas reporting: conversion factors 2024, condensed and full sets plus methodology paper",
+      venue: "UK Department for Energy Security and Net Zero",
+      date: "Published June 2024",
+      url: "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
+    },
+    {
+      id: 4,
+      label: "Lee et al. (2021)",
+      note: "The contribution of global aviation to anthropogenic climate forcing for 2000 to 2018",
+      venue: "Atmospheric Environment vol. 244, 117834",
+      date: "January 2021",
+      url: "https://doi.org/10.1016/j.atmosenv.2020.117834",
+    },
+    {
+      id: 5,
+      label: "OpenFlights",
+      note: "Airport, airline, and route databases under the Open Database License (ODbL)",
+      venue: "openflights.org/data.php",
+      date: "Routes data: final 3rd-party feed June 2014; airports: community-maintained",
+      url: "https://openflights.org/data.php",
+    },
+    {
+      id: 6,
+      label: "ICAO CORSIA",
+      note: "Carbon Offsetting and Reduction Scheme for International Aviation — phase definitions and baseline rules",
+      venue: "International Civil Aviation Organization",
+      date: "CORSIA FAQs, April 2024 update",
+      url: "https://www.icao.int/environmental-protection/CORSIA/Pages/default.aspx",
+    },
+    {
+      id: 7,
+      label: "IATA Fly Net Zero 2050",
+      note: "Resolution committing member airlines to net-zero by 2050, passed at the 77th IATA AGM in Boston",
+      venue: "International Air Transport Association",
+      date: "4 October 2021",
+      url: "https://www.iata.org/en/programs/sustainability/flynetzero/",
+    },
+    {
+      id: 8,
+      label: "BIPM SI Brochure (nautical mile)",
+      note: "International nautical mile defined as exactly 1,852 m at the First International Extraordinary Hydrographic Conference, Monaco, 1929",
+      venue: "Bureau International des Poids et Mesures",
+      date: "Conference 1929; BIPM SI Brochure 9th edition 2019",
+      url: "https://www.bipm.org/en/publications/si-brochure",
+    },
+    {
+      id: 9,
+      label: "IEA Aviation tracking",
+      note: "Aviation accounted for 2.5% of global energy-related CO₂ emissions in 2023, ≈950 Mt CO₂",
+      venue: "International Energy Agency",
+      date: "Updated 2024",
+      url: "https://www.iea.org/energy-system/transport/aviation",
+    },
+  ]}
+/>
+
+<Lede>
+  AirMilesCalc computes geodesic distance, flight duration, and per-cabin CO₂
+  from a closed set of published formulas and reference data. Every figure on
+  this site traces back to a primary source — there are no rounding shortcuts
+  and no mocked numbers. This page lays out what we calculate, how, and where
+  the constants come from.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "0.5 mm",
+      label: "Vincenty distance precision on WGS-84",
+      source: "Vincenty 1975",
+    },
+    {
+      value: "1 ⁄ 298.257223563",
+      label: "WGS-84 inverse flattening (1/f)",
+      source: "NGA.STND.0036",
+    },
+    {
+      value: "1.9 ×",
+      label: "Radiative-forcing uplift on CO₂ for non-CO₂ aviation effects",
+      source: "DESNZ 2024 / Lee 2009 base",
+    },
+    {
+      value: "1,852 m",
+      label: "International nautical mile, defined exactly",
+      source: "Monaco 1929 / BIPM",
+    },
+  ]}
+/>
+
+## How we compute distance
+
+The shortest path between two points on Earth is a **geodesic** — the
+ellipsoidal cousin of a straight line. Treating Earth as a sphere (the
+Haversine formula) gets you within roughly 0.5 % of the true distance, fine for
+most rough navigation but inadequate for aviation flight planning. We use
+Thaddeus Vincenty's 1975 iterative inverse formula on the WGS-84 ellipsoid
+because it converges to sub-millimetre precision in standard double-precision
+arithmetic.
+
+<Callout type="definition" term="Geodesic">
+  The shortest path between two points on a curved surface. On a sphere it is
+  an arc of a great circle; on an oblate ellipsoid like WGS-84 it is a
+  slightly different curve that no closed-form expression captures, which is
+  why Vincenty's solution is iterative.
+</Callout>
+
+<DiagramGreatCircle source="Calculated from WGS-84 Vincenty inverse; rhumb line length from rhumb formula on the same ellipsoid" />
+
+The great-circle path between JFK and HKG measures about 12,983 km, while the
+rhumb-line course you would steer by holding a single magnetic heading runs
+roughly 15,200 km — a 17 % detour on the same trip. That 2,200-km gap is the
+whole reason every long-haul jet uses geodesic navigation rather than a
+constant compass bearing. The bigger the latitude swing, the bigger the
+penalty for steering a straight line on a Mercator map.
+
+<DiagramEllipsoidCrossSection />
+
+<Steps>
+  <Step n={1} title="Reduce the latitudes">
+    Convert geographic latitudes φ₁, φ₂ to reduced latitudes U₁, U₂ via
+    tan U = (1 − f) tan φ. This step collapses the latitude problem onto an
+    auxiliary sphere of radius b/a so the rest of the algorithm can use
+    spherical trigonometry.
+  </Step>
+  <Step n={2} title="Iterate λ until convergence">
+    Starting with λ = L (the longitude difference), compute σ, sin α, and
+    cos 2σm, then update λ from those quantities. Vincenty's inner loop
+    contains six trigonometric terms; we run it for up to 100 iterations with a
+    10⁻¹² rad convergence tolerance — typical real-world pairs converge in 4–8
+    passes.
+  </Step>
+  <Step n={3} title="Resolve fallback for near-antipodes">
+    For points within about half a degree of being antipodal the inverse
+    problem may not converge — Vincenty himself flagged this in the original
+    paper. We fall back to the Haversine formula, which always returns a finite
+    value and is accurate to a few hundred metres at antipodal scale.
+  </Step>
+  <Step n={4} title="Apply the final ellipsoid correction">
+    Compute u² from cos²α and the squared semi-axes, derive the series
+    coefficients A and B (Vincenty equations 3 and 4), then return the surface
+    distance s = b·A·(σ − Δσ) in metres. We then convert to km, statute miles
+    (× 0.621371), and nautical miles (× 0.539957).
+  </Step>
+</Steps>
+
+<DiagramVincentyIteration source="Worked example: London Heathrow → Sydney Kingsford Smith, residual logged each iteration" />
+
+The chart above plots the residual between successive λ values on the
+London → Sydney route — a 17,016-km flight that is geometrically aggressive
+but well-behaved for Vincenty. The residual halves through the first two
+iterations and then drops six orders of magnitude per step once σ stabilises.
+The 10⁻¹² rad tolerance corresponds to roughly 6 micrometres of position error
+at Earth scale, well below the precision of any GNSS receiver.
+
+<DataTable
+  caption="WGS-84 ellipsoid — the constants used in every distance calculation"
+  source="NGA.STND.0036_1.0.0_WGS84, 2014 (defining and derived parameters)"
+  columns={["Parameter", "Symbol", "Value"]}
+  rows={[
+    ["Semi-major axis (equatorial)", "a", "6,378,137.0 m"],
+    ["Inverse flattening", "1/f", "298.257223563"],
+    ["Flattening", "f", "0.003352810664747..."],
+    ["Semi-minor axis (polar, derived)", "b = a(1 − f)", "6,356,752.314 m"],
+    ["Equatorial circumference", "2π a", "40,075.017 km"],
+    ["Polar (meridional) circumference", "≈ 40,007.863 km", "—"],
+    ["First eccentricity squared", "e²", "0.00669437999014"],
+    ["Mean radius (arithmetic)", "(2a + b)/3", "6,371,008.8 m"],
+  ]}
+/>
+
+Earth is not a sphere — its 24-hour rotation flattens it by 21.4 km between
+equatorial and polar radii. Using the sphere approximation on a London → Tokyo
+route produces an error of about 40 km; Vincenty's ellipsoid solution drops
+that to under a millimetre. That difference is the entire reason aviation
+flight plans, ETOPS clearance, and oceanic track allocation depend on geodesic
+math rather than spherical shortcuts.
+
+<BarChart
+  title="Earth's true shape — equatorial vs polar radius"
+  source="NGA.STND.0036, 2014"
+  unit="km"
+  formatValue={(n) => n.toFixed(3)}
+  data={[
+    { label: "Equatorial radius (a)", value: 6378.137 },
+    { label: "Polar radius (b)", value: 6356.752 },
+  ]}
+/>
+
+## How we estimate flight time
+
+A modern narrow-body cruises at Mach 0.78 — about 833 km/h true airspeed at
+FL370 — while a long-haul wide-body holds Mach 0.85 (≈ 903 km/h). We use **850
+km/h** as a single cruise reference because it sits midway between those two
+operating points and matches the block-time arithmetic published by most
+airline planning teams. Then we add ground time for taxi, climb-out, descent,
+and arrival taxi.
+
+<DataTable
+  caption="Cruise speeds that anchor the 850 km/h reference"
+  source="Manufacturer specifications: Boeing.com, Airbus.com"
+  columns={["Aircraft", "Class", "Cruise Mach", "Cruise km/h"]}
+  rows={[
+    ["Boeing 737-800", "Narrow-body", "0.789", "≈ 842"],
+    ["Airbus A320 / A320neo", "Narrow-body", "0.78", "≈ 833"],
+    ["Embraer E195-E2", "Regional jet", "0.78", "≈ 833"],
+    ["Boeing 777-300ER", "Wide-body", "0.84", "≈ 905"],
+    ["Boeing 787-9 Dreamliner", "Wide-body", "0.85", "≈ 903"],
+    ["Airbus A350-900", "Wide-body", "0.85", "≈ 903"],
+    ["Airbus A380", "Wide-body", "0.85", "≈ 900"],
+  ]}
+/>
+
+Ground time scales with distance because long-haul flights typically depart
+from larger airports with longer taxi-out queues and have more elaborate
+descent procedures. We use **30 minutes for routes under 1,500 km**, **40 minutes
+for 1,500–4,000 km**, and **50 minutes beyond 4,000 km**. The total is rounded
+to the nearest minute and split into hours-and-minutes for display.
+
+<Callout type="note">
+  Real schedules vary by airline, aircraft type, and wind. A westbound
+  transatlantic crossing into the jet stream can lose 60–90 minutes against
+  its eastbound counterpart. We do not model winds — our number is the
+  still-air block time and should be taken as a reference, not a flight plan.
+</Callout>
+
+## How we calculate CO₂
+
+The base emission factor comes from the UK Government's annual greenhouse-gas
+reporting tables, published by the Department for Energy Security and Net
+Zero (DESNZ, the body that took over from DEFRA's GHG inventory work). The
+2024 tables give kg CO₂ per passenger-kilometre for three distance bands; the
+cabin-class multipliers reflect how much aircraft floor area each ticket buys;
+and a 1.9 × radiative-forcing uplift converts CO₂ to CO₂-equivalent for the
+warming effect of contrails, NOₓ, and water vapour at altitude.
+
+<DataTable
+  caption="DEFRA / DESNZ 2024 air-travel emission factors — economy baseline, with radiative forcing"
+  source="UK DESNZ 2024 Greenhouse gas reporting conversion factors, condensed set"
+  columns={["Distance band (UK origin)", "kg CO₂e per pax-km", "Why the rate changes"]}
+  rows={[
+    [
+      "Domestic / short-haul (under ~480 km)",
+      "0.255",
+      "Climb and descent dominate fuel burn",
+    ],
+    [
+      "Short-haul (~480 – 3,700 km)",
+      "0.156",
+      "Stable cruise dominates the burn profile",
+    ],
+    [
+      "Long-haul (over 3,700 km)",
+      "0.150",
+      "Most efficient per-km but the longest exposure",
+    ],
+  ]}
+/>
+
+<DataTable
+  caption="Cabin-class multipliers applied to the economy factor"
+  source="DESNZ 2024 methodology — proportional to allocated cabin floor area"
+  columns={["Cabin", "Multiplier", "Rationale"]}
+  rows={[
+    ["Economy", "1.00 ×", "Baseline — densest seat layout"],
+    ["Premium economy", "1.60 ×", "Roughly 1.6 × more floor area per seat"],
+    ["Business", "2.90 ×", "Lie-flat suites consume close to 3 × economy space"],
+    ["First", "4.00 ×", "Largest seat pitch and amenity area on the aircraft"],
+  ]}
+/>
+
+<Callout type="note" term="Why the multiplier is 1.9 ×">
+  DESNZ's 1.9 × factor for non-CO₂ effects traces back to Lee et al. (2009),
+  which the UK Committee on Climate Change adopted as the working uplift. Lee
+  et al. (2021) updated the underlying science: in 2018 aviation's net
+  effective radiative forcing was 100.9 mW m⁻², split into contrail cirrus
+  (57.4 mW m⁻², about 57 %), CO₂ (34.3 mW m⁻², about 34 %), and NOₓ-derived
+  forcing (17.5 mW m⁻², about 17 %) — so non-CO₂ effects account for roughly
+  two-thirds of aviation's warming. Some 2024 industry methodologies are
+  migrating from 1.9 × to 1.7 × as cleaner contrail science arrives; we
+  expose both kg CO₂ and kg CO₂e so you can apply whichever value your
+  framework requires.
+</Callout>
+
+<BarChart
+  title="Aviation's effective radiative forcing components (2018)"
+  source="Lee et al. 2021, Atmospheric Environment 244:117834"
+  unit="mW m⁻²"
+  data={[
+    { label: "Contrail cirrus", value: 57.4 },
+    { label: "CO₂", value: 34.3 },
+    { label: "NOₓ-derived (net)", value: 17.5 },
+  ]}
+/>
+
+For a return economy flight London → New York our calculator returns roughly
+1,668 kg CO₂e — more than the per-capita 2-tonne annual carbon target that
+the IPCC's 1.5 °C scenarios require by 2030, and about 1.6 months of the
+average UK resident's full personal carbon budget. That arithmetic is the
+point of showing the number prominently: it lets you compare a trip against
+your annual footprint rather than reading an abstract figure with no anchor.
+
+## Time-zone and jet-lag estimation
+
+We read both airports' IANA time-zone strings (sourced from OpenFlights) and
+let the browser's `Intl.DateTimeFormat` resolve the current UTC offset,
+including daylight-saving transitions. The hour difference becomes a
+jet-lag severity band — none (≤ 2 h), mild (3–5 h), moderate (6–9 h), and
+severe (10 h or more). Recovery days follow the well-documented circadian
+asymmetry: westward travel realigns at about 92 minutes per day, eastward at
+about 57 minutes.
+
+<Callout type="definition" term="Why east is harder than west">
+  The free-running human circadian period averages roughly 24.2 hours —
+  slightly longer than a solar day. Westward travel extends the day, which
+  aligns with the clock's natural drift. Eastward compresses the day and
+  fights it. The result is a roughly 1.6 × asymmetry: a 9-hour westward flight
+  needs about 6 days to fully reset, the same flight eastward needs closer to
+  9.5 days (Sack, NEJM 2010 review of jet-lag chronobiology).
+</Callout>
+
+## Airport, airline, and route data
+
+OpenFlights is our base data layer — about 7,698 airport rows of which ~3,000
+carry IATA codes, ~6,162 airline rows, and 67,663 route rows captured before
+the third-party route feed stopped supplying updates in June 2014. We treat
+the route table as a topology hint (which carriers historically flew which
+pairs), never as a current schedule. Coordinates, IATA codes, and time-zone
+strings are kept because they describe physical attributes that do not
+expire.
+
+<DataTable
+  caption="OpenFlights data — what we use and how fresh each table is"
+  source="openflights.org/data.php, retrieved at build time"
+  columns={["File", "Records", "Freshness", "What we use it for"]}
+  rows={[
+    [
+      "airports.dat",
+      "≈ 7,698",
+      "Periodic, community-maintained",
+      "Coordinates, IATA, ICAO, country, timezone",
+    ],
+    [
+      "airlines.dat",
+      "≈ 6,162",
+      "Periodic, community-maintained",
+      "Display name, IATA, ICAO, country, active flag",
+    ],
+    [
+      "routes.dat",
+      "67,663",
+      "Final 3rd-party feed June 2014 — not current",
+      "Topological route existence and airline associations only",
+    ],
+  ]}
+/>
+
+## Limitations and disclaimers
+
+These figures are decision-support estimates, not flight plans or compliance
+documents. Actual aircraft paths bend around restricted airspace, oceanic
+tracks rotate daily with the jet stream, and DESNZ emission factors are
+fleet-wide averages across many aircraft and load factors. We surface the
+underlying constants so you can substitute your own when a more precise
+number is available.
+
+<Callout type="warning">
+  For corporate carbon disclosure or aviation-operational use, follow DESNZ
+  guidance, the GHG Protocol, or ICAO Doc 9501 directly — not a web
+  calculator. Our role is to give you a fast, transparent baseline with the
+  formulas and sources visible, so you can audit and override every number.
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "Why use the Vincenty formula over Haversine?",
+      a: "Haversine treats Earth as a sphere and accumulates error up to about 0.5 % — roughly 40 km on a London-Tokyo route. Vincenty solves the geodesic on the WGS-84 ellipsoid and converges to sub-millimetre precision in double-precision arithmetic. For aviation flight planning, ETOPS clearance, and oceanic track allocation, that difference matters.",
+    },
+    {
+      q: "Where do the DEFRA 2024 factors actually come from?",
+      a: "They are published annually by the UK Department for Energy Security and Net Zero (DESNZ, formerly BEIS, originally part of DEFRA). The factors derive from UK aviation fuel data combined with passenger-load and seat-allocation assumptions. The methodology PDF is openly available on gov.uk.",
+    },
+    {
+      q: "Why is the radiative-forcing multiplier 1.9 × and not the IPCC's CO₂-only number?",
+      a: "Aviation's non-CO₂ climate effects — contrails, NOₓ-driven ozone, and water vapour at altitude — account for roughly two-thirds of its effective radiative forcing (Lee et al. 2021). The 1.9 × multiplier is the DESNZ-recommended approximate uplift, traceable to Lee et al. 2009 and adopted by the UK Committee on Climate Change. Some 2024 methodologies are migrating to 1.7 ×; we publish both kg CO₂ and kg CO₂e so users can apply either.",
+    },
+    {
+      q: "How accurate is the flight-time estimate?",
+      a: "Within about 10 % for typical scheduled flights in calm-wind conditions. Headwinds, jet streams, ATC routing, and airport congestion can each shift the actual block time by 10–60 minutes. Our number is a still-air estimate, useful for planning but not for booking.",
+    },
+    {
+      q: "Why does OpenFlights' route table stop in 2014?",
+      a: "OpenFlights pulled route data from a third-party feed that stopped supplying updates in June 2014. The route table remains useful for historical topology (which airline-pair city combinations existed) but should not be relied on for current schedules — use an airline API or an aggregator for that.",
+    },
+    {
+      q: "Do you account for the well-to-tank emissions of jet fuel?",
+      a: "Not in the base CO₂ figure. DESNZ publishes a separate 1.2 × well-to-tank uplift factor for life-cycle accounting; if you need that, multiply our kg CO₂e output by 1.2.",
+    },
+    {
+      q: "What happens for antipodal point pairs?",
+      a: "Vincenty's inverse formula may fail to converge for points within roughly half a degree of true antipodality — Vincenty himself flagged this in the 1975 paper and proposed an alternative iteration in an unpublished follow-up. We detect non-convergence after 100 iterations and fall back to the Haversine spherical formula, which always returns a finite value accurate to a few hundred metres at antipodal scale.",
+    },
+    {
+      q: "How is the nautical mile defined?",
+      a: "Exactly 1,852 metres, fixed at the First International Extraordinary Hydrographic Conference in Monaco in 1929. The value comes from dividing the meridional quarter-circumference (10,000,000 m by historical metric definition) by 90 × 60 — one minute of arc on a meridian. The BIPM SI Brochure lists the nautical mile as a non-SI unit accepted for use with SI.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  heading="Deeper on the methodology"
+  links={[
+    {
+      href: "/methodology/vincenty-formula",
+      title: "Vincenty's formula, step-by-step",
+      description:
+        "The iteration scheme, convergence behaviour, and Vincenty's own warning about near-antipodal pairs.",
+    },
+    {
+      href: "/methodology/haversine-formula",
+      title: "The Haversine fallback",
+      description:
+        "Why the sphere approximation is close enough for most uses and wrong for aviation precision.",
+    },
+    {
+      href: "/methodology/great-circle-distance",
+      title: "Great-circle distance, intuitively",
+      description:
+        "How the shortest path bends north on a Mercator and why JFK → HKG flies over the Arctic.",
+    },
+    {
+      href: "/methodology/wgs84-ellipsoid",
+      title: "WGS-84 — the reference Earth",
+      description:
+        "Where the 6,378,137-metre semi-major axis came from and how GPS depends on it.",
+    },
+    {
+      href: "/methodology/rhumb-line",
+      title: "Rhumb lines vs great circles",
+      description:
+        "Loxodromes, Mercator projection, and why sailors held one bearing while jets cannot.",
+    },
+    {
+      href: "/methodology/co2-emissions-calculation",
+      title: "How we calculate flight CO₂",
+      description:
+        "The full DEFRA → cabin multiplier → radiative-forcing pipeline with worked examples.",
+    },
+    {
+      href: "/methodology/defra-emission-factors",
+      title: "DEFRA 2024 emission factors in depth",
+      description:
+        "How DESNZ derives the per-passenger-km figures and how to map them outside the UK.",
+    },
+    {
+      href: "/methodology/radiative-forcing",
+      title: "Aviation's non-CO₂ climate forcing",
+      description:
+        "The Lee et al. 2021 decomposition: contrails, NOₓ, and why a single multiplier is approximate.",
+    },
+    {
+      href: "/methodology/flight-time-calculation",
+      title: "Flight-time estimation in detail",
+      description:
+        "Cruise speed, climb and descent profiles, and the ground-time bands we apply.",
+    },
+    {
+      href: "/learn/cabin-class-emissions",
+      title: "Cabin class and your CO₂ footprint",
+      description:
+        "Why business class emits roughly 2.9 × what economy does on the same flight.",
+    },
+  ]}
+/>

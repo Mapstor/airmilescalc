@@ -1,0 +1,214 @@
+export const meta = {
+  title: "Why aircraft cruise at 35,000 feet",
+  description:
+    "Most commercial flights cruise between FL350 and FL410 — about 10.7 to 12.5 km. The altitude band is the result of a tight trade between drag, fuel efficiency, and the aircraft's maximum service ceiling.",
+  category: "Learn",
+  updated: "2026-06-01",
+  readingTime: "6 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "ICAO Annex 2 — Rules of the Air",
+      note: "Defines flight levels and the reduced-vertical-separation-minimum (RVSM) airspace",
+      venue: "ICAO",
+      date: "Current edition",
+      url: "https://www.icao.int/safety/airnavigation/Pages/standard.aspx",
+    },
+    {
+      id: 2,
+      label: "Boeing 787 performance manual extract",
+      note: "Service ceiling 43,000 ft; optimum cruise band 35,000–41,000 ft",
+      venue: "Boeing flight crew operations manual",
+      date: "Current",
+      url: "https://www.boeing.com/commercial/787/",
+    },
+    {
+      id: 3,
+      label: "FAA AC 91-85 — Authorisation of Aircraft for RVSM Operations",
+      note: "Background on FL290–FL410 standard cruise altitudes",
+      venue: "U.S. Federal Aviation Administration",
+      date: "Current",
+      url: "https://www.faa.gov/regulations_policies/advisory_circulars",
+    },
+    {
+      id: 4,
+      label: "International Standard Atmosphere (ISA)",
+      note: "Reference for temperature, pressure, and density vs altitude — underlies all cruise-altitude analysis",
+      venue: "ISO 2533:1975",
+      date: "1975, current standard",
+      url: "https://www.iso.org/standard/7472.html",
+    },
+  ]}
+/>
+
+<Lede>
+  Cruise altitude is a fuel-burn problem. Drag depends on air density, so
+  flying higher cuts fuel — but engines also lose thrust at altitude, and
+  every aircraft has a structural ceiling. The result is a narrow band
+  where everything flies: FL350 to FL410 for most commercial operations.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "FL370",
+      label: "Typical long-haul cruise — 37,000 ft, 11,277 m",
+      source: "Schedule analysis, RVSM",
+    },
+    {
+      value: "FL350 – FL410",
+      label: "Standard cruise band for commercial jets",
+      source: "ICAO RVSM, FAA AC 91-85",
+    },
+    {
+      value: "20 – 30 %",
+      label: "Drag reduction at FL410 vs FL350 for the same Mach",
+      source: "Aerodynamics derived from ISA",
+    },
+    {
+      value: "−55 °C",
+      label: "Standard temperature at FL370 (ISA)",
+      source: "ISO 2533",
+    },
+  ]}
+/>
+
+## Flight levels, not altitudes
+
+Above the **transition altitude** (typically 18,000 ft in the US, 6,000 ft
+in much of Europe), all altitude reporting switches to "flight levels" —
+nominal altitudes above the 1013.25 hPa pressure datum, written as FLxxx
+where xxx is the altitude in hundreds of feet. FL370 means 37,000 feet
+pressure-altitude. This convention means every aircraft above the
+transition altitude is measuring height against the same reference, so
+vertical separation in dense airspace is consistent regardless of local
+sea-level pressure.
+
+<DataTable
+  caption="Flight-level reference table for the common cruise band"
+  source="Standard FL nomenclature; FAA AC 91-85"
+  columns={["Flight Level", "Feet", "Metres", "Common use"]}
+  rows={[
+    ["FL290", "29,000", "8,839", "Lower long-haul, off-track"],
+    ["FL310", "31,000", "9,449", "Heavy aircraft early-cruise"],
+    ["FL330", "33,000", "10,058", "Mid long-haul"],
+    ["FL350", "35,000", "10,668", "Standard long-haul"],
+    ["FL370", "37,000", "11,277", "Optimal for most twins"],
+    ["FL390", "39,000", "11,887", "Late-cruise step-up"],
+    ["FL410", "41,000", "12,497", "Max for most narrow-body"],
+    ["FL430", "43,000", "13,106", "Service ceiling, some wide-body twins"],
+  ]}
+/>
+
+## Why higher is more efficient
+
+At FL350, the air density is about 32 % of sea level. Drag (the force
+that opposes motion) is proportional to density × velocity² × area, so
+holding a fixed Mach number at altitude requires roughly one-third of the
+thrust required at sea level for the same true airspeed. The engines'
+fuel burn falls almost in proportion. The result: every 4,000 ft of climb
+roughly cuts cruise fuel burn by 10–15 %.
+
+<Callout type="definition" term="Optimum altitude">
+  The altitude at which the lift-to-drag ratio is maximised for a given
+  aircraft weight and cruise Mach. Optimum altitude rises as the aircraft
+  burns off fuel and gets lighter — a 777 may take off at maximum weight
+  and start at FL310, then "step climb" to FL370 and finally FL390 over
+  a 12-hour leg.
+</Callout>
+
+## Why not higher still
+
+Two limits cap cruise altitude. The **structural service ceiling** is the
+altitude beyond which the cabin pressurisation system cannot maintain a
+safe cabin altitude — most current jets are certified to 41,000 to 43,000
+ft. The **engine flameout margin** falls with altitude — high-altitude
+flameouts are harder to relight, and required margins above engine
+restart limits constrain real cruise to a band below the absolute
+ceiling.
+
+<BarChart
+  title="Air density at typical commercial flight levels (% of sea-level)"
+  source="International Standard Atmosphere (ISO 2533)"
+  unit="%"
+  data={[
+    { label: "Sea level (FL000)", value: 100 },
+    { label: "FL100 (10,000 ft)", value: 73.8 },
+    { label: "FL200 (20,000 ft)", value: 53.3 },
+    { label: "FL300 (30,000 ft)", value: 37.4 },
+    { label: "FL350 (35,000 ft)", value: 31.0 },
+    { label: "FL370 (37,000 ft)", value: 28.5 },
+    { label: "FL410 (41,000 ft)", value: 23.7 },
+    { label: "FL500 (50,000 ft)", value: 15.3 },
+  ]}
+/>
+
+## Cruise altitude affects the contrail problem
+
+Contrail formation depends on relative humidity over ice and the
+temperature at cruise altitude. Flights that pass through ice-
+supersaturated regions tend to leave persistent contrails; those that
+fly slightly above or below avoid them. Recent research (Teoh et al.
+2024) shows that 2 % of flights produce 80 % of the contrail warming
+effect — and a small altitude adjustment could remove most of that
+forcing without significant fuel cost.
+
+<Callout type="note" term="Higher cruise can lower the climate footprint">
+  When contrail-aware altitude routing becomes operational, the fuel
+  optimum and the climate optimum will diverge slightly: aircraft might
+  cruise 1,000–2,000 ft above or below their fuel-optimum altitude on
+  certain routes to avoid ice-supersaturation. The fuel penalty is small;
+  the contrail-forcing reduction is large.
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "Why don't aircraft fly even higher to save more fuel?",
+      a: "Structural pressurisation and engine flameout margins. The cabin pressure differential at altitude is what the fuselage was designed for — going higher would either overstress the structure or require a lower cabin altitude that is harder to engineer. The certified service ceiling is typically 41,000–43,000 ft for current jets.",
+    },
+    {
+      q: "Is FL370 the same height every day?",
+      a: "Pressure-altitude-wise, yes. True altitude varies slightly with the local atmospheric temperature column — a colder air mass means a slightly lower true altitude for the same FL370 pressure level. RVSM was designed to make pressure-altitude separation safe regardless.",
+    },
+    {
+      q: "What's the temperature at cruise altitude?",
+      a: "About −55 °C in the standard atmosphere at FL370. Real-world cruise temperatures range from about −40 °C in unusually warm air masses to about −70 °C in polar regions. Engine performance and contrail formation both depend on this.",
+    },
+    {
+      q: "Do private jets fly higher than airliners?",
+      a: "Yes, the larger business jets (Gulfstream G650, Bombardier Global 7500) cruise at FL450–FL510, above most commercial traffic. The lighter wing loading and higher thrust-to-weight ratio let them stay above turbulence and ATC congestion.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/learn/aircraft-cruise-speeds",
+      title: "Aircraft cruise speeds",
+      description:
+        "Why Mach 0.78 dominates the narrow-body market and Mach 0.85 the wide-body.",
+    },
+    {
+      href: "/methodology/flight-time-calculation",
+      title: "Flight-time estimation in detail",
+      description:
+        "Where cruise speed and cruise altitude enter the block-time formula.",
+    },
+    {
+      href: "/methodology/radiative-forcing",
+      title: "Aviation's non-CO₂ climate forcing",
+      description:
+        "Why altitude matters more for the contrail story than for the CO₂ story.",
+    },
+    {
+      href: "/methodology",
+      title: "Methodology umbrella",
+      description: "All formulas and constants in one place.",
+    },
+  ]}
+/>

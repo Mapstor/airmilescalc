@@ -1,0 +1,208 @@
+export const meta = {
+  title: "Aircraft cruise speeds, by type",
+  description:
+    "Cruise speeds for the dozen aircraft types that fly most of the world's commercial passengers — Mach number, km/h, and why narrow-body holds Mach 0.78 while wide-body holds Mach 0.85.",
+  category: "Learn",
+  updated: "2026-06-01",
+  readingTime: "5 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "Boeing product pages",
+      note: "Manufacturer-published cruise Mach and speed figures for 737, 747, 777, 787",
+      venue: "boeing.com",
+      date: "Current",
+      url: "https://www.boeing.com/commercial/",
+    },
+    {
+      id: 2,
+      label: "Airbus product pages",
+      note: "Manufacturer-published cruise Mach for A220, A320 family, A330, A350, A380",
+      venue: "aircraft.airbus.com",
+      date: "Current",
+      url: "https://aircraft.airbus.com/en/aircraft",
+    },
+    {
+      id: 3,
+      label: "Embraer E-Jets product pages",
+      note: "E175, E190, E195 cruise specifications",
+      venue: "embraercommercialaviation.com",
+      date: "Current",
+      url: "https://www.embraercommercialaviation.com",
+    },
+    {
+      id: 4,
+      label: "International Civil Aviation Organization Annex 6",
+      note: "Reference on commercial-flight operating standards including cruise definitions",
+      venue: "ICAO",
+      date: "Current",
+      url: "https://www.icao.int/safety/airnavigation/Pages/aig.aspx",
+    },
+  ]}
+/>
+
+<Lede>
+  Almost every commercial passenger jet in service cruises somewhere
+  between Mach 0.74 and Mach 0.86 — a narrow band that reflects shared
+  aerodynamic trade-offs, not a coincidence. Narrow-body single-aisles
+  hold the lower end, wide-bodies the upper end, and the regional jets
+  bracket both.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "Mach 0.78",
+      label: "Cruise of the global narrow-body workhorses (737, A320)",
+      source: "Boeing.com, Airbus.com",
+    },
+    {
+      value: "Mach 0.85",
+      label: "Cruise of modern wide-body twins (787, A350)",
+      source: "Boeing.com, Airbus.com",
+    },
+    {
+      value: "Mach 0.84",
+      label: "Cruise of the 777-300ER, fastest current passenger twin",
+      source: "Boeing 777-300ER spec sheet",
+    },
+    {
+      value: "≈ 295 m/s",
+      label: "Mach 1 at typical cruise altitude (−55 °C ISA)",
+      source: "Derived from ISA atmosphere",
+    },
+  ]}
+/>
+
+## The dozen aircraft that fly most of the world
+
+Roughly 80 % of global passenger-kilometres are flown on the twelve
+aircraft families listed below. The A320 and 737 dominate the narrow-body
+market; the 787, A350, and 777 dominate intercontinental wide-body
+service. Regional jets (E-Jets, CRJ, ATR) own short-haul markets that
+the narrow-bodies cannot economically reach.
+
+<DataTable
+  caption="Cruise speed for the twelve most-flown commercial passenger aircraft"
+  source="Boeing.com, Airbus.com, Embraer.com product pages"
+  columns={["Aircraft", "Class", "Cruise Mach", "Cruise km/h", "Cruise mph"]}
+  rows={[
+    ["Airbus A220-300", "Narrow-body", "0.78", "≈ 833", "≈ 518"],
+    ["Airbus A320neo / A321neo", "Narrow-body", "0.78", "≈ 833", "≈ 518"],
+    ["Boeing 737-800", "Narrow-body", "0.789", "≈ 842", "≈ 523"],
+    ["Boeing 737 MAX 8", "Narrow-body", "0.79", "≈ 842", "≈ 523"],
+    ["Embraer E195-E2", "Regional jet", "0.78", "≈ 833", "≈ 518"],
+    ["Bombardier CRJ-900", "Regional jet", "0.78", "≈ 830", "≈ 516"],
+    ["Airbus A330-300", "Wide-body twin", "0.82", "≈ 871", "≈ 541"],
+    ["Boeing 777-300ER", "Wide-body twin", "0.84", "≈ 905", "≈ 562"],
+    ["Boeing 787-9", "Wide-body twin", "0.85", "≈ 903", "≈ 561"],
+    ["Airbus A350-900", "Wide-body twin", "0.85", "≈ 903", "≈ 561"],
+    ["Boeing 747-400", "Wide-body quad", "0.85", "≈ 920", "≈ 572"],
+    ["Airbus A380", "Wide-body quad", "0.85", "≈ 900", "≈ 559"],
+  ]}
+/>
+
+## Why Mach 0.78 vs Mach 0.85
+
+Cruise speed selection is a fuel-burn-versus-time trade. At the same
+altitude, increasing speed costs proportionally more drag once the
+aircraft enters the transonic regime above about Mach 0.78. Narrow-body
+designs optimise for fuel cost per available seat kilometre, so they sit
+right below the transonic-drag rise. Wide-bodies have higher daily
+utilisation pressure and longer routes where the per-trip time saving
+matters more, so they accept the higher fuel burn of Mach 0.85.
+
+<BarChart
+  title="Cruise speeds, the twelve fleet workhorses"
+  source="Manufacturer product pages (Boeing, Airbus, Embraer)"
+  unit="km/h"
+  data={[
+    { label: "Boeing 747-400", value: 920 },
+    { label: "Boeing 777-300ER", value: 905 },
+    { label: "Boeing 787-9 / A350-900", value: 903 },
+    { label: "Airbus A380", value: 900 },
+    { label: "Airbus A330-300", value: 871 },
+    { label: "Boeing 737-800 / MAX 8", value: 842 },
+    { label: "Airbus A320neo / A321neo / A220", value: 833 },
+    { label: "Embraer E195-E2", value: 833 },
+    { label: "Bombardier CRJ-900", value: 830 },
+  ]}
+/>
+
+## Mach number is not km/h
+
+Mach number is the ratio of true airspeed to the local speed of sound,
+which depends on air temperature. At sea level the speed of sound is
+about 340 m/s (1,225 km/h); at typical cruise altitude (FL370, −55 °C)
+it falls to about 295 m/s (1,062 km/h). So Mach 0.85 at FL370 is
+about 903 km/h, while at sea level the same Mach would be 1,041 km/h —
+faster in absolute speed but at the same fraction of the local sound
+speed.
+
+<Callout type="note" term="Why pilots care about Mach more than km/h">
+  Above the troposphere, aerodynamic drag depends on Mach number, not
+  true airspeed. Holding Mach 0.85 keeps the wing's local airflow in its
+  designed envelope regardless of altitude or temperature. Holding km/h
+  would put the wing into a different aerodynamic regime as conditions
+  change, which is unsafe and inefficient.
+</Callout>
+
+## The faster planes are getting older
+
+The 777-300ER and 747-400 sit at the top of the cruise-speed table —
+both are older designs with higher cruise speeds because the fuel-cost
+calculus of the 1990s was different. The newest aircraft (A350, 787,
+A220, A321neo) all bring cruise speed back down a touch in exchange
+for measurably lower fuel burn per ASK. Cruise speed has peaked.
+
+<FAQ
+  items={[
+    {
+      q: "Why is the 747 faster than the A380?",
+      a: "The 747 was designed in the 1960s when fuel was cheap and speed was a selling point — its cruise Mach 0.85 corresponds to a higher km/h because the wing was sized for high-speed cruise. The A380 was designed in the 1990s with a wing optimised for lower drag at Mach 0.85, giving roughly 20 km/h lower top cruise but lower fuel burn per seat.",
+    },
+    {
+      q: "Will future aircraft fly faster?",
+      a: "Probably not in mainstream commercial service. Boom and other supersonic start-ups are targeting niche premium routes, but subsonic mainline cruise has settled near Mach 0.78 – 0.85 for fuel-cost reasons. Hydrogen-fuelled concepts (Airbus ZEROe) explore the same Mach band rather than higher speeds.",
+    },
+    {
+      q: "Do airlines ever fly slower than the published cruise to save fuel?",
+      a: "Yes — 'long-range cruise' or LRC is a published lower-speed setting, typically Mach 0.78 instead of 0.85, that trades a few percent of trip time for several percent of fuel saving. Airlines apply LRC discretionarily when on-time arrival is not at risk.",
+    },
+    {
+      q: "Why does AirMilesCalc use 850 km/h instead of a per-aircraft speed?",
+      a: "Most routes do not have a stable aircraft assignment, and the cruise-speed differences between narrow-body (≈ 833) and wide-body (≈ 903) are smaller than typical jet-stream variation. 850 km/h sits between them and matches scheduled block-time data to within ~10 % on average.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/methodology/flight-time-calculation",
+      title: "Flight-time estimation in detail",
+      description:
+        "How the 850 km/h reference becomes an arrival-time prediction.",
+    },
+    {
+      href: "/learn/cruising-altitude",
+      title: "Why aircraft cruise so high",
+      description:
+        "FL350 to FL410 and the relationship between Mach number and altitude.",
+    },
+    {
+      href: "/learn/longest-flights-in-the-world",
+      title: "The world's longest flights",
+      description:
+        "Which aircraft can actually do 18-hour non-stops.",
+    },
+    {
+      href: "/methodology",
+      title: "Methodology umbrella",
+      description: "All the formulas behind AirMilesCalc.",
+    },
+  ]}
+/>

@@ -1,0 +1,95 @@
+# AirMilesCalc
+
+> Free, ad-supported geodesic flight-distance and emissions calculator. Uses
+> Vincenty's 1975 inverse formula on the WGS-84 ellipsoid for sub-millimetre
+> distance precision; DESNZ 2024 conversion factors for CO₂ with the 1.9 ×
+> radiative-forcing uplift; OpenFlights for airport / airline / route reference
+> data; Sack 2010 chronobiology for jet-lag estimates.
+
+This file follows the llms.txt convention so language-model agents can find the
+canonical resources without crawling JavaScript-heavy template pages.
+
+## Calculator and APIs
+
+- [Distance calculator](https://airmilescalc.com/): main entry; computes distance,
+  block time, per-cabin CO₂e, bearing, and jet-lag for any pair of airports.
+- [POST /api/calculate](https://airmilescalc.com/api/calculate): JSON endpoint
+  accepting `{ fromIata, toIata, cabinClass? }` and returning the full result.
+- [GET /api/airports/search?q=…](https://airmilescalc.com/api/airports/search):
+  IATA / city / name autocomplete.
+
+## Methodology (primary sources cited per page)
+
+- [Methodology umbrella](https://airmilescalc.com/methodology): every formula
+  and constant the calculator uses, with sources.
+- [Vincenty's formula](https://airmilescalc.com/methodology/vincenty-formula):
+  iterative algorithm, convergence behaviour, antipodal edge case.
+- [Haversine formula](https://airmilescalc.com/methodology/haversine-formula):
+  the spherical fallback used for near-antipodal pairs.
+- [Great-circle distance](https://airmilescalc.com/methodology/great-circle-distance):
+  geometric intuition for the shortest path on a sphere.
+- [WGS-84 ellipsoid](https://airmilescalc.com/methodology/wgs84-ellipsoid):
+  defining parameters (a, 1/f, GM, ω) per NGA.STND.0036.
+- [Rhumb line vs great circle](https://airmilescalc.com/methodology/rhumb-line):
+  loxodromes and Mercator projection.
+- [End-to-end CO₂ calculation](https://airmilescalc.com/methodology/co2-emissions-calculation):
+  pipeline from distance to per-cabin kg CO₂e.
+- [DEFRA / DESNZ 2024 emission factors](https://airmilescalc.com/methodology/defra-emission-factors):
+  UK Government per-passenger-km factors for three distance bands.
+- [Aviation radiative forcing](https://airmilescalc.com/methodology/radiative-forcing):
+  Lee et al. 2021 ERF decomposition and the 1.9 × CO₂ → CO₂e uplift.
+- [Flight-time estimation](https://airmilescalc.com/methodology/flight-time-calculation):
+  850 km/h cruise reference plus banded ground time.
+
+## Applied / educational
+
+- [Learn umbrella](https://airmilescalc.com/learn): index of applied content.
+- [Nautical miles](https://airmilescalc.com/learn/nautical-miles): 1,852 m exactly,
+  fixed at Monaco 1929.
+- [Aircraft cruise speeds](https://airmilescalc.com/learn/aircraft-cruise-speeds):
+  Mach 0.78 narrow-body, Mach 0.85 wide-body.
+- [Cruising altitude](https://airmilescalc.com/learn/cruising-altitude): FL350–FL410
+  fuel-efficiency band.
+- [Cabin class and CO₂](https://airmilescalc.com/learn/cabin-class-emissions):
+  business ≈ 2.9 × economy on the same flight.
+- [Jet lag science](https://airmilescalc.com/learn/jet-lag-science): east vs west
+  asymmetry, 92 vs 57 minutes per day recovery.
+- [CORSIA, explained](https://airmilescalc.com/learn/corsia): ICAO's market-based
+  measure entering mandatory phase 2027.
+- [Sustainable aviation fuel](https://airmilescalc.com/learn/sustainable-aviation-fuel):
+  0.3 % of jet fuel in 2024, IATA target 65 % by 2050.
+- [Longest flights](https://airmilescalc.com/learn/longest-flights-in-the-world):
+  SQ23 Singapore → JFK at 15,349 km.
+- [Busiest airports](https://airmilescalc.com/learn/busiest-airports-in-the-world):
+  ACI World 2023 — ATL at 104.6 M passengers.
+- [Airline alliances](https://airmilescalc.com/learn/airline-alliances):
+  Star (25), oneworld (13), SkyTeam (19).
+
+## Project and policy
+
+- [About AirMilesCalc](https://airmilescalc.com/about): mission, audience, who
+  runs the site, limitations.
+- [Privacy policy](https://airmilescalc.com/privacy): first-party data position,
+  Google AdSense disclosure, cookie inventory, GDPR / CCPA / LGPD / PIPEDA / UK GDPR.
+- [Terms of service](https://airmilescalc.com/terms): usage rights, disclaimers.
+- [Contact](https://airmilescalc.com/contact): editorial corrections, partnerships.
+- [Accessibility](https://airmilescalc.com/accessibility): WCAG 2.1 AA goal,
+  known limitations, EAA compliance tracking.
+
+## Reference data sources
+
+- OpenFlights (ODbL): https://openflights.org/data.php — airports, airlines,
+  routes (routes snapshot June 2014).
+- DESNZ 2024 conversion factors: https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024
+- Vincenty 1975 paper (NGS hosting): https://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
+- NGA WGS-84 standard: https://earth-info.nga.mil/index.php?dir=wgs84&action=wgs84
+- Lee et al. 2021 aviation ERF: https://doi.org/10.1016/j.atmosenv.2020.117834
+- ICAO CORSIA: https://www.icao.int/environmental-protection/CORSIA/Pages/default.aspx
+- IATA Fly Net Zero 2050: https://www.iata.org/en/programs/sustainability/flynetzero/
+
+## Optional
+
+- [Sitemap](https://airmilescalc.com/sitemap.xml): full URL index including
+  thousands of route, airport, and country pages.
+- [Robots](https://airmilescalc.com/robots.txt): /api/ is disallowed for general
+  crawlers; everything else is indexable.

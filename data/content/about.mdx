@@ -1,0 +1,356 @@
+export const meta = {
+  title: "About AirMilesCalc",
+  description:
+    "Why the project exists, who it serves, who runs it, and what we deliberately leave to other tools. Hosting will be funded by Google AdSense advertising once approved; everything else is free.",
+  category: "About",
+  updated: "2026-06-01",
+  readingTime: "6 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "OpenFlights data",
+      note: "Source of the airport, airline, and route reference data (≈ 7,698 airports, ≈ 6,162 airlines, 67,663 routes captured June 2014) under ODbL v1.0",
+      venue: "openflights.org/data.php",
+      date: "Community-maintained",
+      url: "https://openflights.org/data.php",
+    },
+    {
+      id: 2,
+      label: "Vincenty (1975)",
+      note: "Iterative geodesic-distance formula on the ellipsoid — Survey Review XXIII (176), pp. 88–93",
+      venue: "NGS publication",
+      date: "April 1975",
+      url: "https://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf",
+    },
+    {
+      id: 3,
+      label: "NGA.STND.0036_1.0.0_WGS84",
+      note: "Reference ellipsoid (a = 6,378,137 m, 1/f = 298.257223563) underlying every distance the calculator returns",
+      venue: "NGA Standard, v1.0.0",
+      date: "July 2014",
+      url: "https://earth-info.nga.mil/index.php?dir=wgs84&action=wgs84",
+    },
+    {
+      id: 4,
+      label: "DESNZ 2024 greenhouse-gas reporting conversion factors",
+      note: "Per-passenger-km kg CO₂e factors for three distance bands and four cabin classes, with the 1.9 × radiative-forcing uplift baked in",
+      venue: "UK Department for Energy Security and Net Zero",
+      date: "Published June 2024",
+      url: "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
+    },
+    {
+      id: 5,
+      label: "Sack (2010) — Jet lag",
+      note: "Clinical chronobiology review used for the jet-lag severity bands and recovery-rate estimates",
+      venue: "New England Journal of Medicine 362:440-447",
+      date: "February 2010",
+      url: "https://www.nejm.org/doi/full/10.1056/NEJMcp0909838",
+    },
+    {
+      id: 6,
+      label: "Google AdSense Publisher Policies",
+      note: "Bind us as a publisher — disclosure obligations, content restrictions, ad-placement rules",
+      venue: "Google",
+      date: "Continuously updated",
+      url: "https://support.google.com/adsense/answer/48182",
+    },
+  ]}
+/>
+
+<Lede>
+  AirMilesCalc is an independent, free-to-use tool that computes the
+  canonical numbers for any flight route — distance, block time, CO₂e by
+  cabin class, jet lag, fuel — from published formulas and open data.
+  Every figure traces back to a primary source. Hosting will be funded
+  by Google AdSense advertising once approved; the calculator and
+  content stay free regardless of whether ads are showing.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "3,000+",
+      label: "Commercial airports with IATA codes in the database",
+      source: "OpenFlights",
+    },
+    {
+      value: "0.5 mm",
+      label: "Distance precision on the Vincenty + WGS-84 path",
+      source: "Vincenty 1975",
+    },
+    {
+      value: "AdSense planned",
+      label: "Hosting will be funded by Google AdSense once approved — see /privacy",
+      source: "Disclosed",
+    },
+    {
+      value: "0",
+      label: "First-party trackers, fingerprinting, or behavioural profiling by AirMilesCalc itself",
+      source: "By policy",
+    },
+  ]}
+/>
+
+## What this calculator does
+
+AirMilesCalc returns precise geodesic distance, still-air block time,
+per-cabin CO₂-equivalent, and route metadata for any pair of commercial
+airports worldwide. The 3D globe visualises the great-circle path that
+aircraft actually fly, and every number traces back to a primary source
+published openly. Unlike most free distance tools, we use the
+ellipsoidal Vincenty formula on WGS-84 rather than the spherical
+Haversine approximation.
+
+<DataTable
+  caption="What AirMilesCalc returns for every route query"
+  source="AirMilesCalc API contract — see /methodology"
+  columns={["Output", "Source / formula", "Precision"]}
+  rows={[
+    ["Distance (km / mi / NM)", "Vincenty 1975 on WGS-84", "0.5 mm"],
+    ["Flight block time", "Distance ÷ 850 km/h + 30–50 min ground", "±10 % typical"],
+    ["CO₂e per cabin class", "DESNZ 2024 + 1.9 × RF uplift", "Fleet average"],
+    ["Bearing + cardinal direction", "Initial-azimuth great-circle formula", "1° rounded"],
+    ["Cruising altitude", "Distance-banded reference (FL250–FL410)", "Nominal"],
+    ["Jet-lag severity + recovery days", "Sack 2010 chronobiology, asymmetric rates", "Population mean"],
+    ["3D globe arc + animated aircraft", "globe.gl WebGL visualisation", "Visual only"],
+  ]}
+/>
+
+## Who this is for
+
+The audience spans consumer travel, corporate sustainability, education,
+and aviation hobbyism. The tool is deliberately scoped to one job —
+compute the canonical numbers for a route, fast, and explain them.
+Anyone who needs a fuller flight-management system, a regulated emission
+report, or live airline schedules is better served elsewhere.
+
+<DataTable
+  caption="Audiences and the best entry point for each"
+  source="Project usage analysis"
+  columns={["Audience", "Typical task", "Best entry point"]}
+  rows={[
+    ["Frequent flyers", "Mileage and route comparison", "Calculator on /"],
+    ["Travel planners", "Compare multi-stop itinerary distances", "/distance/[route]"],
+    ["Business travellers", "Block time + jet-lag for meeting timing", "Per-route Jet Lag section"],
+    ["Sustainability teams", "Per-cabin CO₂e for corporate reporting", "/methodology/defra-emission-factors"],
+    ["Educators and students", "Real-world geodesy and emissions math", "/methodology subpages"],
+    ["Aviation enthusiasts", "ULR routes, cruise speeds, globe view", "/learn/longest-flights-in-the-world"],
+    ["Corporate travel managers", "Distance for expense reports + carbon attribution", "Per-route CO₂ breakdown"],
+  ]}
+/>
+
+## Why we built this
+
+Most free flight-distance calculators online are either advertising-
+stuffed, require account creation, or use the spherical Haversine
+approximation that drifts by up to 0.5 % on long polar routes. We wanted
+one tool that did the math properly, published the formulas, and stayed
+free of the dark patterns common in the travel-data consumer web. Ads
+will fund hosting once AdSense is approved; the editorial product
+itself stays free of upsells regardless.
+
+<Callout type="note" term="Our commitments">
+  Free to use — every feature, no signup, no premium tier, no upsell.
+  Ad-supported (planned) — Google AdSense will fund hosting and ongoing
+  data work once the application is approved; the third-party disclosure
+  is in <a href="/privacy" className="text-blue-700 hover:underline">/privacy</a>.
+  First-party-clean — AirMilesCalc itself runs no analytics, no
+  fingerprinting, no behavioural profiling. Open methodology — every
+  constant has a citation and every formula is on <a href="/methodology" className="text-blue-700 hover:underline">/methodology</a>.
+  No data resale — your queries are not stored by us, aggregated, or
+  sold to anyone.
+</Callout>
+
+## Who runs this
+
+I'm **Sam K.**, the independent maintainer of AirMilesCalc. The project
+started as a personal habit of mine. I fly a lot &mdash; enough that
+&ldquo;how far am I from home right now?&rdquo; became the question I
+asked from most window seats, and enough that the annual mileage total
+turned into a quietly competitive number against the friends and family
+members who also rack up flights. The free distance tools I was using to
+answer those questions were either ad-cluttered, used the spherical
+Haversine approximation that drifts up to 0.5 % on long polar routes,
+or hid the good math behind a signup wall.
+
+<Callout type="note" term="Before the public site, there were three private tools">
+  A small script that printed Vincenty distance between any two IATA
+  codes. A spreadsheet that totalled every flight I&apos;d taken in a
+  year and broke down the CO&#8322; per cabin. A bookmark to a great-circle
+  map I opened from most window seats. The web app on this site is the
+  engine those three relied on, packaged so it stops being private.
+</Callout>
+
+So I built my own, and every design choice on the site reflects what I
+wanted from the tool myself. Vincenty geodesic precision because the
+spherical-approximation rounding felt sloppy on long routes; DEFRA 2024
+factors because the UK government&apos;s data was the cleanest source I
+could actually cite; no signup because I did not want to sign up to my
+own tool. The public version is the same engine I use &mdash; compute the
+distance between any two airports, see what that ticket emits, watch the
+great-circle arc on the globe.
+
+<Callout type="note" term="Why it&apos;s public">
+  Because the math is identical whether I&apos;m settling whose annual
+  mileage really won that year or you&apos;re working out the carbon
+  footprint of a trip you have not booked yet. The calculator is free,
+  signup-free, and the methodology is fully documented at{" "}
+  <a href="/methodology" className="text-blue-700 hover:underline">/methodology</a>
+  . If you also turn it into a personal habit, that is the whole point.
+</Callout>
+
+<Callout type="note" term="Contact and corrections">
+  For data-correction reports, partnership inquiries, methodology
+  questions, or anything else, the contact channel is at{" "}
+  <a href="/contact" className="text-blue-700 hover:underline">/contact</a>
+  . All correspondence is read; routine replies typically arrive within
+  48&ndash;72 hours, and statutory data-subject requests are answered
+  within the deadlines listed there.
+</Callout>
+
+<Callout type="definition" term="About the author">
+  AirMilesCalc is operated by Sam K., its independent maintainer, who
+  keeps a low public profile by choice. The trust anchor is the
+  correspondence channel at{" "}
+  <a href="/contact" className="text-blue-700 hover:underline">/contact</a>
+  &thinsp;&mdash;&thinsp; every email is read, every data-correction
+  request is investigated against the upstream source, and statutory
+  data-subject requests are answered within the deadlines on{" "}
+  <a href="/privacy" className="text-blue-700 hover:underline">/privacy</a>
+  . The codebase, the formulas, the content, and the data pipelines
+  have one human author. First drafts are sometimes AI-assisted to
+  accelerate writing, but every factual claim is verified against the
+  primary source cited inline before publication &mdash; the
+  &lsquo;verified-or-omitted&rsquo; rule on the methodology pages is
+  enforced manually, and no paragraph ships without an editor's pass.
+</Callout>
+
+## How to use the calculator
+
+<Steps>
+  <Step n={1} title="Enter the origin airport">
+    Type the city name, the airport name, or the three-letter IATA
+    code. The autocomplete searches across all three fields and
+    prioritises exact IATA matches.
+  </Step>
+  <Step n={2} title="Enter the destination airport">
+    Repeat the search for the arrival airport. The 3D globe updates as
+    soon as both endpoints are selected so you can preview the great-
+    circle path before computing.
+  </Step>
+  <Step n={3} title="Pick a cabin class">
+    Economy is the default — the CO₂ figure scales by the DESNZ cabin
+    multipliers (1.0 × economy through 4.0 × first). You can change
+    this later without recomputing the geometry.
+  </Step>
+  <Step n={4} title="Calculate and review">
+    The results page returns distance in three units, block time, CO₂e
+    by class, bearing, jet-lag estimate, fuel, and the animated globe.
+    Every figure links back to the formula on /methodology.
+  </Step>
+</Steps>
+
+## Limitations and disclaimer
+
+AirMilesCalc provides decision-support estimates, not flight plans or
+regulated disclosures. Distances are geodesic great-circle paths; actual
+flown paths bend around airspace and oceanic tracks; individual flights
+diverge from fleet-average emission factors. The seven important caveats
+are consolidated below.
+
+<Callout type="warning" term="Not a substitute for professional sources">
+  For corporate carbon disclosure (UK SECR, EU CSRD, US SEC climate
+  rules) use the official factor sets directly. For aviation flight
+  planning use a certified flight-management system. For live schedules
+  use an airline or aggregator API. Our role is fast, transparent,
+  citable reference numbers — not regulated output.
+</Callout>
+
+<DataTable
+  caption="Known limitations of every number we publish"
+  source="See /methodology for the full discussion of each"
+  columns={["Number", "Limit", "Typical magnitude"]}
+  rows={[
+    ["Flight distance", "Great-circle path, not flown path", "Actual ≈ 1–4 % longer due to ATC / winds"],
+    ["Block time", "Still-air, no jet stream modelled", "±10 % typical, ±60 min on transatlantic"],
+    ["CO₂e per cabin", "DESNZ fleet-weighted UK average", "Individual flight may differ ±20 %"],
+    ["Cabin multipliers", "Allocated by floor area, not measurement", "Convention, not physics"],
+    ["Airport coordinates", "OpenFlights community-maintained snapshot", "Periodic, not live"],
+    ["Route table", "OpenFlights routes.dat, June 2014 final feed", "Topology only, not current schedule"],
+    ["Jet-lag recovery", "Population mean from Sack 2010", "Individual variation 0.5 × – 2 ×"],
+  ]}
+/>
+
+<FAQ
+  items={[
+    {
+      q: "Is AirMilesCalc really free?",
+      a: "Yes — every feature is free with no signup, no premium tier, and no upsell. Hosting will be funded by Google AdSense advertising once approved; the calculator and content stay free regardless of which ads, if any, you see in future.",
+    },
+    {
+      q: "Do you track searches or store query history?",
+      a: "AirMilesCalc itself does not — calculations are processed server-side against a local SQLite database and nothing about the query is persisted. Third-party Google AdSense (when enabled) does set cookies for ad serving, frequency capping, and fraud prevention; full disclosure is at /privacy.",
+    },
+    {
+      q: "Can I cite AirMilesCalc in academic or corporate work?",
+      a: "Yes — the formulas and primary sources are documented at /methodology and its subpages, suitable for academic citation. Reference the methodology page rather than a specific query result, since dynamic outputs change as the database updates.",
+    },
+    {
+      q: "Why use Vincenty over Haversine?",
+      a: "Haversine treats Earth as a sphere and accumulates up to 0.5 % error on long polar routes — about 40 km on a London-Tokyo flight. Vincenty solves the ellipsoidal geodesic to sub-millimetre precision and is the industry standard for aviation distance. See /methodology/vincenty-formula for the full algorithm.",
+    },
+    {
+      q: "How do I report incorrect data?",
+      a: "Email info@airmilescalc.com with the airport IATA codes, the specific data you believe is wrong, and a primary-source citation for the correct value. Airport data is sourced from OpenFlights and updated periodically; corrections feed back upstream where appropriate.",
+    },
+    {
+      q: "Do you have an API?",
+      a: "There is a public POST /api/calculate endpoint that returns the same JSON the web UI uses. We do not publish rate-limit guarantees and may add throttling in the future; bulk users should email first.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  heading="Where to go next"
+  links={[
+    {
+      href: "/methodology",
+      title: "Methodology and primary sources",
+      description:
+        "Every formula, constant, and citation behind AirMilesCalc.",
+    },
+    {
+      href: "/learn",
+      title: "Learn",
+      description:
+        "Plain-English deep dives — longest flights, busiest airports, jet-lag science, SAF, CORSIA, more.",
+    },
+    {
+      href: "/airports",
+      title: "Airport directory",
+      description:
+        "Browse the full database of commercial airports with IATA codes.",
+    },
+    {
+      href: "/distance/jfk-to-lhr",
+      title: "Sample route: JFK → LHR",
+      description:
+        "A worked example of every number our calculator returns.",
+    },
+    {
+      href: "/privacy",
+      title: "Privacy policy",
+      description:
+        "Exactly what we collect, what AdSense collects, and the worldwide opt-out paths.",
+    },
+    {
+      href: "/contact",
+      title: "Contact",
+      description:
+        "Email, response time, GDPR / CCPA request deadlines.",
+    },
+  ]}
+/>

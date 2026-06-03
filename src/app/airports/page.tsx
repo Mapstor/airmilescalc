@@ -1,15 +1,24 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getCountriesWithAirports, getStats, getTopAirportsByRouteCount } from '@/lib/queries';
+import AirportDirectorySearch from '@/components/airports/AirportDirectorySearch';
+import { slugify } from '@/lib/slug';
+import { displayCountryName } from '@/lib/country';
+import { InternalLinks, Sources, Lede } from '@/components/content/blocks';
+import { ogImageMeta, twitterMeta } from '@/lib/og';
 
 export const metadata: Metadata = {
-  title: 'All Airports',
-  description: 'Browse airports worldwide by country. Find airport codes, locations, and calculate flight distances.',
+  title: 'Airport directory',
+  description: 'Browse 3,000+ commercial airports worldwide by country. IATA / ICAO codes, coordinates, route counts, and direct links to per-airport distance and CO₂ pages.',
   alternates: { canonical: '/airports' },
   openGraph: {
-    title: 'Airport Directory - AirMilesCalc',
-    description: 'Browse 3,000+ airports worldwide by country. Find IATA codes, locations, and calculate flight distances.',
+    title: 'Airport directory — AirMilesCalc',
+    description: 'Browse 3,000+ commercial airports worldwide by country, with IATA codes and route counts.',
+    url: '/airports',
+    type: 'website',
+    images: ogImageMeta({ title: 'Airport directory', subtitle: '3,000+ commercial airports worldwide, by country.', category: 'Airports' }),
   },
+  twitter: twitterMeta({ title: 'Airport directory', subtitle: '3,000+ commercial airports worldwide, by country.', category: 'Airports' }),
 };
 
 const continents = [
@@ -61,7 +70,9 @@ export default function AirportsPage() {
 
   // Group countries by first letter
   const groupedCountries = countries.reduce((acc, country) => {
-    const letter = country.country[0].toUpperCase();
+    // Group by the canonical display name's first letter so e.g. "North
+    // Macedonia" lives under "N" not "M".
+    const letter = displayCountryName(country.country)[0]?.toUpperCase() ?? '#';
     if (!acc[letter]) acc[letter] = [];
     acc[letter].push(country);
     return acc;
@@ -82,10 +93,37 @@ export default function AirportsPage() {
     })),
   };
 
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://airmilescalc.com' },
+      { '@type': 'ListItem', position: 2, name: 'Airports', item: 'https://airmilescalc.com/airports' },
+    ],
+  };
+
+  const collectionPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Airport directory',
+    description: 'Browse 3,000+ commercial airports worldwide by country, with IATA codes and route counts.',
+    url: 'https://airmilescalc.com/airports',
+    inLanguage: 'en',
+    isPartOf: { '@type': 'WebSite', name: 'AirMilesCalc', url: 'https://airmilescalc.com' },
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
-        {/* FAQ JSON-LD */}
+        {/* JSON-LD schemas */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -94,15 +132,15 @@ export default function AirportsPage() {
         {/* Breadcrumb */}
         <nav className="text-sm mb-6">
           <ol className="flex items-center gap-2 text-slate-600">
-            <li><Link href="/" className="hover:text-blue-600">Home</Link></li>
+            <li><Link href="/" className="hover:text-[#0B2447]">Home</Link></li>
             <li>/</li>
-            <li><span className="text-slate-900">Airports</span></li>
+            <li><span className="text-[#0B2447]">Airports</span></li>
           </ol>
         </nav>
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+          <h1 className="text-[24px] md:text-[28px] font-semibold text-[#0B2447] tracking-tight mb-2">
             All Airports
           </h1>
           <p className="text-lg text-slate-600">
@@ -110,30 +148,77 @@ export default function AirportsPage() {
           </p>
         </div>
 
+        <Lede>
+          Every commercial airport in the OpenFlights database, organised by
+          country, with a live IATA / city / name search. Each airport links
+          to a dedicated page showing routes, airlines, country context, and a
+          distance calculator pre-filled with that airport as origin.
+        </Lede>
+
+        <Sources
+          items={[
+            {
+              id: 1,
+              label: 'OpenFlights — Airports, airlines, and routes',
+              note: 'Open Database License (ODbL) v1.0; ~7,698 airports, ~6,162 airlines, 67,663 routes captured in the final third-party feed update of June 2014',
+              venue: 'openflights.org/data.php',
+              date: 'Community-maintained',
+              url: 'https://openflights.org/data.php',
+            },
+            {
+              id: 2,
+              label: 'IATA Airline Coding Directory',
+              note: 'Authoritative list of IATA two-letter airline codes and three-letter airport codes',
+              venue: 'International Air Transport Association',
+              date: 'Updated periodically',
+              url: 'https://www.iata.org/en/publications/directories/code-search/',
+            },
+            {
+              id: 3,
+              label: 'ICAO Doc 7910 — Location Indicators',
+              note: 'Authoritative list of four-letter ICAO location indicators for aerodromes worldwide',
+              venue: 'International Civil Aviation Organization',
+              date: 'Updated quarterly',
+              url: 'https://www.icao.int/safety/OPS/OPS-Section/Pages/doc7910.aspx',
+            },
+            {
+              id: 4,
+              label: 'ACI World — Top 20 busiest airports',
+              note: 'Annual passenger-traffic ranking; ATL led 2023 with 104.6 M passengers',
+              venue: 'Airports Council International',
+              date: 'July 2024 (for 2023 data)',
+              url: 'https://aci.aero/2024/07/16/top-20-busiest-airports-in-the-world-confirmed-by-aci-world/',
+            },
+          ]}
+        />
+
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.airports.toLocaleString()}</div>
+          <div className="bg-white rounded-md border border-slate-200 p-4 text-center">
+            <div className="text-[22px] font-semibold text-[#0B2447] font-mono tabular-nums leading-none">{stats.airports.toLocaleString()}</div>
             <div className="text-sm text-slate-600">Airports</div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{countries.length}</div>
+          <div className="bg-white rounded-md border border-slate-200 p-4 text-center">
+            <div className="text-[22px] font-semibold text-[#0B2447] font-mono tabular-nums leading-none">{countries.length}</div>
             <div className="text-sm text-slate-600">Countries</div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.routes.toLocaleString()}</div>
+          <div className="bg-white rounded-md border border-slate-200 p-4 text-center">
+            <div className="text-[22px] font-semibold text-[#0B2447] font-mono tabular-nums leading-none">{stats.routes.toLocaleString()}</div>
             <div className="text-sm text-slate-600">Routes</div>
           </div>
         </div>
 
+        {/* Live airport search (client-side, hits /api/airports/search) */}
+        <AirportDirectorySearch />
+
         {/* Letter Navigation */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-8">
+        <div className="bg-white rounded-md border border-slate-200 p-4 mb-8">
           <div className="flex flex-wrap gap-2">
             {letters.map(letter => (
               <a
                 key={letter}
                 href={`#${letter}`}
-                className="w-8 h-8 flex items-center justify-center rounded bg-slate-100 hover:bg-blue-100 hover:text-blue-700 text-sm font-medium transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded bg-slate-100 hover:bg-[#EEF2F7] hover:text-[#0B2447] text-sm font-medium transition-colors"
               >
                 {letter}
               </a>
@@ -142,8 +227,8 @@ export default function AirportsPage() {
         </div>
 
         {/* Intro Text */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">About This Airport Directory</h2>
+        <div className="bg-white rounded-md border border-slate-200 p-6 mb-8">
+          <h2 className="text-[16px] font-semibold text-[#0B2447] tracking-tight mb-3">About This Airport Directory</h2>
           <div className="space-y-4 text-slate-700 leading-relaxed">
             <p>
               Welcome to the AirMilesCalc global airport directory. This page catalogues every commercial airport in our database,
@@ -153,7 +238,7 @@ export default function AirportsPage() {
             </p>
             <p>
               The underlying data comes from the{' '}
-              <a href="https://openflights.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              <a href="https://openflights.org/" target="_blank" rel="noopener noreferrer" className="text-[#0B2447] hover:underline underline-offset-2 font-medium">
                 OpenFlights
               </a>{' '}
               open-data project, which compiles airport records from public aviation sources worldwide. Each
@@ -171,8 +256,8 @@ export default function AirportsPage() {
         </div>
 
         {/* Top 20 Busiest Airports */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-1">Top 20 Busiest Airports by Destinations</h2>
+        <div className="bg-white rounded-md border border-slate-200 p-6 mb-8">
+          <h2 className="text-[16px] font-semibold text-[#0B2447] tracking-tight mb-1">Top 20 Busiest Airports by Destinations</h2>
           <p className="text-sm text-slate-500 mb-4">Ranked by number of unique route destinations served</p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
@@ -196,15 +281,15 @@ export default function AirportsPage() {
                     <td className="py-2 pr-3">
                       <Link
                         href={`/airport/${entry.airport.iata.toLowerCase()}`}
-                        className="text-blue-600 hover:underline font-medium"
+                        className="text-[#0B2447] hover:underline underline-offset-2 font-medium font-medium"
                       >
                         {entry.airport.name}
                       </Link>
                     </td>
                     <td className="py-2 pr-3 font-mono text-slate-700">{entry.airport.iata.toUpperCase()}</td>
                     <td className="py-2 pr-3 text-slate-700">{entry.airport.city}</td>
-                    <td className="py-2 pr-3 text-slate-700">{entry.airport.country}</td>
-                    <td className="py-2 pl-3 text-right font-semibold text-slate-900">{entry.route_count}</td>
+                    <td className="py-2 pr-3 text-slate-700">{displayCountryName(entry.airport.country)}</td>
+                    <td className="py-2 pl-3 text-right font-semibold text-[#0B2447]">{entry.route_count}</td>
                   </tr>
                 ))}
               </tbody>
@@ -214,21 +299,21 @@ export default function AirportsPage() {
 
         {/* Airports by Continent */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-4">Airports by Continent</h2>
+          <h2 className="text-[16px] font-semibold text-[#0B2447] tracking-tight mb-4">Airports by Continent</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {continents.map((continent) => (
               <div
                 key={continent.name}
-                className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow"
+                className="bg-white rounded-md border border-slate-200 p-4 hover:border-[#0B2447]/40 hover:bg-stone-50 transition-colors"
               >
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">{continent.name}</h3>
+                <h3 className="text-[15px] font-semibold text-[#0B2447] tracking-tight mb-2">{continent.name}</h3>
                 <div className="flex gap-6 text-sm text-slate-600">
                   <div>
-                    <span className="text-2xl font-bold text-blue-600 block">{continent.countries.toLocaleString()}</span>
+                    <span className="text-[22px] font-semibold text-[#0B2447] font-mono tabular-nums leading-none block">{continent.countries.toLocaleString()}</span>
                     Countries
                   </div>
                   <div>
-                    <span className="text-2xl font-bold text-blue-600 block">~{continent.airports.toLocaleString()}</span>
+                    <span className="text-[22px] font-semibold text-[#0B2447] font-mono tabular-nums leading-none block">~{continent.airports.toLocaleString()}</span>
                     Airports
                   </div>
                 </div>
@@ -238,8 +323,8 @@ export default function AirportsPage() {
         </div>
 
         {/* Airport Hub Types */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">Airport Hub Types</h2>
+        <div className="bg-white rounded-md border border-slate-200 p-6 mb-8">
+          <h2 className="text-[16px] font-semibold text-[#0B2447] tracking-tight mb-2">Airport Hub Types</h2>
           <div className="space-y-4 text-slate-700 leading-relaxed mb-5">
             <p>
               Airports are classified into hub types based on the volume of connections they handle and the
@@ -261,25 +346,25 @@ export default function AirportsPage() {
               </thead>
               <tbody>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  <td className="py-2 pr-3 text-slate-900 font-medium">Primary Hub</td>
+                  <td className="py-2 pr-3 text-[#0B2447] font-medium">Primary Hub</td>
                   <td className="py-2 pr-3 text-slate-700">Major connection point for one or more airlines</td>
                   <td className="py-2 pr-3 text-slate-700">100+ destinations</td>
-                  <td className="py-2 pr-3 font-mono text-blue-600">ATL, LHR, DXB</td>
+                  <td className="py-2 pr-3 font-mono text-[#0B2447]">ATL, LHR, DXB</td>
                 </tr>
                 <tr className="border-b border-slate-100 bg-white">
-                  <td className="py-2 pr-3 text-slate-900 font-medium">Secondary Hub</td>
+                  <td className="py-2 pr-3 text-[#0B2447] font-medium">Secondary Hub</td>
                   <td className="py-2 pr-3 text-slate-700">Regional connection serving a geographic area</td>
                   <td className="py-2 pr-3 text-slate-700">50&ndash;100 destinations</td>
-                  <td className="py-2 pr-3 font-mono text-blue-600">CLT, MUC, DOH</td>
+                  <td className="py-2 pr-3 font-mono text-[#0B2447]">CLT, MUC, DOH</td>
                 </tr>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  <td className="py-2 pr-3 text-slate-900 font-medium">Focus City</td>
+                  <td className="py-2 pr-3 text-[#0B2447] font-medium">Focus City</td>
                   <td className="py-2 pr-3 text-slate-700">Significant airline operations without full hub status</td>
                   <td className="py-2 pr-3 text-slate-700">30&ndash;50 destinations</td>
-                  <td className="py-2 pr-3 font-mono text-blue-600">AUS, BHX</td>
+                  <td className="py-2 pr-3 font-mono text-[#0B2447]">AUS, BHX</td>
                 </tr>
                 <tr className="border-b border-slate-100 bg-white">
-                  <td className="py-2 pr-3 text-slate-900 font-medium">Regional Airport</td>
+                  <td className="py-2 pr-3 text-[#0B2447] font-medium">Regional Airport</td>
                   <td className="py-2 pr-3 text-slate-700">Serves the local market with limited connections</td>
                   <td className="py-2 pr-3 text-slate-700">&lt;30 destinations</td>
                   <td className="py-2 pr-3 text-slate-500">&mdash;</td>
@@ -293,7 +378,7 @@ export default function AirportsPage() {
               href="https://www.faa.gov/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
+              className="text-[#0B2447] hover:underline underline-offset-2 font-medium"
             >
               FAA
             </a>{' '}
@@ -302,8 +387,8 @@ export default function AirportsPage() {
         </div>
 
         {/* Airport Runway Facts */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">Airport Runway Facts</h2>
+        <div className="bg-white rounded-md border border-slate-200 p-6 mb-8">
+          <h2 className="text-[16px] font-semibold text-[#0B2447] tracking-tight mb-2">Airport Runway Facts</h2>
           <div className="space-y-4 text-slate-700 leading-relaxed mb-5">
             <p>
               Airport runways vary enormously in length, elevation, and throughput depending on geography,
@@ -324,27 +409,27 @@ export default function AirportsPage() {
               </thead>
               <tbody>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  <td className="py-2 pr-3 text-slate-900 font-medium">Highest airport</td>
+                  <td className="py-2 pr-3 text-[#0B2447] font-medium">Highest airport</td>
                   <td className="py-2 pr-3 text-slate-700">El Alto, La Paz</td>
-                  <td className="py-2 pr-3 font-mono text-blue-600">LPB</td>
+                  <td className="py-2 pr-3 font-mono text-[#0B2447]">LPB</td>
                   <td className="py-2 pr-3 text-slate-700">4,061 m / 13,323 ft elevation</td>
                 </tr>
                 <tr className="border-b border-slate-100 bg-white">
-                  <td className="py-2 pr-3 text-slate-900 font-medium">Lowest airport</td>
+                  <td className="py-2 pr-3 text-[#0B2447] font-medium">Lowest airport</td>
                   <td className="py-2 pr-3 text-slate-700">Bar Yehuda (Dead Sea)</td>
-                  <td className="py-2 pr-3 font-mono text-blue-600">MTZ</td>
+                  <td className="py-2 pr-3 font-mono text-[#0B2447]">MTZ</td>
                   <td className="py-2 pr-3 text-slate-700">-389 m / -1,276 ft elevation</td>
                 </tr>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  <td className="py-2 pr-3 text-slate-900 font-medium">Longest runway</td>
+                  <td className="py-2 pr-3 text-[#0B2447] font-medium">Longest runway</td>
                   <td className="py-2 pr-3 text-slate-700">Qamdo Bamda</td>
-                  <td className="py-2 pr-3 font-mono text-blue-600">BPX</td>
+                  <td className="py-2 pr-3 font-mono text-[#0B2447]">BPX</td>
                   <td className="py-2 pr-3 text-slate-700">5,500 m / 18,045 ft</td>
                 </tr>
                 <tr className="border-b border-slate-100 bg-white">
-                  <td className="py-2 pr-3 text-slate-900 font-medium">Busiest single runway</td>
+                  <td className="py-2 pr-3 text-[#0B2447] font-medium">Busiest single runway</td>
                   <td className="py-2 pr-3 text-slate-700">London Gatwick</td>
-                  <td className="py-2 pr-3 font-mono text-blue-600">LGW</td>
+                  <td className="py-2 pr-3 font-mono text-[#0B2447]">LGW</td>
                   <td className="py-2 pr-3 text-slate-700">~55 movements/hour</td>
                 </tr>
               </tbody>
@@ -356,7 +441,7 @@ export default function AirportsPage() {
               href="https://aci.aero/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
+              className="text-[#0B2447] hover:underline underline-offset-2 font-medium"
             >
               ACI World
             </a>{' '}
@@ -365,8 +450,8 @@ export default function AirportsPage() {
         </div>
 
         {/* Understanding Airport Codes */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">Understanding Airport Codes</h2>
+        <div className="bg-white rounded-md border border-slate-200 p-6 mb-8">
+          <h2 className="text-[16px] font-semibold text-[#0B2447] tracking-tight mb-2">Understanding Airport Codes</h2>
           <div className="space-y-4 text-slate-700 leading-relaxed mb-5">
             <p>
               Two coding systems are used to identify airports globally. <strong>IATA codes</strong> are three-letter
@@ -400,9 +485,9 @@ export default function AirportsPage() {
                     key={row.iata}
                     className={`border-b border-slate-100 ${index % 2 === 0 ? 'bg-slate-50' : 'bg-white'}`}
                   >
-                    <td className="py-2 pr-3 text-slate-900 font-medium">{row.airport}</td>
+                    <td className="py-2 pr-3 text-[#0B2447] font-medium">{row.airport}</td>
                     <td className="py-2 pr-3 text-slate-700">{row.city}</td>
-                    <td className="py-2 pr-3 font-mono text-blue-600 font-semibold">{row.iata}</td>
+                    <td className="py-2 pr-3 font-mono text-[#0B2447] font-semibold">{row.iata}</td>
                     <td className="py-2 pr-3 font-mono text-slate-700">{row.icao}</td>
                   </tr>
                 ))}
@@ -415,18 +500,19 @@ export default function AirportsPage() {
         <div className="space-y-8">
           {letters.map(letter => (
             <section key={letter} id={letter}>
-              <h2 className="text-2xl font-bold text-slate-900 mb-4 pb-2 border-b border-slate-200">
+              <h2 className="text-[20px] font-semibold text-[#0B2447] tracking-tight mb-4 pb-2 border-b border-slate-200">
                 {letter}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {groupedCountries[letter].map(country => (
-                  <div
+                  <Link
                     key={country.country}
-                    className="bg-white rounded-lg border border-slate-200 p-4"
+                    href={`/airports/${slugify(country.country)}`}
+                    className="bg-white rounded-md border border-slate-200 p-3.5 hover:border-[#0B2447]/40 hover:bg-stone-50 transition-colors"
                   >
-                    <div className="font-medium text-slate-900">{country.country}</div>
+                    <div className="font-medium text-[#0B2447]">{displayCountryName(country.country)}</div>
                     <div className="text-sm text-slate-500">{country.count} airports</div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </section>
@@ -434,56 +520,33 @@ export default function AirportsPage() {
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 mt-12 mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-6">Frequently Asked Questions</h2>
+        <div className="bg-white rounded-md border border-slate-200 p-6 mt-12 mb-8">
+          <h2 className="text-[16px] font-semibold text-[#0B2447] tracking-tight mb-6">Frequently Asked Questions</h2>
           <div className="space-y-6">
             {faqItems.map((item, index) => (
               <div key={index} className={index < faqItems.length - 1 ? 'pb-6 border-b border-slate-100' : ''}>
-                <h3 className="text-base font-semibold text-slate-900 mb-2">{item.question}</h3>
+                <h3 className="text-base font-semibold text-[#0B2447] mb-2">{item.question}</h3>
                 <p className="text-sm text-slate-600 leading-relaxed">{item.answer}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Interlinking Block */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-4">Explore More</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Link
-              href="/"
-              className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md hover:border-blue-200 transition-all"
-            >
-              <h3 className="font-semibold text-slate-900 mb-1">Distance Calculator</h3>
-              <p className="text-sm text-slate-600">Calculate air miles and flight distances between any two airports.</p>
-            </Link>
-            <Link
-              href="/about"
-              className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md hover:border-blue-200 transition-all"
-            >
-              <h3 className="font-semibold text-slate-900 mb-1">About AirMilesCalc</h3>
-              <p className="text-sm text-slate-600">Learn how we calculate distances and where our data comes from.</p>
-            </Link>
-            <Link
-              href="/contact"
-              className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md hover:border-blue-200 transition-all"
-            >
-              <h3 className="font-semibold text-slate-900 mb-1">Contact Us</h3>
-              <p className="text-sm text-slate-600">Report a data issue or suggest a feature for our airport tools.</p>
-            </Link>
-            <Link
-              href="/about"
-              className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md hover:border-blue-200 transition-all"
-            >
-              <h3 className="font-semibold text-slate-900 mb-1">Our Methodology</h3>
-              <p className="text-sm text-slate-600">Learn how we calculate distances with the Vincenty formula.</p>
-            </Link>
-          </div>
-        </div>
+        <InternalLinks
+          heading="Where to go next"
+          links={[
+            { href: '/', title: 'Distance calculator', description: 'Compute air miles, flight time, and CO₂ between any two airports.' },
+            { href: '/methodology', title: 'Methodology & sources', description: 'Vincenty, WGS-84, DEFRA 2024, Lee 2021 — every formula and primary source.' },
+            { href: '/learn/busiest-airports-in-the-world', title: "World's busiest airports", description: 'ACI World 2023 top ten with passenger numbers — Atlanta at 104.6 M leads.' },
+            { href: '/learn/longest-flights-in-the-world', title: "World's longest flights", description: 'SQ23 SIN → JFK at 15,349 km and the rest of the ultra-long-haul top ten.' },
+            { href: '/learn/airline-alliances', title: 'Airline alliances', description: 'Star, oneworld, SkyTeam — member rosters, hubs, and benefits.' },
+            { href: '/learn', title: 'Learn — full index', description: 'Deep dives on aviation operations, emissions, and travel science.' },
+          ]}
+        />
 
         {/* External Links / References */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-3">External References</h2>
+        <div className="bg-white rounded-md border border-slate-200 p-6 mb-8">
+          <h2 className="text-[16px] font-semibold text-[#0B2447] tracking-tight mb-3">External References</h2>
           <p className="text-sm text-slate-600 mb-4">
             Official resources for airport codes and aviation data:
           </p>
@@ -493,7 +556,7 @@ export default function AirportsPage() {
                 href="https://www.iata.org/en/publications/directories/code-search/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-[#0B2447] hover:underline underline-offset-2 font-medium"
               >
                 IATA Airport Code Search
               </a>
@@ -504,7 +567,7 @@ export default function AirportsPage() {
                 href="https://www.icao.int/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-[#0B2447] hover:underline underline-offset-2 font-medium"
               >
                 ICAO (Doc 7910)
               </a>
@@ -515,7 +578,7 @@ export default function AirportsPage() {
                 href="https://openflights.org/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-[#0B2447] hover:underline underline-offset-2 font-medium"
               >
                 OpenFlights
               </a>
@@ -526,7 +589,7 @@ export default function AirportsPage() {
                 href="https://www.flightaware.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-[#0B2447] hover:underline underline-offset-2 font-medium"
               >
                 FlightAware
               </a>
@@ -537,7 +600,7 @@ export default function AirportsPage() {
                 href="https://www.flightradar24.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-[#0B2447] hover:underline underline-offset-2 font-medium"
               >
                 Flightradar24
               </a>
@@ -548,7 +611,7 @@ export default function AirportsPage() {
                 href="https://aci.aero/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-[#0B2447] hover:underline underline-offset-2 font-medium"
               >
                 ACI World
               </a>
@@ -559,7 +622,7 @@ export default function AirportsPage() {
                 href="https://www.faa.gov/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-[#0B2447] hover:underline underline-offset-2 font-medium"
               >
                 FAA
               </a>
@@ -570,7 +633,7 @@ export default function AirportsPage() {
                 href="https://www.eurocontrol.int/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-[#0B2447] hover:underline underline-offset-2 font-medium"
               >
                 Eurocontrol
               </a>

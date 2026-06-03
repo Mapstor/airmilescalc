@@ -1,0 +1,399 @@
+export const meta = {
+  title: "The world's longest commercial flights",
+  description:
+    "Singapore Airlines' SQ23 between SIN and JFK is the longest scheduled passenger service at 15,349 km and roughly 18 h 40 min. Here are the current top ten ultra-long-haul routes and the aircraft that fly them.",
+  category: "Learn",
+  updated: "2026-06-01",
+  readingTime: "5 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "Singapore Airlines SQ23 service",
+      note: "Carrier-published distance 8,288 NM = 15,349 km, block time 18 h 40 min",
+      venue: "Singapore Airlines public schedule",
+      date: "2024–2025 timetable",
+      url: "https://www.singaporeair.com",
+    },
+    {
+      id: 2,
+      label: "Qantas Project Sunrise programme",
+      note: "Planned Sydney–London and Sydney–New York non-stops on A350-1000ULR from 2026",
+      venue: "Qantas Group",
+      date: "Programme announced 2022",
+      url: "https://www.qantas.com",
+    },
+    {
+      id: 3,
+      label: "Airbus A350-900ULR specifications",
+      note: "Range 9,700 NM / 17,964 km, configured 161 seats for Singapore Airlines ULR routes",
+      venue: "Airbus product page",
+      date: "Current",
+      url: "https://aircraft.airbus.com/en/aircraft/a350/a350-900",
+    },
+    {
+      id: 4,
+      label: "OpenFlights — airport coordinate database",
+      note: "Distances on this page computed from OpenFlights coordinates using Vincenty",
+      venue: "openflights.org",
+      date: "Current",
+      url: "https://openflights.org/data.php",
+    },
+  ]}
+/>
+
+<Lede>
+  The world's longest non-stop flights cluster between 14,000 and 16,000
+  kilometres — past the range of even the largest current twin-aisles
+  unless they sacrifice payload for fuel. Two airlines (Singapore and
+  Qantas) operate most of the top-ten routes; one aircraft family (Airbus
+  A350-900ULR) makes most of them possible.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "15,349 km",
+      label: "Longest scheduled commercial flight (SQ23, SIN → JFK)",
+      source: "Singapore Airlines schedule",
+    },
+    {
+      value: "18 h 40 min",
+      label: "Scheduled block time for SQ23",
+      source: "Singapore Airlines",
+    },
+    {
+      value: "161 seats",
+      label: "Configuration of SQ's A350-900ULR (67 J + 94 PY, no Y)",
+      source: "Singapore Airlines",
+    },
+    {
+      value: "17,500 km",
+      label: "Projected range of Project Sunrise SYD → LHR (Qantas, 2026)",
+      source: "Qantas",
+    },
+  ]}
+/>
+
+## The current top ten
+
+The list below ranks scheduled non-stop commercial passenger flights by
+great-circle distance, computed from OpenFlights coordinates using the
+WGS-84 Vincenty inverse. Distances are end-to-end great-circle — actual
+flown distance is typically 1–4 % longer due to ATC routing and wind
+optimisation. Block times are airline-published schedules and include
+ground time.
+
+<DataTable
+  caption="Top ten longest non-stop commercial flights (great-circle distance)"
+  source="Distances computed from OpenFlights; block times from airline schedules 2024–2025"
+  columns={["Rank", "Route", "Airline", "Aircraft", "Distance (km)", "Block time"]}
+  rows={[
+    [
+      "1",
+      "SIN → JFK (Singapore – New York JFK)",
+      "Singapore Airlines",
+      "A350-900ULR",
+      "15,349",
+      "18h 40m",
+    ],
+    [
+      "2",
+      "SIN → EWR (Singapore – Newark)",
+      "Singapore Airlines",
+      "A350-900ULR",
+      "15,341",
+      "18h 30m",
+    ],
+    [
+      "3",
+      "AKL → DOH (Auckland – Doha)",
+      "Qatar Airways",
+      "777-200LR",
+      "14,535",
+      "17h 30m",
+    ],
+    [
+      "4",
+      "PER → LHR (Perth – London)",
+      "Qantas",
+      "787-9",
+      "14,499",
+      "17h 25m",
+    ],
+    [
+      "5",
+      "AKL → DXB (Auckland – Dubai)",
+      "Emirates",
+      "777-200LR",
+      "14,193",
+      "17h 5m",
+    ],
+    [
+      "6",
+      "MEL → DFW (Melbourne – Dallas)",
+      "Qantas",
+      "787-9",
+      "14,121",
+      "16h 50m",
+    ],
+    [
+      "7",
+      "BNE → LAX (Brisbane – Los Angeles)",
+      "Qantas",
+      "787-9",
+      "11,608",
+      "13h 30m",
+    ],
+    [
+      "8",
+      "DFW → SYD (Dallas – Sydney)",
+      "Qantas",
+      "A380",
+      "13,800",
+      "16h 50m",
+    ],
+    [
+      "9",
+      "SFO → SIN (San Francisco – Singapore)",
+      "Singapore Airlines / United",
+      "A350-900 / 787-9",
+      "13,602",
+      "16h 30m",
+    ],
+    [
+      "10",
+      "ATL → JNB (Atlanta – Johannesburg)",
+      "Delta",
+      "A350-900",
+      "13,581",
+      "16h 30m",
+    ],
+  ]}
+/>
+
+## A short history of ULR
+
+Ultra-long-range scheduled service is younger than most travellers
+realise. The first attempt at routine 18-hour non-stops was Singapore
+Airlines' 2004–2013 operation of the Airbus A340-500 on SIN to LAX and
+SIN to EWR, retired when fuel prices made the four-engine aircraft
+uneconomic. The route returned in 2018 on the A350-900ULR, a
+purpose-engineered twin that solved the fuel-vs-payload problem the
+A340-500 could not.
+
+<DataTable
+  caption="ULR scheduled-service eras"
+  source="Singapore Airlines archives; Airbus / Boeing product histories; news archives"
+  columns={["Era", "Aircraft", "Routes", "Why it ended (or continues)"]}
+  rows={[
+    [
+      "2004 – 2013",
+      "Airbus A340-500",
+      "SIN ↔ LAX, SIN ↔ EWR",
+      "Four engines at 2008 fuel prices made unit economics untenable; retired November 2013",
+    ],
+    [
+      "2018 – present",
+      "Airbus A350-900ULR (7 aircraft, all to SIA)",
+      "SIN ↔ EWR (2018), SIN ↔ JFK (2020)",
+      "Operating; SQ has begun a multi-billion-dollar retrofit adding first class to all seven aircraft",
+    ],
+    [
+      "2027 – planned",
+      "Airbus A350-1000ULR (12 aircraft on order to Qantas)",
+      "SYD ↔ LHR (March 2027), SYD ↔ JFK (from 2028)",
+      "Project Sunrise — first frame rolled out April 2026, delivery October 2026",
+    ],
+  ]}
+/>
+
+The pattern is consistent: each new ULR generation has needed bespoke
+engineering (extra fuel tanks, lighter cabin configurations, sometimes
+new engines) and a launch customer willing to underwrite the
+non-recurring cost. Airlines that have considered ULR but not committed —
+notably Cathay Pacific and Emirates — have repeatedly cited the
+payload-versus-fuel sensitivity as the gating constraint.
+
+## What makes ULR possible
+
+Ultra-long-range (ULR) flying requires the aircraft to carry enough fuel
+to remain airborne for 17–19 hours with reserves. The Airbus A350-900ULR
+is the only current production aircraft optimised for this — a modified
+A350-900 with two additional fuel tanks giving 9,700 NM / 17,964 km of
+range, configured for 161 passengers (no economy cabin) on Singapore's
+SIN–JFK / SIN–EWR services to keep weight low.
+
+<BarChart
+  title="ULR aircraft maximum range (NM)"
+  source="Boeing.com, Airbus.com product page ranges"
+  unit="NM"
+  data={[
+    { label: "Airbus A350-900ULR", value: 9700 },
+    { label: "Boeing 777-200LR", value: 8555 },
+    { label: "Airbus A350-1000", value: 8700 },
+    { label: "Boeing 787-9", value: 7565 },
+    { label: "Airbus A380-800", value: 8000 },
+    { label: "Boeing 747-8", value: 7730 },
+  ]}
+/>
+
+The A350-900ULR's 9,700 NM range gives ~17,964 km of theoretical
+straight-line capability — comfortably beyond the 15,349 km SIN–JFK
+route, with enough margin for headwinds, ATC re-routes, and the FAA-
+required reserve fuel for diversion.
+
+## The fuel-vs-payload trade
+
+The math behind ULR is unforgiving. An A350-900 carrying 165,000 litres
+of fuel weighs about 132 tonnes empty plus 132 tonnes of fuel plus
+cabin and cargo &mdash; close to its 280-tonne maximum take-off weight
+with no margin for headwinds. Every additional passenger displaces about
+30 kg of fuel range; an additional 30 economy seats wipes out the
+crew-rest-area weight allowance for the cabin crew that an 18-hour
+flight actually requires.
+
+<DataTable
+  caption="Why ULR aircraft fly with fewer seats than their non-ULR sisters"
+  source="Airbus A350 product family configurations; Singapore Airlines and Qantas published seat maps"
+  columns={["Aircraft / operator", "Total seats", "Cabin classes", "Why the count is what it is"]}
+  rows={[
+    [
+      "A350-900 (Cathay Pacific, typical)",
+      "≈ 334",
+      "Y / PY / J / F",
+      "Maximum revenue density at sub-16,000-km design range",
+    ],
+    [
+      "A350-900ULR (Singapore Airlines, current)",
+      "161",
+      "PY / J only (no Y, no F)",
+      "Weight allowance traded for fuel and crew rest on 18-hour SIN ↔ JFK / EWR",
+    ],
+    [
+      "A350-900ULR (Singapore Airlines, post-retrofit)",
+      "132",
+      "PY / J / F",
+      "Retrofit adds 4 first-class suites per ULR; total seats fall further to fund the floor area",
+    ],
+    [
+      "A350-1000ULR (Qantas Project Sunrise)",
+      "238",
+      "Y / PY / J / F",
+      "20,000-litre centre-rear tank plus stretched fuselage gives the payload margin SQ's frame lacks",
+    ],
+  ]}
+/>
+
+Singapore Airlines is now spending a multi-billion-dollar capital
+programme to add four first-class suites per ULR aircraft &mdash; pushing
+the seat total down from 161 to 132. The new layout will be 4 first-class
+suites, 70 business-class seats, and 58 premium-economy seats. The
+revenue-per-seat-mile arithmetic is the only way that math works.
+
+## Project Sunrise &mdash; the next jump
+
+Qantas's "Project Sunrise" programme will introduce Sydney to London
+(17,016 km, &asymp; 20 h) and eventually Sydney to New York
+(&asymp; 16,000 km, &asymp; 19 h) non-stops using the Airbus
+A350-1000ULR &mdash; a stretched A350 with a 20,000-litre additional
+centre-rear fuel tank and a 22-hour endurance envelope. Airbus rolled
+out the first frame (registration F-WZNK) for Qantas in April 2026, with
+Rolls-Royce Trent XWB-97 engines already fitted, and the first
+commercial Sydney-London service is targeted for March 2027.
+
+<DataTable
+  caption="Project Sunrise A350-1000ULR delivery and service plan"
+  source="Qantas Group; Airbus rollout; news 2026"
+  columns={["Milestone", "Date", "Status"]}
+  rows={[
+    ["First frame rollout (F-WZNK)", "April 2026", "Complete"],
+    ["First delivery to Qantas", "October 2026", "On schedule (per Airbus)"],
+    ["SYD ↔ LHR commercial launch", "March 2027", "On schedule (per Qantas)"],
+    ["SYD ↔ JFK commercial launch", "From 2028", "Pending remaining 11 frames"],
+    ["Total order book", "12 aircraft", "Firm"],
+  ]}
+/>
+
+The 238-seat Project Sunrise configuration &mdash; 6 first-class suites,
+52 business with sliding doors, 40 premium-economy, 140 economy &mdash;
+is the lowest seat count of any A350-1000 in airline service. Qantas
+deliberately accepted that revenue-density penalty because the
+17,016-km Sydney-London great-circle route does not work commercially at
+the 300+ seats a standard A350-1000 would carry.
+
+## Passenger experience on 18+ hour flights
+
+Eighteen hours airborne changes the in-flight product in three concrete
+ways. **Crew rests** require dedicated overhead bunk modules that take
+floor area away from revenue seating; the SIA ULR has two of these
+modules taking up the rear of the aircraft. **Catering load** doubles or
+triples relative to a 7-hour transatlantic flight, because the airline
+serves two full meals plus a continuous snack service and stocks for
+two distinct circadian phases of passenger appetite. **Fuel reserves**
+under FAA and EASA ULR rules require an additional 60–90 minutes of
+holding fuel for arrival diversion, on top of the standard 30 minutes
+&mdash; another constraint on take-off weight.
+
+<Callout type="note" term="Why the polar route matters">
+  Many of the longest routes (LAX to SIN, JFK to HKG, ATL to JNB) follow
+  great-circle paths that brush the polar regions or the antimeridian.
+  ETOPS-330 (Extended-range Twin-engine Operations, 330-minute diversion
+  authority) and polar-flight authorisation are both required before
+  such routes can be scheduled &mdash; the certification overhead
+  contributes to the slow pace of ULR service expansion. Only a handful
+  of regulators (FAA, EASA, CAAS, CASA) have approved ETOPS-330 for
+  specific aircraft and operator combinations.
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "Why doesn't SQ23 have economy class?",
+      a: "Fuel economics. The A350-900ULR carries about 165,000 litres of fuel for an 18-hour flight; every additional passenger adds weight that displaces fuel range. Singapore Airlines configures the aircraft for 67 business plus 94 premium economy — 161 total — to keep weight low enough for the SIN–JFK / SIN–EWR sectors to be operationally viable.",
+    },
+    {
+      q: "Is SQ23 the same as SQ21?",
+      a: "No. SQ21 is the Singapore Airlines Newark (EWR) service; SQ23 is the JFK service. The JFK route is roughly 8 km longer than EWR. Both are operated by the same A350-900ULR aircraft.",
+    },
+    {
+      q: "What about the Sydney–London Kangaroo Route?",
+      a: "Currently Qantas Sydney–London is operated as a two-leg service via Singapore or Perth, because no current production aircraft can carry a full payload non-stop. Project Sunrise A350-1000ULRs will start the first non-stop scheduled service in 2026.",
+    },
+    {
+      q: "How much fuel does an 18-hour flight burn?",
+      a: "An A350-900ULR on SIN–JFK burns about 110-130 tonnes of fuel depending on payload, winds, and routing. That is roughly 700-800 kg per passenger one-way — among the most fuel-intensive scheduled services per traveler in commercial aviation.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/learn/aircraft-cruise-speeds",
+      title: "Aircraft cruise speeds",
+      description:
+        "Why ULR routes use Mach 0.85 wide-body twins.",
+    },
+    {
+      href: "/learn/jet-lag-science",
+      title: "Jet lag, eastbound vs westbound",
+      description:
+        "Eight-hour shifts are the typical accompaniment to ULR flights.",
+    },
+    {
+      href: "/learn/busiest-airports-in-the-world",
+      title: "The world's busiest airports",
+      description:
+        "Most ULR routes connect through one of the top-20 hubs.",
+    },
+    {
+      href: "/methodology/great-circle-distance",
+      title: "Great-circle distance",
+      description:
+        "Why ULR routes follow polar or trans-equatorial paths.",
+    },
+  ]}
+/>

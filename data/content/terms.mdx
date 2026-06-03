@@ -1,0 +1,393 @@
+export const meta = {
+  title: "Terms of service",
+  description:
+    "What you can do with AirMilesCalc, how the OpenFlights ODbL license affects redistribution, the limitation of liability, the DMCA-style takedown route, and how Google AdSense advertising fits in.",
+  category: "Terms",
+  updated: "2026-06-01",
+  readingTime: "6 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "Open Database License (ODbL) v1.0",
+      note: "Governs the underlying airport, airline, and route data inherited from OpenFlights — Section 4 sets the attribution and share-alike obligations for any redistribution",
+      venue: "Open Knowledge Foundation / Open Data Commons",
+      date: "Published 19 June 2009",
+      url: "https://opendatacommons.org/licenses/odbl/1-0/",
+    },
+    {
+      id: 2,
+      label: "Consumer Rights Act 2015 (UK)",
+      note: "Section 49 sets the implied terms about quality and fitness of digital content provided to consumers in the UK",
+      venue: "UK Public General Acts",
+      date: "Effective 1 October 2015",
+      url: "https://www.legislation.gov.uk/ukpga/2015/15/contents",
+    },
+    {
+      id: 3,
+      label: "U.S. Digital Millennium Copyright Act, 17 U.S.C. §512",
+      note: "Safe-harbour framework for online service providers handling user-claimed copyright infringement",
+      venue: "U.S. Code via Cornell LII",
+      date: "Enacted 28 October 1998",
+      url: "https://www.law.cornell.edu/uscode/text/17/512",
+    },
+    {
+      id: 4,
+      label: "Google AdSense Publisher Policies",
+      note: "Sets the disclosure, content-restriction, and ad-placement obligations that bind us as an AdSense publisher",
+      venue: "Google",
+      date: "Continuously updated",
+      url: "https://support.google.com/adsense/answer/48182",
+    },
+    {
+      id: 5,
+      label: "U.S. Copyright Act §107 — Fair use",
+      note: "Statutory four-factor framework that governs whether a use of copyrighted material is permitted without permission",
+      venue: "U.S. Code via Cornell LII",
+      date: "Codified 1976; amended 1992",
+      url: "https://www.law.cornell.edu/uscode/text/17/107",
+    },
+  ]}
+/>
+
+<Lede>
+  These terms cover what you can and cannot do with the AirMilesCalc
+  website and the calculator output. They are written in plain English,
+  reflect the open-data license that binds the underlying airport
+  database, and disclaim the kinds of liability that no reasonable
+  free-to-use reference tool can credibly accept.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "$0",
+      label: "What you pay to use the calculator and every page on the site",
+      source: "By design",
+    },
+    {
+      value: "ODbL v1.0",
+      label: "License covering the underlying OpenFlights data — binds redistribution",
+      source: "Open Data Commons",
+    },
+    {
+      value: "MIT-style",
+      label: "Position on calculator output (the numbers you see) — yours to use",
+      source: "Project policy",
+    },
+    {
+      value: "30 days",
+      label: "Notice we will publish before any material terms change",
+      source: "Project policy",
+    },
+  ]}
+/>
+
+## License and ownership
+
+AirMilesCalc has two layers of intellectual property. The **website
+content** (prose, methodology pages, learn articles, source-code blocks,
+design) is original work by the project maintainer, licensed for personal,
+educational, and non-commercial use. The **underlying airport, airline,
+and route database** is sourced from OpenFlights and carries forward
+the Open Database License v1.0 — that license does not change when you
+get the data via our pages.
+
+<DataTable
+  caption="Who owns what, and how it can be redistributed"
+  source="ODbL v1.0; UK Copyright Designs and Patents Act 1988; project policy"
+  columns={["Element", "Author / source", "Your rights"]}
+  rows={[
+    [
+      "Methodology + learn articles",
+      "AirMilesCalc maintainer",
+      "Personal / educational use; cite for academic work; ask before commercial reuse",
+    ],
+    [
+      "Airport / airline / route data",
+      "OpenFlights contributors",
+      "Use under ODbL v1.0 — attribution + share-alike on derivative databases",
+    ],
+    [
+      "Calculator output (specific numbers)",
+      "Computed from open data + open formulas",
+      "Use freely; no proprietary claim on a specific distance",
+    ],
+    [
+      "Geodesic / CO₂ formulas",
+      "Public-domain math + UK government conversion factors",
+      "Use freely; cite when used in academic work",
+    ],
+    [
+      "Site code (open components)",
+      "AirMilesCalc maintainer (some MIT-style permissive)",
+      "Inspect / inspect-and-borrow; consult the repository for specific files",
+    ],
+    [
+      "OG image, logo, brand marks",
+      "AirMilesCalc maintainer",
+      "No use without permission",
+    ],
+  ]}
+/>
+
+## What you may do
+
+The site is designed to be useful, so the default disposition for
+ordinary use is permissive. **Linking** to AirMilesCalc from any external
+site is welcome without permission. **Sharing screenshots** of calculator
+output for personal, educational, or journalistic purposes is fine.
+**Citing the methodology** in research is fine and encouraged — please
+cite a /methodology subpage URL rather than a specific calculator query,
+because dynamic outputs may change as the database updates.
+
+<Callout type="note" term="Bulk use, embedding, and white-labeling">
+  Bulk programmatic access (above casual use of the public /api/calculate
+  endpoint), embedding the calculator on a third-party site, white-
+  labeling the API behind your own brand, or republishing the OpenFlights
+  data in derivative form all require a conversation. Email{" "}
+  <a
+    href="mailto:info@airmilescalc.com"
+    className="text-blue-700 hover:underline"
+  >
+    info@airmilescalc.com
+  </a>{" "}
+  before you build. We can usually accommodate — attribution requirements
+  under ODbL v1.0 still apply to the data layer in every case.
+</Callout>
+
+## What you may not do
+
+Five activities are out of scope no matter how small the scale: **scraping
+or automated harvesting** that interferes with normal site operation;
+**reverse-engineering** to claim AirMilesCalc&apos;s editorial output as your
+own; **republishing OpenFlights data** without ODbL-compliant attribution
+and share-alike on the derivative database; **using the site for any
+illegal purpose** under your local law; and **circumventing or tampering
+with** the Google AdSense advertising or the consent-management UI that
+funds the site.
+
+<Callout type="warning" term="Why we draw the line at the AdSense layer">
+  Tampering with the ad layer — blocking the consent banner from
+  appearing, modifying ad markup, or repackaging ad-served content
+  without the ads — breaches our publisher obligations to Google AdSense.
+  That can cost the site its monetization and therefore its hosting.
+  Adblockers used personally on your own browser are not in scope here;
+  what we exclude is republishing or embedding our content with the ad
+  layer scrubbed.
+</Callout>
+
+## Disclaimer of warranty and limitation of liability
+
+AirMilesCalc is a **decision-support reference tool**, not flight planning,
+not regulated emissions disclosure, not booked-itinerary verification.
+Distances are geodesic great-circle paths; real-flown paths bend around
+airspace; emission factors are fleet-wide averages with named uncertainty
+ranges. **No warranty** of fitness for a particular purpose is offered or
+implied beyond what the UK Consumer Rights Act 2015 §49 mandates.
+
+<DataTable
+  caption="Where this estimate is not enough — use the cited primary tool instead"
+  source="DESNZ guidance; ICAO Doc 9501; FAA advisory circulars"
+  columns={["Use case", "What to use instead"]}
+  rows={[
+    ["Audited corporate carbon disclosure (SECR, CSRD, SEC climate)", "DESNZ spreadsheet with your own activity data + GHG Protocol"],
+    ["Aviation flight-plan distance", "A certified flight-management system"],
+    ["Booked-itinerary verification", "The airline's confirmation system or an aggregator"],
+    ["Regulatory compliance reporting", "The relevant national regulator's tool"],
+    ["Legal proceedings, insurance claims", "Source documents from the operator(s)"],
+  ]}
+/>
+
+## DMCA and copyright concerns
+
+If you believe material on AirMilesCalc infringes a copyright you own,
+send a written notice under 17 U.S.C. §512(c)(3) to{" "}
+<a href="mailto:info@airmilescalc.com" className="text-blue-700 hover:underline">
+  info@airmilescalc.com
+</a>
+. A complete notice identifies the copyrighted work, the URL of the
+allegedly infringing material, your contact details, a good-faith
+statement that the use is unauthorised, and a statement under penalty
+of perjury that you are authorised to act on the owner&apos;s behalf.
+
+<Steps>
+  <Step n={1} title="Identify the work">
+    Provide enough detail that we can verify what is being claimed —
+    title, publication, URL of the original, or registration number where
+    available.
+  </Step>
+  <Step n={2} title="Identify the AirMilesCalc URL">
+    The specific page or asset URL on airmilescalc.com that you believe
+    infringes. Multiple URLs go in one notice.
+  </Step>
+  <Step n={3} title="Sign and send">
+    Include your name, address, phone (optional), email, and the two
+    statutory statements (good faith + authority). Email to the address
+    above with &ldquo;DMCA Notice&rdquo; in the subject.
+  </Step>
+  <Step n={4} title="Counter-notice route">
+    If material you posted has been taken down and you believe the notice
+    was mistaken, you may submit a counter-notice under 17 U.S.C.
+    §512(g) at the same address.
+  </Step>
+</Steps>
+
+## Third-party services and ads
+
+The site is funded by **Google AdSense** advertising. The Google AdSense
+Publisher Policies, the Google ads technologies policy, and any
+applicable consent regime (GDPR / UK GDPR / CCPA via the Funding Choices
+CMP) all bind your interaction with the ad layer. The non-ad parts of the
+site rely on three additional third-party services: **Vercel** for
+hosting, **OpenStreetMap + CARTO** for map tiles on country and airport
+pages, and the static **OpenFlights** dataset for reference data.
+
+<DataTable
+  caption="Third parties that participate in delivering the site"
+  source="See /privacy for the full data-flow disclosure"
+  columns={["Service", "Role", "Their terms"]}
+  rows={[
+    ["Google AdSense", "Advertising + Funding Choices CMP", "Google AdSense Publisher Policies"],
+    ["Vercel", "Hosting, edge runtime, server logs", "Vercel Terms of Service"],
+    ["OpenStreetMap + CARTO", "Map tile imagery", "OSM ODbL + CARTO terms"],
+    ["OpenFlights", "Reference data (static)", "Open Database License v1.0"],
+  ]}
+/>
+
+## Affiliate disclosure and independence
+
+AirMilesCalc has **zero affiliate relationships**. We earn no commission
+from airlines, online travel agencies, booking aggregators, comparison
+sites, GDS providers, ancillary-service vendors, or any other aviation
+or travel service. External links on the site to airlines, airports,
+regulators, and reference sites (IATA, ICAO, FAA, Eurocontrol, ACI,
+Google Flights, Flightradar24, FlightAware, SeatGuru, and similar) are
+provided for editorial context and reader convenience only.
+
+<Callout type="note" term="The independence position, in one sentence">
+  We are not affiliated with, sponsored by, or otherwise commercially
+  related to any airline, airport, booking site, regulator, or aviation
+  trade body. The methodology pages cite primary sources (DESNZ, NGA,
+  ICAO, IATA, ACI, OpenFlights, peer-reviewed papers) but the project
+  has no formal relationship with any of these organisations.
+</Callout>
+
+The **only** projected revenue source for AirMilesCalc is Google
+AdSense display advertising, which is not yet active &mdash; see the
+implementation status notice on <a href="/privacy" className="text-blue-700 hover:underline">/privacy</a>{" "}
+for the current state. There is no sponsored content, no paid
+placements, no advertorial coverage, no &ldquo;recommended by&rdquo;
+sections funded by a third party, and no money changes hands for the
+editorial choices on methodology or learn pages.
+
+<DataTable
+  caption="Relationships AirMilesCalc has and does not have"
+  source="Project policy"
+  columns={["Relationship type", "Status", "Disclosure if changed"]}
+  rows={[
+    [
+      "Affiliate or commission programmes",
+      "None",
+      "Would be disclosed on this page with effective date",
+    ],
+    [
+      "Sponsored content or advertorial",
+      "None",
+      "Would be labelled &ldquo;Sponsored&rdquo; per FTC / ASA conventions",
+    ],
+    [
+      "Paid editorial placements",
+      "None",
+      "Would breach the editorial process &mdash; would not be accepted",
+    ],
+    [
+      "Display advertising (planned)",
+      "Google AdSense, planned post-approval",
+      "Disclosed at /privacy with implementation status notice",
+    ],
+    [
+      "Donations or memberships",
+      "Not accepted",
+      "If introduced, donor list and amounts thresholds would be published",
+    ],
+    [
+      "Data partnerships with airlines / aggregators",
+      "None",
+      "Would be disclosed on this page",
+    ],
+  ]}
+/>
+
+The full editorial standards that back this independence position are
+documented at <a href="/editorial-process" className="text-blue-700 hover:underline">/editorial-process</a>.
+
+## Changes to these terms
+
+These terms are not the kind of contract that needs constant tweaking,
+but they will evolve. **Material changes** (new restrictions, changed
+limitation-of-liability scope, modified license claims) will be
+preceded by 30 days&apos; notice published on this page and referenced
+from the change log. **Editorial fixes** (typos, clarifications, link
+updates) can be made without notice.
+
+<FAQ
+  items={[
+    {
+      q: "Can I screenshot calculator results and post them on social media?",
+      a: "Yes — personal, educational, and journalistic sharing of screenshots is fine and welcomed. Attribution back to airmilescalc.com is appreciated but not required for casual sharing. For volume sharing or commercial use, email first.",
+    },
+    {
+      q: "Can I scrape airport and route data for my project?",
+      a: "Use OpenFlights directly at openflights.org/data.php — the source is open under ODbL v1.0 and they host the canonical data files. Scraping AirMilesCalc pages to extract that same data interferes with our site operation and violates the spirit of using the open source. The ODbL terms apply either way.",
+    },
+    {
+      q: "Can I cite AirMilesCalc in academic research?",
+      a: "Yes. Cite the methodology page URL (e.g., /methodology/vincenty-formula) rather than a calculator query — dynamic outputs change as the database updates. Use the canonical primary sources listed in our Sources blocks as your underlying references where possible.",
+    },
+    {
+      q: "What happens if I find a bug that gives a wrong distance?",
+      a: "Email info@airmilescalc.com with the IATA codes and the value we returned. We investigate, fix the issue (which usually means correcting upstream OpenFlights data), and republish. No compensation is offered for incorrect output — these are reference estimates.",
+    },
+    {
+      q: "Is there a copy of these terms preserved as I read them now?",
+      a: "Yes — the page is version-stamped at the top with a last-updated date. Material changes are preceded by 30 days' notice; if you need a snapshot for a contract or audit, save a PDF of the current version and we can confirm in writing what terms applied on a given date.",
+    },
+    {
+      q: "Which law governs these terms?",
+      a: "Disputes are governed by the law of the maintainer's jurisdiction of residence. Where you are a consumer in the UK, EU, or another jurisdiction with mandatory consumer-protection rules, those rules apply on top of and override anything in these terms that would otherwise reduce your statutory rights.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  heading="Related"
+  links={[
+    {
+      href: "/privacy",
+      title: "Privacy policy",
+      description:
+        "Detailed disclosure of every data flow, cookie, and third-party service.",
+    },
+    {
+      href: "/contact",
+      title: "Contact",
+      description:
+        "Email channel, response-time policy, DMCA notice address.",
+    },
+    {
+      href: "/about",
+      title: "About",
+      description:
+        "Project identity, who runs it, why it exists.",
+    },
+    {
+      href: "/methodology",
+      title: "Methodology",
+      description:
+        "The formulas and primary sources you can cite when referencing the calculator.",
+    },
+  ]}
+/>

@@ -1,0 +1,268 @@
+export const meta = {
+  title: "Airline alliances — Star, oneworld, SkyTeam",
+  description:
+    "Three global alliances cover most international long-haul traffic: Star Alliance (25 members), SkyTeam (19), and oneworld (13). Founded between 1997 and 2000, they each connect roughly 500–750 million passengers a year.",
+  category: "Learn",
+  updated: "2026-06-01",
+  readingTime: "5 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "Star Alliance — Member list",
+      note: "25 member airlines as of 2024",
+      venue: "staralliance.com",
+      date: "Current",
+      url: "https://www.staralliance.com/en/member-airlines",
+    },
+    {
+      id: 2,
+      label: "SkyTeam — Member airlines",
+      note: "19 member airlines as of 2024",
+      venue: "skyteam.com",
+      date: "Current",
+      url: "https://www.skyteam.com",
+    },
+    {
+      id: 3,
+      label: "oneworld — Member airlines",
+      note: "13 member airlines as of 2024",
+      venue: "oneworld.com",
+      date: "Current",
+      url: "https://www.oneworld.com/members",
+    },
+    {
+      id: 4,
+      label: "Star Alliance — Annual fact sheet",
+      note: "Carrier-published statistics including daily flights, destinations, and combined passenger numbers",
+      venue: "Star Alliance press portal",
+      date: "Annual",
+      url: "https://www.staralliance.com",
+    },
+  ]}
+/>
+
+<Lede>
+  Three alliances together cover roughly 60 % of global airline seat
+  capacity. They were founded between 1997 and 2000 with the original
+  goal of letting frequent flyers earn and use status across multiple
+  carriers; they have since become the operational backbone of nearly
+  every long-haul connecting itinerary.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "25 / 19 / 13",
+      label: "Star Alliance / SkyTeam / oneworld member counts (2024)",
+      source: "Alliance websites",
+    },
+    {
+      value: "≈ 750 M",
+      label: "Star Alliance annual passengers — largest of the three",
+      source: "Star Alliance fact sheet",
+    },
+    {
+      value: "1997",
+      label: "Year Star Alliance founded — the first global alliance",
+      source: "Star Alliance",
+    },
+    {
+      value: "≈ 60 %",
+      label: "Global seat-capacity share held by the three alliances combined",
+      source: "Industry analysis",
+    },
+  ]}
+/>
+
+## The three alliances at a glance
+
+<DataTable
+  caption="The three global airline alliances, 2024 snapshot"
+  source="Alliance websites; carrier-published fact sheets"
+  columns={["Alliance", "Founded", "Members", "Annual passengers", "Daily departures"]}
+  rows={[
+    ["Star Alliance", "1997", "25", "≈ 750 M", "≈ 19,000"],
+    ["SkyTeam", "June 2000", "19", "≈ 624 M", "≈ 10,800"],
+    ["oneworld", "1999", "13", "≈ 510 M", "≈ 13,000"],
+  ]}
+/>
+
+## Star Alliance — the original
+
+Star Alliance was founded in 1997 by Lufthansa, Air Canada, Thai Airways,
+SAS, and United Airlines as the first global airline alliance. It is
+still the largest, with 25 member airlines covering nearly every major
+international hub. Its largest members by revenue are Lufthansa Group,
+United, and Air China.
+
+<DataTable
+  caption="Star Alliance member airlines (2024)"
+  source="staralliance.com/en/member-airlines"
+  columns={["Airline", "Country", "Notable hubs"]}
+  rows={[
+    ["Aegean Airlines", "Greece", "Athens (ATH)"],
+    ["Air Canada", "Canada", "Toronto (YYZ), Montréal (YUL)"],
+    ["Air China", "China", "Beijing (PEK), Shanghai (PVG)"],
+    ["Air India", "India", "Delhi (DEL), Mumbai (BOM)"],
+    ["Air New Zealand", "New Zealand", "Auckland (AKL)"],
+    ["ANA", "Japan", "Tokyo Haneda (HND), Narita (NRT)"],
+    ["Asiana Airlines", "South Korea", "Seoul Incheon (ICN)"],
+    ["Austrian", "Austria", "Vienna (VIE)"],
+    ["Avianca", "Colombia", "Bogotá (BOG)"],
+    ["Brussels Airlines", "Belgium", "Brussels (BRU)"],
+    ["Copa Airlines", "Panama", "Panama City (PTY)"],
+    ["Croatia Airlines", "Croatia", "Zagreb (ZAG)"],
+    ["EGYPTAIR", "Egypt", "Cairo (CAI)"],
+    ["Ethiopian Airlines", "Ethiopia", "Addis Ababa (ADD)"],
+    ["EVA Air", "Taiwan", "Taipei Taoyuan (TPE)"],
+    ["LOT Polish Airlines", "Poland", "Warsaw (WAW)"],
+    ["Lufthansa", "Germany", "Frankfurt (FRA), Munich (MUC)"],
+    ["SAS", "Scandinavia", "Copenhagen (CPH), Stockholm (ARN), Oslo (OSL)"],
+    ["Singapore Airlines", "Singapore", "Singapore (SIN)"],
+    ["South African Airways", "South Africa", "Johannesburg (JNB)"],
+    ["SWISS", "Switzerland", "Zürich (ZRH)"],
+    ["TAP Portugal", "Portugal", "Lisbon (LIS)"],
+    ["Thai Airways", "Thailand", "Bangkok (BKK)"],
+    ["Turkish Airlines", "Türkiye", "Istanbul (IST)"],
+    ["United", "United States", "Chicago (ORD), Houston (IAH), Newark (EWR)"],
+  ]}
+/>
+
+## oneworld — quality over count
+
+oneworld is the smallest of the three by member count, with 13 carriers
+heavily skewed toward premium international service. It includes British
+Airways, Cathay Pacific, Qantas, Japan Airlines, and Qatar Airways — all
+top-tier brands. The alliance has actively rejected mass expansion in
+favour of maintaining a consistent on-board product across members.
+
+<DataTable
+  caption="oneworld member airlines (2024)"
+  source="oneworld.com/members"
+  columns={["Airline", "Country", "Notable hubs"]}
+  rows={[
+    ["Alaska Airlines", "United States", "Seattle (SEA), Anchorage (ANC)"],
+    ["American Airlines", "United States", "Dallas (DFW), Charlotte (CLT)"],
+    ["British Airways", "United Kingdom", "London Heathrow (LHR)"],
+    ["Cathay Pacific", "Hong Kong", "Hong Kong (HKG)"],
+    ["Finnair", "Finland", "Helsinki (HEL)"],
+    ["Iberia", "Spain", "Madrid (MAD)"],
+    ["Japan Airlines (JAL)", "Japan", "Tokyo Haneda (HND), Narita (NRT)"],
+    ["Malaysia Airlines", "Malaysia", "Kuala Lumpur (KUL)"],
+    ["Oman Air", "Oman", "Muscat (MCT)"],
+    ["Qantas", "Australia", "Sydney (SYD), Melbourne (MEL)"],
+    ["Qatar Airways", "Qatar", "Doha (DOH)"],
+    ["Royal Air Maroc", "Morocco", "Casablanca (CMN)"],
+    ["Royal Jordanian", "Jordan", "Amman (AMM)"],
+    ["SriLankan Airlines", "Sri Lanka", "Colombo (CMB)"],
+  ]}
+/>
+
+## SkyTeam — the global east-west balance
+
+SkyTeam was founded in June 2000 by Aeromexico, Air France, Delta, and
+Korean Air. It has expanded steadily to 19 members and runs particularly
+strong in Europe (KLM, Air France, ITA), East Asia (Korean Air, China
+Eastern, China Airlines), and Latin America (Aeroméxico). The alliance
+operates a coordinated frequent-flyer programme (SkyMiles via Delta is
+the largest single account base) and a shared lounge network at major
+hubs.
+
+<DataTable
+  caption="SkyTeam member airlines (2024)"
+  source="skyteam.com"
+  columns={["Airline", "Country", "Notable hubs"]}
+  rows={[
+    ["Aerolíneas Argentinas", "Argentina", "Buenos Aires (EZE)"],
+    ["Aeroméxico", "Mexico", "Mexico City (MEX)"],
+    ["Air Europa", "Spain", "Madrid (MAD)"],
+    ["Air France", "France", "Paris CDG (CDG)"],
+    ["China Airlines", "Taiwan", "Taipei Taoyuan (TPE)"],
+    ["China Eastern Airlines", "China", "Shanghai (PVG)"],
+    ["Delta Air Lines", "United States", "Atlanta (ATL), Detroit (DTW)"],
+    ["Garuda Indonesia", "Indonesia", "Jakarta (CGK)"],
+    ["ITA Airways", "Italy", "Rome Fiumicino (FCO)"],
+    ["Kenya Airways", "Kenya", "Nairobi (NBO)"],
+    ["KLM", "Netherlands", "Amsterdam Schiphol (AMS)"],
+    ["Korean Air", "South Korea", "Seoul Incheon (ICN)"],
+    ["Middle East Airlines", "Lebanon", "Beirut (BEY)"],
+    ["Saudia", "Saudi Arabia", "Jeddah (JED), Riyadh (RUH)"],
+    ["TAROM", "Romania", "Bucharest (OTP)"],
+    ["Vietnam Airlines", "Vietnam", "Hanoi (HAN), Ho Chi Minh City (SGN)"],
+    ["Virgin Atlantic", "United Kingdom", "London Heathrow (LHR)"],
+    ["XiamenAir", "China", "Xiamen (XMN)"],
+    ["Czech Airlines (CSA)", "Czech Republic", "Prague (PRG)"],
+  ]}
+/>
+
+## What being in an alliance gets you
+
+Three benefits matter to passengers. **Frequent-flyer reciprocity** lets
+you earn miles in one programme on flights operated by any alliance
+member and redeem them across the alliance's network. **Status
+reciprocity** extends benefits (priority boarding, lounge access, extra
+baggage) when flying any alliance partner. **Through-checked baggage**
+and coordinated schedules simplify multi-airline itineraries that would
+otherwise require separate check-ins.
+
+<Callout type="note" term="The shape of alliance status">
+  Star Gold, oneworld Emerald, and SkyTeam Elite Plus are the three top-
+  tier alliance status levels. They confer comparable benefits: lounge
+  access at any alliance hub, priority boarding, extra baggage allowance.
+  The underlying loyalty programmes (United MileagePlus, BA Executive
+  Club, Delta SkyMiles, etc.) each have their own earning and redemption
+  rules, but the on-the-day experience is consistent across the alliance.
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "Why aren't Ryanair or easyJet in any alliance?",
+      a: "Low-cost carriers historically have not joined alliances because their model relies on point-to-point routes, single-class cabins, and minimum service overhead. Reciprocal frequent-flyer earning and status benefits do not fit a no-frills product. Some LCCs partner bilaterally with full-service carriers (Ryanair × Aer Lingus, for example) but stay out of the global alliances.",
+    },
+    {
+      q: "Are Emirates and Etihad in an alliance?",
+      a: "No. Emirates has built its own global network anchored on Dubai and prefers bilateral partnerships (notably with Qantas). Etihad joined the Etihad Equity Alliance in 2014–2018 (Air Berlin, Alitalia, Jet Airways) but that collapsed; Etihad now runs bilateral partnerships only.",
+    },
+    {
+      q: "Do alliance airlines codeshare beyond their alliance?",
+      a: "Yes — codeshares can exist between airlines in different alliances or with non-alliance carriers. The alliance benefits (lounge access, status reciprocity, mileage earning) are usually alliance-only, but codeshare routing is more flexible.",
+    },
+    {
+      q: "Has any airline switched alliances?",
+      a: "Yes — most notably Continental Airlines moved from SkyTeam to Star Alliance in 2009 (in advance of its merger with United), and LATAM left oneworld in 2020 after Delta acquired a 20 % stake. Alliance membership is rebalanced as airlines merge, fail, or change partnerships.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/learn/busiest-airports-in-the-world",
+      title: "The world's busiest airports",
+      description:
+        "Each alliance has its dominant hubs in the top-twenty list.",
+    },
+    {
+      href: "/learn/longest-flights-in-the-world",
+      title: "The world's longest flights",
+      description:
+        "Most ULR routes are operated by alliance members on coordinated schedules.",
+    },
+    {
+      href: "/learn/corsia",
+      title: "CORSIA, explained",
+      description:
+        "Alliance-coordinated SAF purchasing is shaping CORSIA strategy.",
+    },
+    {
+      href: "/airports",
+      title: "Browse all airports",
+      description:
+        "Explore the full OpenFlights database AirMilesCalc uses.",
+    },
+  ]}
+/>

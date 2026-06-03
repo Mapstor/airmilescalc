@@ -1,0 +1,193 @@
+export const meta = {
+  title: "Great-circle distance, intuitively",
+  description:
+    "Why the shortest path between two points on Earth bends north on a Mercator map, why JFK → HKG flies over the Arctic, and how to derive great-circle distance from the spherical law of cosines.",
+  category: "Methodology",
+  updated: "2026-06-01",
+  readingTime: "6 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "Spherical trigonometry — Bowditch (American Practical Navigator)",
+      note: "The reference text for great-circle navigation, published by the U.S. National Geospatial-Intelligence Agency",
+      venue: "NGA Pub. 9, 2019 edition",
+      date: "2019",
+      url: "https://msi.nga.mil/Publications/APN",
+    },
+    {
+      id: 2,
+      label: "NGA.STND.0036_1.0.0_WGS84",
+      note: "Defines the spherical reference radius derived from the WGS-84 ellipsoid",
+      venue: "NGA Standard",
+      date: "2014",
+      url: "https://earth-info.nga.mil/index.php?dir=wgs84&action=wgs84",
+    },
+    {
+      id: 3,
+      label: "ICAO Circular 328 — Modernizing the Global Air Navigation System",
+      note: "Describes Performance-Based Navigation and great-circle routing as the operational standard",
+      venue: "ICAO",
+      date: "2012",
+      url: "https://www.icao.int/publications",
+    },
+  ]}
+/>
+
+<Lede>
+  A great circle is the shortest path between two points on a sphere — and
+  the closest spherical analogue to the geodesic that aircraft actually fly
+  on the WGS-84 ellipsoid. The difference between the two is small enough
+  that "great-circle distance" is the everyday name for what AirMilesCalc
+  computes, even though the underlying math uses the ellipsoid.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "6,371 km",
+      label: "Mean spherical radius used in great-circle calculation",
+      source: "Derived from WGS-84",
+    },
+    {
+      value: "≤ 0.5 %",
+      label: "Spherical-vs-ellipsoidal distance error in worst cases",
+      source: "Empirical, NGA",
+    },
+    {
+      value: "12,983 km",
+      label: "JFK → HKG great-circle distance (over the Arctic)",
+      source: "Computed with WGS-84 Vincenty",
+    },
+    {
+      value: "17 %",
+      label: "Rhumb-line excess on the same JFK → HKG pair",
+      source: "Computed",
+    },
+  ]}
+/>
+
+## What makes a circle "great"
+
+A great circle is the intersection of a sphere with a plane that passes
+through the sphere's centre. The equator is a great circle; every meridian
+is a half great circle joined to its antimeridian. Any line drawn on a
+sphere that does not pass through the centre's plane is a **small circle**
+— a parallel of latitude (other than the equator) is the canonical
+example.
+
+<DiagramGreatCircle source="Computed from WGS-84 Vincenty inverse; rhumb-line course from constant-bearing integration" />
+
+## Why the great-circle path looks curved on a map
+
+Mercator projections preserve angles — they were invented in 1569 for
+sailors who needed to read a constant compass course as a straight line.
+The price for that property is dramatic area distortion near the poles,
+and great-circle routes, which want to head north then turn back south on
+trans-hemispheric flights, look like dramatic arcs against the projection.
+On a globe the great-circle route is the straight line.
+
+<DataTable
+  caption="Great-circle distance vs rhumb-line course for representative long-haul pairs"
+  source="Both computed against WGS-84; rhumb via Mercator inverse"
+  columns={["Route", "Great-circle (km)", "Rhumb (km)", "Detour"]}
+  rows={[
+    ["JFK → LHR", "5,555", "5,597", "+0.8 %"],
+    ["LAX → SYD", "12,051", "12,238", "+1.6 %"],
+    ["JFK → HKG", "12,983", "15,231", "+17.3 %"],
+    ["LHR → AKL", "18,330", "23,000", "+25.5 %"],
+    ["LHR → NRT (Tokyo)", "9,564", "11,180", "+16.9 %"],
+  ]}
+/>
+
+## How great-circle distance is computed
+
+The spherical law of cosines gives a one-line answer:
+**cos σ = sin φ₁ sin φ₂ + cos φ₁ cos φ₂ cos Δλ**, after which the surface
+distance is **d = R · σ** for some chosen Earth radius R. For small
+distances the law of cosines suffers floating-point cancellation; the
+**Haversine formula** is a numerically stable rearrangement that is
+preferred in production code. AirMilesCalc uses Haversine only as a
+fallback — Vincenty's ellipsoidal solution is preferred for everything
+else.
+
+<Callout type="definition" term="Mean radius R">
+  When using a spherical formula we pick R = 6,371 km, the
+  arithmetic mean (2a + b)/3 of the WGS-84 semi-axes. This minimises
+  worst-case spherical-vs-ellipsoidal error to about 0.5 %. Other choices
+  exist (the WGS-84 authalic radius for area-preserving work, or the
+  volumetric mean for volume problems), but 6,371 km is the
+  navigation-standard pick.
+</Callout>
+
+## When great-circle is wrong
+
+The great-circle and Vincenty distances disagree by up to 0.5 % because
+Earth is not a sphere. On a long polar route — like Helsinki → Tokyo —
+that error reaches roughly 40 km. For a flight plan, 40 km is enough fuel
+to matter; for casual reference, it is not. AirMilesCalc always reports
+the ellipsoidal number, and the "great-circle distance" label is a
+shorthand for the geodesic on WGS-84.
+
+<BarChart
+  title="Why pilots care about the difference: sphere-vs-ellipsoid error on selected long-haul routes"
+  source="AirMilesCalc, Vincenty (WGS-84) minus Haversine (R = 6,371 km)"
+  unit="km"
+  data={[
+    { label: "JFK → LHR (5,555 km)", value: 9 },
+    { label: "LAX → SYD (12,051 km)", value: 23 },
+    { label: "LHR → NRT (9,564 km)", value: 35 },
+    { label: "HEL → KIX (9,094 km, polar)", value: 41 },
+  ]}
+/>
+
+<FAQ
+  items={[
+    {
+      q: "Are great circles always the shortest path?",
+      a: "On a perfect sphere, yes. On the WGS-84 ellipsoid that real Earth flights use, the geodesic deviates from the great circle by a small amount that becomes noticeable only on long high-latitude routes. AirMilesCalc reports the geodesic; the difference matters for fuel planning but not for casual reference.",
+    },
+    {
+      q: "Why do JFK → Hong Kong flights pass over the Arctic?",
+      a: "Because the great-circle (and geodesic) path from a mid-latitude origin to a mid-latitude destination at almost-antipodal longitude crosses high northern latitudes. The Mercator projection makes the route look like an enormous loop; on a globe it is the obvious straight line.",
+    },
+    {
+      q: "What's the difference between great-circle and 'as the crow flies'?",
+      a: "On Earth, they are the same — both refer to the shortest surface path between two points. The phrase 'as the crow flies' is a colloquial synonym; great-circle is the technical name from spherical navigation.",
+    },
+    {
+      q: "Why is the Haversine formula 'numerically stable' but the law of cosines isn't?",
+      a: "For two nearby points, sin φ₁ sin φ₂ + cos φ₁ cos φ₂ cos Δλ is very close to 1, and acos of a near-1 number loses precision rapidly. Haversine rearranges the algebra to operate on sin²(half-distance) terms, which stay well away from problematic regions for all real inputs.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/methodology",
+      title: "Methodology umbrella",
+      description: "All formulas and constants AirMilesCalc uses.",
+    },
+    {
+      href: "/methodology/haversine-formula",
+      title: "Haversine — the spherical fallback",
+      description:
+        "The numerically stable spherical formula and when it suffices.",
+    },
+    {
+      href: "/methodology/rhumb-line",
+      title: "Rhumb lines vs great circles",
+      description:
+        "Why a constant-bearing course looks straight on a Mercator map.",
+    },
+    {
+      href: "/methodology/vincenty-formula",
+      title: "Vincenty's formula",
+      description:
+        "The ellipsoidal calculation that beats great-circle to sub-mm precision.",
+    },
+  ]}
+/>

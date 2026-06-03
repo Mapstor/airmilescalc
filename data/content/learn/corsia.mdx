@@ -1,0 +1,222 @@
+export const meta = {
+  title: "CORSIA, explained",
+  description:
+    "ICAO's Carbon Offsetting and Reduction Scheme for International Aviation enters its mandatory phase in 2027. Here is what the three phases actually require, how the 85 %-of-2019 baseline works, and what airlines actually buy.",
+  category: "Learn",
+  updated: "2026-06-01",
+  readingTime: "6 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "ICAO — CORSIA programme page",
+      note: "Authoritative description of CORSIA phases, eligibility, and baseline rules",
+      venue: "International Civil Aviation Organization",
+      date: "Current",
+      url: "https://www.icao.int/environmental-protection/CORSIA/Pages/default.aspx",
+    },
+    {
+      id: 2,
+      label: "ICAO CORSIA FAQs",
+      note: "Official Q&A document — April 2024 update covers post-COVID baseline change",
+      venue: "ICAO",
+      date: "April 2024",
+      url: "https://www.icao.int/sites/default/files/environmental-protection/CORSIA/CORSIA_FAQs_Apr2024.pdf",
+    },
+    {
+      id: 3,
+      label: "IATA — CORSIA fact sheet",
+      note: "Airline-industry perspective on CORSIA implementation and eligible unit availability",
+      venue: "IATA",
+      date: "December 2025",
+      url: "https://www.iata.org/en/iata-repository/pressroom/fact-sheets/fact-sheet-corsia/",
+    },
+    {
+      id: 4,
+      label: "EASA — CORSIA implementation",
+      note: "European Union Aviation Safety Agency overview of CORSIA in EU context",
+      venue: "EASA",
+      date: "Current",
+      url: "https://www.easa.europa.eu/en/domains/environment/icao-carbon-offsetting-and-reduction-scheme-international-aviation-corsia",
+    },
+  ]}
+/>
+
+<Lede>
+  CORSIA is aviation's global carbon market for international flights —
+  airlines from participating states must offset their CO₂ growth above
+  a defined baseline by buying eligible emission units or using sustainable
+  aviation fuel. It enters its first mandatory phase in 2027.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "2021 – 2023",
+      label: "Pilot phase — voluntary participation",
+      source: "ICAO",
+    },
+    {
+      value: "2024 – 2026",
+      label: "First phase — still voluntary",
+      source: "ICAO",
+    },
+    {
+      value: "2027 – 2035",
+      label: "Second phase — mandatory for most ICAO states",
+      source: "ICAO",
+    },
+    {
+      value: "85 % of 2019",
+      label: "Baseline for first and second phases (revised post-COVID)",
+      source: "ICAO Council, June 2020",
+    },
+  ]}
+/>
+
+## What CORSIA is
+
+The Carbon Offsetting and Reduction Scheme for International Aviation
+(CORSIA) was adopted by ICAO in 2016 as the world's first global
+market-based measure for any industrial sector. It applies only to
+**international** flights (purely domestic flights remain under each
+state's own climate policy) and requires airlines to offset CO₂
+emissions above a defined baseline. The scheme covers more than 80 %
+of the post-2020 growth in international aviation emissions.
+
+<Callout type="definition" term="Eligible emission unit">
+  A carbon credit that ICAO's Technical Advisory Body has approved as
+  meeting CORSIA's quality criteria. The current eligibility list
+  includes selected vintages from the Architecture for REDD+
+  Transactions, the American Carbon Registry, the Climate Action
+  Reserve, and a small number of Verra Verified Carbon Standard credits.
+  CORSIA explicitly does not accept all carbon credits — many low-quality
+  programmes are excluded.
+</Callout>
+
+## The three phases
+
+<DataTable
+  caption="CORSIA implementation phases"
+  source="ICAO CORSIA FAQs April 2024"
+  columns={["Phase", "Years", "Participation", "Compliance cycle length"]}
+  rows={[
+    ["Pilot", "2021–2023", "Voluntary, ~88 states", "3 years (one cycle)"],
+    ["First phase", "2024–2026", "Voluntary, ~126 states", "3 years (one cycle)"],
+    [
+      "Second phase",
+      "2027–2035",
+      "Mandatory (most ICAO states)",
+      "3 years × 3 cycles",
+    ],
+  ]}
+/>
+
+The voluntary phases cover roughly 88 to 126 states; the mandatory
+second phase will cover all ICAO contracting states except those with
+specific exemptions (least-developed countries, small-island developing
+states, and landlocked developing countries that do not opt in). The
+second phase runs three rolling three-year compliance cycles, with
+final reckoning in 2035.
+
+## The 2019 baseline — why it changed
+
+The original CORSIA design used the **average of 2019 and 2020** CO₂
+emissions as the baseline. COVID collapsed 2020 international aviation
+to a fraction of normal volumes, which would have set an artificially
+low baseline and forced enormous offset purchases as flying recovered.
+The ICAO Council met in June 2020 and revised the baseline to **2019
+only** for the pilot phase, then to **85 % of 2019** for the first and
+second phases — softening the post-COVID growth offset requirement
+while still constraining long-term growth.
+
+<BarChart
+  title="CORSIA baseline arithmetic in tonnes-relative terms"
+  source="ICAO CORSIA FAQs April 2024"
+  unit="% of 2019"
+  data={[
+    { label: "Original baseline (avg 2019, 2020)", value: 80 },
+    { label: "Pilot-phase baseline (2019 only)", value: 100 },
+    { label: "First / second phase baseline (85 % of 2019)", value: 85 },
+  ]}
+/>
+
+## What airlines actually buy
+
+Eligible emission units fall into a handful of categories. Some are
+forest-conservation credits (REDD+ projects in Brazil and Indonesia
+dominate the available supply). Others are renewable-energy projects
+that pre-date the Paris Agreement clean-energy windfall. A growing
+share is **CORSIA-eligible sustainable aviation fuel** — airlines may
+claim CORSIA credits for SAF use, which is the main reason European
+carriers have pushed for tighter SAF mandates.
+
+<Callout type="note" term="CORSIA and the EU ETS overlap">
+  EU and UK airlines also face the EU and UK Emissions Trading Systems
+  on top of CORSIA. Where the systems overlap (intra-EEA flights, some
+  flights to UK ETS-covered destinations), airlines pay under the
+  domestic ETS rather than CORSIA — CORSIA "tops up" only the
+  international-flight gap between the ETS and the global CORSIA
+  baseline.
+</Callout>
+
+## How big are the obligations?
+
+ICAO estimates CORSIA will cover the offsetting of about 2.5 to 4
+gigatonnes of CO₂ across the 2021-2035 period — a number that depends
+heavily on actual aviation growth and SAF deployment. Per-airline
+obligations in 2024 are still modest because emissions have only just
+returned to baseline; obligations are expected to ramp quickly through
+the second phase.
+
+<FAQ
+  items={[
+    {
+      q: "Does CORSIA cover domestic flights?",
+      a: "No. CORSIA covers only international flights between participating states. Domestic aviation falls under each country's own climate policy — the UK ETS, US EPA rules, China's national ETS pilot for aviation, and so on.",
+    },
+    {
+      q: "Is CORSIA enough to put aviation on a 1.5 °C path?",
+      a: "Not by itself. CORSIA is designed to offset growth above the baseline, not to reduce absolute emissions. Aviation's net-zero-by-2050 path requires sustainable aviation fuel, more efficient aircraft, and operational improvements alongside CORSIA — the offsetting layer is the last-mile fallback, not the main mechanism.",
+    },
+    {
+      q: "Why are some Verra credits not CORSIA-eligible?",
+      a: "ICAO's Technical Advisory Body applies a strict eligibility filter: only credits that meet additionality, permanence, and double-counting safeguards are approved, and only specific vintages. Many credits that satisfy a standard certification are still excluded by CORSIA's tighter rules.",
+    },
+    {
+      q: "Do passengers pay for CORSIA?",
+      a: "Indirectly. CORSIA compliance costs are borne by airlines and largely passed through in ticket prices — at current eligible-unit prices the per-passenger cost is single-digit dollars on long-haul tickets. The transparency of the pass-through varies by carrier.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/learn/sustainable-aviation-fuel",
+      title: "Sustainable aviation fuel",
+      description:
+        "How SAF interacts with CORSIA and the wider net-zero path.",
+    },
+    {
+      href: "/methodology/radiative-forcing",
+      title: "Aviation's non-CO₂ climate forcing",
+      description:
+        "Why CO₂-only schemes like CORSIA leave 65 % of aviation's warming uncovered.",
+    },
+    {
+      href: "/methodology/defra-emission-factors",
+      title: "DEFRA 2024 emission factors",
+      description:
+        "How national reporting differs from the CORSIA international framework.",
+    },
+    {
+      href: "/learn/airline-alliances",
+      title: "Airline alliances",
+      description:
+        "How alliance-level policy coordination is shaping CORSIA compliance strategy.",
+    },
+  ]}
+/>

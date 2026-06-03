@@ -79,6 +79,36 @@ export function getAirportsByCountry(country: string, limit: number = 100): Airp
   return results;
 }
 
+export interface AirportWithRouteCount extends Airport {
+  routeCount: number;
+}
+
+/**
+ * Get airports by country, each annotated with its scheduled-route count.
+ * Single SQL statement (correlated subquery hits the routes(source_iata) index).
+ */
+export function getAirportsByCountryWithRoutes(
+  country: string,
+  limit: number = 1000,
+): AirportWithRouteCount[] {
+  const db = getDb();
+  const results = db.prepare(`
+    SELECT
+      a.id, a.iata, a.icao, a.name, a.city, a.country,
+      a.latitude, a.longitude, a.altitude, a.timezone, a.timezone_offset,
+      (SELECT COUNT(DISTINCT dest_iata)
+         FROM routes r
+        WHERE r.source_iata = a.iata) AS routeCount
+    FROM airports a
+    WHERE LOWER(a.country) = ?
+      AND a.iata IS NOT NULL AND a.iata != ''
+    ORDER BY a.city, a.name
+    LIMIT ?
+  `).all(country.toLowerCase(), limit) as AirportWithRouteCount[];
+
+  return results;
+}
+
 /**
  * Get all unique countries with airport count
  */

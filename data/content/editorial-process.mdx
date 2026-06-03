@@ -1,0 +1,396 @@
+export const meta = {
+  title: "Editorial process",
+  description:
+    "How content on AirMilesCalc is researched, fact-checked, corrected, and reviewed — the editorial standards Sam K. applies to every methodology page, learn page, and calculator output.",
+  category: "Editorial",
+  updated: "2026-06-03",
+  readingTime: "7 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "Google Search Quality Rater Guidelines",
+      note: "Public document defining the E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) framework Google's search quality raters apply — the bar this editorial process is calibrated against",
+      venue: "Google",
+      date: "Continuously updated; current version 2024",
+      url: "https://services.google.com/fh/files/misc/hsw-sqrg.pdf",
+    },
+    {
+      id: 2,
+      label: "International Fact-Checking Network (IFCN) Code of Principles",
+      note: "Five-pillar framework for trustworthy fact-checking: non-partisanship, transparency of sources, transparency of funding, transparency of methodology, and open corrections policy",
+      venue: "Poynter Institute",
+      date: "Current edition 2022",
+      url: "https://www.ifcncodeofprinciples.poynter.org/",
+    },
+    {
+      id: 3,
+      label: "Google Helpful Content Guidance",
+      note: "Google Search Central guidance on AI-assisted content — content quality matters more than method of creation; primary-source verification is the differentiating signal",
+      venue: "Google Search Central",
+      date: "Latest update February 2023",
+      url: "https://developers.google.com/search/blog/2023/02/google-search-and-ai-content",
+    },
+    {
+      id: 4,
+      label: "NewsGuard Reliability Criteria",
+      note: "Nine-criterion framework for assessing news and information sites; AirMilesCalc applies the methodology-relevant criteria (clear corrections, transparency of ownership, responsibility for content)",
+      venue: "NewsGuard",
+      date: "Current criteria 2024",
+      url: "https://www.newsguardtech.com/ratings/rating-process-criteria/",
+    },
+  ]}
+/>
+
+<Lede>
+  Every page on AirMilesCalc is researched, written, and reviewed by Sam K.,
+  the independent maintainer. This page documents the standards applied to
+  every methodology page, every learn page, and every calculator-output
+  page &mdash; what counts as a valid source, how corrections are handled,
+  how AI assistance is used, and how often the content is re-verified.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "Primary only",
+      label: "Source policy &mdash; if it can't be traced to a primary publisher, the claim is omitted",
+      source: "Project policy",
+    },
+    {
+      value: "1 author",
+      label: "Sam K. is the only editorial voice on the site",
+      source: "By design",
+    },
+    {
+      value: "Annual",
+      label: "Standard review cadence; specific pages refresh sooner when their primary source publishes an update",
+      source: "Project policy",
+    },
+    {
+      value: "48&ndash;72 h",
+      label: "Typical response time on corrections sent to info@airmilescalc.com",
+      source: "Project policy",
+    },
+  ]}
+/>
+
+## How content is researched and sourced
+
+Every factual claim on AirMilesCalc traces to a **primary source** &mdash;
+a published paper, a regulator's official document, a manufacturer's
+spec sheet, a government data release. Aggregator websites, Wikipedia
+articles, and second-hand references are used for navigation and
+context but never cited as the authority for a number. The
+verified-or-omitted rule is strict: if a number can't be traced to a
+primary source, it is removed from the page, not paraphrased or hedged.
+
+<DataTable
+  caption="What counts as a primary source on AirMilesCalc"
+  source="Project editorial policy"
+  columns={["Topic area", "Primary sources accepted", "Examples used on the site"]}
+  rows={[
+    [
+      "Distance calculation",
+      "Peer-reviewed papers; geodetic standards bodies",
+      "Vincenty (1975) Survey Review; NGA WGS-84 standard",
+    ],
+    [
+      "CO₂ emission factors",
+      "Government greenhouse-gas conversion-factor publications",
+      "DESNZ (UK) annual conversion factors; IEA aviation tracking",
+    ],
+    [
+      "Radiative forcing",
+      "Peer-reviewed atmospheric-science papers",
+      "Lee et al. (2021) Atmospheric Environment 244, 117834",
+    ],
+    [
+      "Airport / airline / route data",
+      "Open-data projects with auditable provenance and an open licence",
+      "OpenFlights (ODbL v1.0)",
+    ],
+    [
+      "Airport traffic rankings",
+      "Industry-body annual rankings",
+      "ACI World annual passenger-traffic releases",
+    ],
+    [
+      "Aviation regulations",
+      "Regulator publications",
+      "ICAO Annexes; FAA Advisory Circulars; EASA Certification Specifications",
+    ],
+    [
+      "Jet-lag and circadian research",
+      "Peer-reviewed clinical papers",
+      "Sack (2010) NEJM jet-lag review; Czeisler et al. on circadian period",
+    ],
+  ]}
+/>
+
+The Sources block at the top of every methodology and learn page lists
+the specific publications used on that page, with publication date and
+URL. A reader who wants to verify a number can click straight from the
+Sources block to the underlying paper or government document.
+
+## Fact-checking and verification
+
+Every numeric claim in prose is **double-sourced where possible**:
+once against the primary publication, once against a derivative or
+independent calculation. Where the two diverge, the lower-confidence
+number is dropped, the discrepancy is documented in a Callout, and the
+reader is told which value the site shows and why.
+
+<Steps>
+  <Step n={1} title="Identify the primary source">
+    Locate the original publication. For DESNZ conversion factors that
+    is the gov.uk spreadsheet for the relevant reporting year; for ACI
+    rankings it is the ACI press release for the relevant data year.
+  </Step>
+  <Step n={2} title="Verify the number">
+    Pull the number directly from the primary source, not from an
+    aggregator. Check units, year, and methodology footnotes.
+  </Step>
+  <Step n={3} title="Cross-check where feasible">
+    For high-stakes numbers (CO&#8322; per pax-km, ACI rankings,
+    distance precision claims), find an independent secondary source
+    that reports the same value with the same methodology. If they
+    disagree, investigate; if the discrepancy can&apos;t be resolved,
+    document it openly.
+  </Step>
+  <Step n={4} title="Write the prose around the verified figure">
+    Every number in prose gets a one-sentence explanation: what it
+    measures, why it matters, what it implies. No naked figures.
+  </Step>
+  <Step n={5} title="Pre-publish review">
+    The page is read end-to-end one more time looking for unsourced
+    sentences, units mismatches, paragraph-length violations of the
+    three-sentence rule, and any claim that smells like memory rather
+    than verification.
+  </Step>
+</Steps>
+
+## Correction policy
+
+Errors get **acknowledged in-page and dated**. The bar for triggering a
+correction is low: if a reader sends a credible report against a primary
+source, the correction goes in within 48&ndash;72 hours of receipt for
+routine issues, and within the statutory deadline for any data-subject
+matter under GDPR / CCPA.
+
+<DataTable
+  caption="How corrections are handled, by severity"
+  source="Project editorial policy"
+  columns={["Severity", "Examples", "Resolution timeline", "How the correction is disclosed"]}
+  rows={[
+    [
+      "Critical",
+      "Wrong distance, wrong CO&#8322; figure, wrong regulator name, factual error in methodology",
+      "Same day where feasible; otherwise within 72 hours",
+      "Inline correction note dated; if material, a separate Callout flagging the prior error",
+    ],
+    [
+      "Substantive",
+      "Outdated source year, missing context, ambiguous wording around a number",
+      "Within 7 days",
+      "Inline update; Sources block date refreshed",
+    ],
+    [
+      "Minor",
+      "Typo, broken link, formatting issue",
+      "Within 14 days",
+      "Silent fix; not separately disclosed",
+    ],
+    [
+      "Source supersession",
+      "Primary source publishes a new edition (DESNZ annual update, ACI annual release)",
+      "Within 30 days of the new release",
+      "Page reviewed end-to-end; Sources block updated; meta.updated refreshed",
+    ],
+  ]}
+/>
+
+<Callout type="note" term="How to send a correction">
+  Email{" "}
+  <a href="mailto:info@airmilescalc.com" className="text-blue-700 hover:underline">
+    info@airmilescalc.com
+  </a>{" "}
+  with the page URL, the number or claim that is wrong, and a primary
+  source for the correct value. We can&apos;t accept &ldquo;I heard from
+  a pilot&rdquo; corrections &mdash; the verification has to be against a
+  publication. Standard reply window is 48&ndash;72 hours.
+</Callout>
+
+## AI assistance disclosure
+
+AirMilesCalc uses AI assistance during the writing process, in line
+with Google Search Central&apos;s 2023 guidance that content quality
+matters more than method of creation. The specific way AI is used is
+documented openly:
+
+<DataTable
+  caption="Where AI is used and where it is not"
+  source="Project editorial policy"
+  columns={["Stage", "AI used?", "Why or why not"]}
+  rows={[
+    [
+      "First-draft prose",
+      "Sometimes",
+      "Used to accelerate writing on long methodology pages; every paragraph is verified and rewritten by hand before publication",
+    ],
+    [
+      "Code and calculation logic",
+      "Yes",
+      "Vincenty, Haversine, distance formulas, JSON-LD schemas, and React components are AI-assisted but reviewed line by line before commit",
+    ],
+    [
+      "Primary-source verification",
+      "Never",
+      "Every cited number is verified against the primary publication by the human maintainer &mdash; not against an AI summary or memory",
+    ],
+    [
+      "Fact-checking decisions",
+      "Never",
+      "Whether to include or omit a claim is a human editorial decision",
+    ],
+    [
+      "Editorial voice and judgment",
+      "Never",
+      "Tone, framing, what to emphasise, what to leave out: human only",
+    ],
+  ]}
+/>
+
+The aim is that every page meets the bar Google Search Central published
+for AI-assisted content: *people-first content, demonstrating expertise,
+not produced primarily to rank on search results*. Content quality is
+audited against that standard before publication.
+
+## Editorial review cadence
+
+Every methodology and learn page is reviewed at least annually and
+whenever its primary source publishes an update. The cadence is
+documented per source family below.
+
+<DataTable
+  caption="Review cadence by source family"
+  source="Project editorial policy; primary-source publication patterns"
+  columns={["Source family", "Publication cycle", "Triggered review"]}
+  rows={[
+    [
+      "DESNZ greenhouse-gas conversion factors",
+      "Annual (typically June)",
+      "Methodology / DEFRA emission-factors page, /learn/cabin-class-emissions, calculator output",
+    ],
+    [
+      "ACI World passenger-traffic rankings",
+      "Annual (typically April for prior year)",
+      "/learn/busiest-airports-in-the-world",
+    ],
+    [
+      "IATA Net Zero / SAF progress reports",
+      "Annual (December)",
+      "/learn/sustainable-aviation-fuel, /learn/corsia",
+    ],
+    [
+      "OpenFlights data",
+      "Community-maintained; route table stable since June 2014",
+      "Distance and airport pages reviewed on data-correction reports",
+    ],
+    [
+      "NGA WGS-84 standard",
+      "Stable (current revision July 2014)",
+      "Methodology pages reviewed on rare revision; otherwise stable",
+    ],
+    [
+      "Sack 2010 jet-lag review",
+      "Stable; periodic literature update",
+      "/learn/jet-lag-science reviewed annually against newer chronobiology reviews",
+    ],
+  ]}
+/>
+
+## Independence and conflicts of interest
+
+AirMilesCalc has **no affiliate relationships, no sponsorships, no paid
+placements, and no commercial partnerships** with any airline, airport,
+booking aggregator, regulator, or industry trade body. The only
+projected revenue source is Google AdSense advertising once approved.
+External links to airline and airport sites are for editorial context
+and reader convenience only &mdash; not affiliate links.
+
+<Callout type="note" term="The independence position, stated plainly">
+  We are not affiliated with any airline, airport, booking site, regulator,
+  or aviation trade body. Methodology pages cite primary sources (DESNZ,
+  NGA, ICAO, IATA, ACI, OpenFlights and academic publications) but the
+  project has no formal relationship with any of these organisations. If
+  any of that ever changes, the change will be disclosed on this page
+  with the effective date and the nature of the relationship.
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "Is AirMilesCalc independent?",
+      a: "Yes. The project is independent, with no affiliate relationships, no sponsorships, and no commercial partnerships with airlines, airports, booking sites, regulators, or industry trade bodies. The only projected revenue source is Google AdSense advertising once approved.",
+    },
+    {
+      q: "Who writes the content?",
+      a: "Sam K., the independent maintainer of AirMilesCalc, writes and reviews every page. First drafts are sometimes AI-assisted to speed up writing on long methodology pages, but every factual claim is verified against the cited primary source by Sam K. before publication.",
+    },
+    {
+      q: "How quickly are errors corrected?",
+      a: "Critical errors (wrong distance, wrong CO₂ figure, wrong regulator name) are resolved the same day where feasible and within 72 hours otherwise. Substantive errors within 7 days. Minor issues (typos, broken links) within 14 days. Source-supersession reviews (annual DESNZ or ACI updates) happen within 30 days of the new release.",
+    },
+    {
+      q: "What's the AI policy?",
+      a: "AI assistance is used for first-draft prose and code in line with Google Search Central's February 2023 guidance. Primary-source verification, fact-checking, editorial judgment, and tone decisions are human-only. The aim is people-first content that demonstrates expertise — not content produced primarily to rank on search.",
+    },
+    {
+      q: "How do I report a factual error?",
+      a: "Email info@airmilescalc.com with the page URL, the specific claim or number that is wrong, and a primary-source citation for the correct value. We can't accept anecdotal corrections — the verification has to be against a publication. We reply within 48–72 hours.",
+    },
+    {
+      q: "Are sponsors or paid content ever published?",
+      a: "No. There are no sponsored posts, no paid placements, no advertorial content, no affiliate links. The only paid content on the site will be Google AdSense advertisements once approved, which are clearly labelled as advertisements per AdSense policy. We do not accept payment for editorial coverage or links of any kind.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  heading="Related"
+  links={[
+    {
+      href: "/about",
+      title: "About",
+      description:
+        "The personal story behind the project, the publisher identity, and the design choices the calculator reflects.",
+    },
+    {
+      href: "/privacy",
+      title: "Privacy policy",
+      description:
+        "Implementation status, cookie inventory, AdSense disclosure, and worldwide privacy regulations honoured.",
+    },
+    {
+      href: "/terms",
+      title: "Terms of service",
+      description:
+        "Usage rights, ODbL attribution, independence + affiliate disclosure, limitation of liability.",
+    },
+    {
+      href: "/methodology",
+      title: "Methodology",
+      description:
+        "The formulas, constants, and primary sources cited inline on every calculation.",
+    },
+    {
+      href: "/contact",
+      title: "Contact",
+      description:
+        "Email, response time, statutory data-subject deadlines, accessibility report channel.",
+    },
+  ]}
+/>

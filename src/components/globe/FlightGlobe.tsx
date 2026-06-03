@@ -358,37 +358,33 @@ export default function FlightGlobe({
         </div>
       )}
 
-      {/* Flight info overlay */}
+      {/* Flight info overlay — air miles as the focal number */}
       {hasRoute && isLoaded && (
         <div className="absolute bottom-4 left-4 right-4 flex justify-center">
-          <div className="bg-black/80 backdrop-blur-sm rounded-xl px-5 py-3 flex items-center gap-6">
-            {distanceMiles && (
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-                <div>
-                  <div className="text-white font-bold text-lg">{distanceMiles.toLocaleString()} mi</div>
-                  <div className="text-slate-400 text-xs">Distance</div>
+          <div className="bg-black/80 backdrop-blur-md rounded-xl px-5 py-3 flex items-center gap-5 sm:gap-7 border border-white/10 shadow-xl">
+            {distanceMiles !== undefined && (
+              <div className="flex items-end gap-2">
+                <div className="font-mono tabular-nums leading-none">
+                  <span className="text-white font-bold text-[34px] sm:text-[42px]">
+                    {distanceMiles.toLocaleString()}
+                  </span>
+                </div>
+                <div className="text-blue-300 text-[10.5px] uppercase tracking-[0.16em] font-semibold pb-1">
+                  air<br />miles
                 </div>
               </div>
             )}
             {flightTime && (
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                  <div className="text-white font-bold text-lg">{flightTime}</div>
-                  <div className="text-slate-400 text-xs">Est. Time</div>
-                </div>
+              <div className="hidden sm:flex items-baseline gap-2 pl-5 sm:pl-6 border-l border-white/15">
+                <div className="text-white font-semibold tabular-nums text-[20px]">{flightTime}</div>
+                <div className="text-slate-400 text-[10px] uppercase tracking-[0.12em] font-semibold">flight</div>
               </div>
             )}
-            <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${animationPhase === 'flying' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-500'}`}></div>
-              <span className="text-slate-300 text-sm">
-                {animationPhase === 'starting' && 'Departing...'}
-                {animationPhase === 'flying' && 'In Flight'}
+            <div className="flex items-center gap-2 pl-3 sm:pl-4 border-l border-white/15">
+              <div className={`w-2 h-2 rounded-full ${animationPhase === 'flying' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`}></div>
+              <span className="text-slate-300 text-[11px] uppercase tracking-[0.12em] font-mono">
+                {animationPhase === 'starting' && 'Departing'}
+                {animationPhase === 'flying' && 'In flight'}
                 {animationPhase === 'landed' && 'Arrived'}
                 {animationPhase === 'idle' && 'Ready'}
               </span>

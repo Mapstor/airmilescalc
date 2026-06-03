@@ -46,3 +46,7 @@ CLAUDE_CODE_PROMPT.md
 
 # devcontainer
 .devcontainer/port
+
+# agent / session
+.claude/
+dev.log

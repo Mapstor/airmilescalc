@@ -1,0 +1,252 @@
+export const meta = {
+  title: "Contact AirMilesCalc",
+  description:
+    "How to reach the project — typical response time, what we can help with, how to file a data correction or bug report, and the statutory deadlines we follow for GDPR and CCPA requests.",
+  category: "Contact",
+  updated: "2026-06-01",
+  readingTime: "5 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "GDPR Article 12 — Transparent information, communication and modalities",
+      note: "Sets the obligation to respond to data-subject requests without undue delay and in any event within one month",
+      venue: "EUR-Lex, Regulation (EU) 2016/679",
+      date: "Entered into force 25 May 2018",
+      url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+    },
+    {
+      id: 2,
+      label: "ICO — Right of access",
+      note: "UK Information Commissioner's Office guidance on SAR response timeframes",
+      venue: "Information Commissioner's Office",
+      date: "Current",
+      url: "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/right-of-access/",
+    },
+    {
+      id: 3,
+      label: "California Consumer Privacy Act §1798.130",
+      note: "CCPA verifiable consumer request response window (45 days, extendable to 90)",
+      venue: "California Office of the Attorney General",
+      date: "Effective 1 January 2020; amended by CPRA 2023",
+      url: "https://oag.ca.gov/privacy/ccpa",
+    },
+    {
+      id: 4,
+      label: "OpenFlights data attribution requirements",
+      note: "Open Database License (ODbL) 1.0 — derivative works must attribute the source",
+      venue: "openflights.org/data.php",
+      date: "ODbL v1.0 published 19 June 2009",
+      url: "https://opendatacommons.org/licenses/odbl/1-0/",
+    },
+  ]}
+/>
+
+<Lede>
+  Email is the only channel — there is no phone number, no public chat,
+  and no social DM queue. One inbox receives data-correction reports,
+  partnership inquiries, GDPR / CCPA requests, methodology questions,
+  and feature suggestions, and one editorial voice answers them.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "info@airmilescalc.com",
+      label: "Single contact email — read by the project maintainer",
+      source: "Project policy",
+    },
+    {
+      value: "48–72 h",
+      label: "Typical response time for routine inquiries",
+      source: "Project policy",
+    },
+    {
+      value: "1 month",
+      label: "Statutory deadline for GDPR data-subject requests",
+      source: "GDPR Art. 12(3)",
+    },
+    {
+      value: "45 days",
+      label: "Statutory deadline for CCPA verifiable consumer requests",
+      source: "CCPA §1798.130(a)(2)",
+    },
+  ]}
+/>
+
+## What to contact us about
+
+The inbox handles five categories: **data corrections** (an airport name,
+IATA code, coordinate, or route is wrong), **bug reports** (the calculator
+returns an unexpected result), **methodology questions** (how a number was
+computed), **partnership inquiries** (embedding the calculator, bulk data,
+attribution), and **statutory data-subject requests** under GDPR, CCPA, or
+similar regulations. Everything in those categories gets a reply.
+
+<DataTable
+  caption="What we respond to versus what we don't"
+  source="Project editorial policy"
+  columns={["Category", "Response", "Typical reply window"]}
+  rows={[
+    ["Data correction (airport, code, coordinate)", "Yes — investigated against upstream sources", "48–72 hours"],
+    ["Bug report (calculator, UI, schema)", "Yes — triaged by severity", "48–72 hours"],
+    ["Methodology question", "Yes — answered or pointed to /methodology subpage", "48–72 hours"],
+    ["Partnership / embedding / bulk data", "Yes — substantive replies welcome", "1 week typical"],
+    ["GDPR / CCPA data-subject request", "Yes — within statutory deadlines", "GDPR 1 month / CCPA 45 days"],
+    ["General travel advice", "No — point to a travel agent or airline", "Brief reply only"],
+    ["Specific flight booking question", "No — point to the airline or aggregator", "Brief reply only"],
+    ["Press / publicity outreach", "Yes — but no commission, no paid placements", "1 week typical"],
+  ]}
+/>
+
+## Bug reports and data corrections
+
+A useful bug report includes four things — the **URL** you were on, the
+**browser and device**, the **input** you used, and the **expected vs.
+actual** output. A useful data correction includes three things — the
+**IATA code** (or country slug) of the entity, the **claimed correct
+value**, and a **primary-source citation** so we can validate without
+re-investigating from scratch.
+
+<Steps>
+  <Step n={1} title="Reproduce the issue once">
+    Open the exact URL where the problem appears. Note the browser
+    version and device type. Take a screenshot if the visual layout is
+    part of the bug.
+  </Step>
+  <Step n={2} title="Describe the gap">
+    Write what you expected to see and what you actually saw. For data
+    bugs include the airport IATA codes and the metric (distance, time,
+    CO₂, bearing) that looks wrong.
+  </Step>
+  <Step n={3} title="Cite a primary source">
+    Data corrections should reference an authoritative source — an IATA
+    or ICAO publication, an airline schedule page, or an official
+    aviation-authority document. We can&apos;t accept &ldquo;heard from a
+    pilot&rdquo; corrections.
+  </Step>
+  <Step n={4} title="Send to info@airmilescalc.com">
+    One email per issue. We reply within 48–72 hours for routine
+    reports; data corrections that require upstream OpenFlights changes
+    can take longer because we have to file with that project too.
+  </Step>
+</Steps>
+
+## Data-subject requests under GDPR, CCPA, and similar
+
+If you are exercising statutory rights under GDPR Articles 15–22, the
+California Consumer Privacy Act, Brazil&apos;s LGPD, the UK Data Protection
+Act 2018, or any equivalent regulation, write to the same email with
+&ldquo;Data subject request&rdquo; in the subject line. We respond within
+the statutory deadline for your jurisdiction.
+
+<DataTable
+  caption="Statutory response deadlines we follow"
+  source="Regulator publications — see Sources block above"
+  columns={["Regulation", "Deadline", "Extendable to"]}
+  rows={[
+    ["GDPR / UK GDPR (Art. 12)", "1 month", "3 months for complex requests"],
+    ["CCPA / CPRA (§1798.130)", "45 days", "90 days with notice"],
+    ["LGPD (Art. 19)", "15 days", "No standard extension"],
+    ["PIPEDA (Principle 9)", "30 days", "30 additional days with notice"],
+    ["PIPA / Korea (Art. 35)", "10 days", "10 additional days"],
+  ]}
+/>
+
+<Callout type="note" term="What we actually hold about you">
+  Because AirMilesCalc collects no account information, no behavioural
+  profile, and retains no calculation history, most data-subject access
+  requests are met with a brief letter confirming that we hold no
+  personal data about the requester. If you have previously emailed us,
+  we hold the email itself; that is generally the only record. See{" "}
+  <a href="/privacy" className="text-blue-700 hover:underline">
+    /privacy
+  </a>{" "}
+  for the full data inventory.
+</Callout>
+
+## Partnerships, embedding, and bulk data
+
+The calculator is free to link to from any website without permission.
+Embedding the live UI on a third-party site, white-labeling the
+distance/CO₂ API, or accessing bulk data exports needs a conversation —
+we can usually accommodate but require attribution under the OpenFlights
+ODbL terms that bind the underlying data.
+
+<Callout type="note" term="ODbL attribution">
+  OpenFlights data is licensed under the Open Database License v1.0.
+  Any redistribution of substantial portions — including via an embedded
+  AirMilesCalc widget that exposes the underlying coordinates or route
+  table — must carry visible attribution to &ldquo;OpenFlights / ODbL&rdquo;
+  and link to{" "}
+  <a
+    href="https://openflights.org/data.php"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-blue-700 hover:underline"
+  >
+    openflights.org/data.php
+  </a>
+  .
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "Why no phone or chat support?",
+      a: "AirMilesCalc is a one-maintainer project. Email scales; phone and chat don't. Routing all inquiries through one inbox keeps the editorial response consistent and lets the maintainer batch replies in a single sitting, which is faster on average than fragmented channels.",
+    },
+    {
+      q: "How quickly will you actually reply?",
+      a: "Routine bug reports, methodology questions, and partnership inquiries: 48 to 72 hours in most cases. Statutory data-subject requests: within the deadline for your jurisdiction (1 month for GDPR, 45 days for CCPA, 15 days for LGPD). Press inquiries and complex partnership questions: one week typical.",
+    },
+    {
+      q: "Can I report a security vulnerability?",
+      a: "Yes — email the same address with 'Security' in the subject. Responsible disclosure is welcomed. We do not currently run a bug bounty; verbal acknowledgement and a disclosure-date negotiation are what we offer.",
+    },
+    {
+      q: "I'm a journalist or researcher. How do I cite the calculator?",
+      a: "Cite our methodology page (/methodology) rather than a specific calculator URL — dynamic outputs change as the database updates and may not be reproducible. The /methodology subpages list primary sources you can cite directly. If you need a one-line authorship line, use 'AirMilesCalc, accessed <date>'.",
+    },
+    {
+      q: "Do you offer an API?",
+      a: "There is a public POST /api/calculate endpoint that returns the JSON behind the web UI. We do not publish rate-limit guarantees and may add throttling in the future. Bulk users should email first so we know what to expect.",
+    },
+    {
+      q: "Can I send you donations or sponsor the project?",
+      a: "Not currently — hosting and infrastructure are funded by Google AdSense advertising, which is sufficient to cover costs. We don't accept donations because accepting them would require additional financial-services compliance (refund policy, payment processor, tax handling) that is not justified at the project's current scale.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  heading="Related"
+  links={[
+    {
+      href: "/privacy",
+      title: "Privacy policy",
+      description:
+        "Exactly what we collect (very little) and what third parties (Google AdSense) collect via the site.",
+    },
+    {
+      href: "/terms",
+      title: "Terms of service",
+      description:
+        "Usage rights, ODbL attribution requirements, and disclaimers.",
+    },
+    {
+      href: "/about",
+      title: "About AirMilesCalc",
+      description:
+        "Why the project exists, who it serves, and who runs it.",
+    },
+    {
+      href: "/methodology",
+      title: "Methodology",
+      description:
+        "Every formula and primary source — the right page to cite in research.",
+    },
+  ]}
+/>

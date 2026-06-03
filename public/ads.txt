@@ -1,0 +1,14 @@
+# AirMilesCalc ads.txt — IAB Tech Lab Authorized Digital Sellers spec
+#
+# This file lists the companies authorized to sell AirMilesCalc's ad inventory.
+# Until AdSense approval, this file intentionally lists no authorized sellers —
+# any crawler or buyer that tries to transact inventory on our behalf is
+# unauthorized.
+#
+# After AdSense approval, replace the line below with the Publisher ID Google
+# issues (the format is:  google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0).
+#
+# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+#
+# Spec: https://iabtechlab.com/ads-txt/
+# AdSense how-to: https://support.google.com/adsense/answer/7532444

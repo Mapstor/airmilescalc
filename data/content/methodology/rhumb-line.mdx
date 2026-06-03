@@ -1,0 +1,195 @@
+export const meta = {
+  title: "Rhumb lines vs great circles",
+  description:
+    "A rhumb line crosses every meridian at the same angle and looks straight on a Mercator map; a great circle is the shortest path on a globe. The two coincide at the equator and diverge dramatically near the poles.",
+  category: "Methodology",
+  updated: "2026-06-01",
+  readingTime: "6 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "Pedro Nunes (1537)",
+      note: "First to describe the rhumb line / loxodrome and prove it spirals to the poles rather than ending",
+      venue: "Tratado da Sphera",
+      date: "1537",
+      url: "https://en.wikipedia.org/wiki/Pedro_Nunes",
+    },
+    {
+      id: 2,
+      label: "Mercator (1569)",
+      note: "Original Mercator projection world map, designed to make rhumb-line courses appear straight",
+      venue: "Nova et Aucta Orbis Terrae Descriptio ad Usum Navigantium Emendate Accommodata",
+      date: "1569",
+      url: "https://en.wikipedia.org/wiki/Mercator_1569_world_map",
+    },
+    {
+      id: 3,
+      label: "Bowditch — American Practical Navigator",
+      note: "Authoritative reference on rhumb-line and great-circle navigation",
+      venue: "NGA Pub. 9, current edition",
+      date: "2019",
+      url: "https://msi.nga.mil/Publications/APN",
+    },
+    {
+      id: 4,
+      label: "Veness — Movable Type Scripts",
+      note: "Working rhumb-line equations and JavaScript implementation",
+      venue: "movable-type.co.uk/scripts/latlong.html",
+      date: "Continuously maintained",
+      url: "https://www.movable-type.co.uk/scripts/latlong.html",
+    },
+  ]}
+/>
+
+<Lede>
+  A rhumb line is the course you would steer if you held one compass
+  bearing for the whole trip. It spirals slowly toward whichever pole the
+  bearing tilts to, and on a Mercator map it looks like a perfectly
+  straight line — which is exactly why Mercator invented his projection.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "≤ 30 %",
+      label: "Maximum excess of rhumb over great-circle for high-latitude routes",
+      source: "Bowditch, computed examples",
+    },
+    {
+      value: "1 bearing",
+      label: "Steerable compass course — that is the entire point",
+      source: "Definition",
+    },
+    {
+      value: "≈ 0 %",
+      label: "Rhumb-vs-great-circle excess for equatorial pairs",
+      source: "Geometric identity",
+    },
+    {
+      value: "1569",
+      label: "Year Mercator's projection made the rhumb line straight on paper",
+      source: "Mercator 1569",
+    },
+  ]}
+/>
+
+## The two ways to draw a line on Earth
+
+There are two natural lines between two points on a sphere. The
+**great circle** is the shortest path — what a geodesic computes. The
+**rhumb line** (or loxodrome, from Greek "oblique course") is the path of
+constant true bearing — what a compass-steered ship draws. On a flat
+projection these two paths look very different; on a globe both are
+fully visible curves.
+
+<Callout type="definition" term="Loxodrome">
+  A curve on the surface of a sphere that intersects every meridian at the
+  same angle. Equivalently, the path of a ship or aircraft that holds a
+  single constant true bearing. Loxodromes spiral toward the poles in
+  the limit, never reaching them — Pedro Nunes proved this in 1537.
+</Callout>
+
+<DiagramGreatCircle source="Both paths computed against WGS-84; rhumb via Mercator-inverse integration" />
+
+## Why Mercator made rhumbs straight
+
+Gerardus Mercator's 1569 projection stretches the latitude axis non-
+linearly so that every angle between any two intersecting curves on
+Earth's surface is preserved on the map. A constant-bearing course is by
+definition an angle-preserving curve relative to the meridians, and so
+shows as a straight line. The price is that area is wildly exaggerated
+near the poles — Greenland looks larger than Africa, when it is in
+reality 14 times smaller.
+
+## The excess varies with latitude
+
+For two points at the same latitude on the equator, the great circle is
+the equator itself and the rhumb line is the same path — zero excess.
+For points at higher latitudes, the great circle bulges poleward while
+the rhumb line traces a curve closer to the parallel of latitude. The
+excess grows quickly with latitude and with the longitude span.
+
+<DataTable
+  caption="Rhumb-line excess on real long-haul pairs"
+  source="AirMilesCalc, computed against WGS-84"
+  columns={["Route", "Great-circle", "Rhumb", "Excess"]}
+  rows={[
+    ["Equator: STI (Cape Verde) → JIB (Djibouti)", "6,760 km", "6,772 km", "0.2 %"],
+    ["JFK → LHR", "5,555 km", "5,597 km", "0.8 %"],
+    ["LAX → SYD", "12,051 km", "12,238 km", "1.6 %"],
+    ["JFK → HKG", "12,983 km", "15,231 km", "17.3 %"],
+    ["LHR → AKL", "18,330 km", "23,000 km", "25.5 %"],
+  ]}
+/>
+
+## Why ships still use rhumb lines
+
+Modern bulk carriers and most commercial maritime traffic plan rhumb-line
+courses for legs under about 1,000 nautical miles because steering one
+bearing is operationally simpler than re-plotting a great-circle
+multi-segment course every few hours. The extra distance is small on
+short legs and the navigation simplification is worth it. Beyond
+1,000 nm the great-circle saving becomes large enough that ships break
+the course into shorter rhumb-line segments approximating the great
+circle.
+
+<Callout type="note" term="Why aircraft never use rhumb lines">
+  Aircraft fuel cost per kilometre is so high that even a 1 % distance
+  saving justifies the navigation complexity. Modern Flight Management
+  Systems continuously refer to GPS-based geodesic waypoints, so there is
+  no operational simplicity argument in favour of rhumb lines. The only
+  exception is some published approaches and instrument-departure
+  segments that are deliberately specified as constant-bearing courses.
+</Callout>
+
+<FAQ
+  items={[
+    {
+      q: "If a rhumb line is longer, why is it shown as straight on every world map?",
+      a: "Because the world maps you see most often are Mercator projections, designed in 1569 specifically to make rhumb-line (constant-bearing) courses straight. The price is severe area distortion near the poles. Equal-area projections like Mollweide or Robinson distort shape instead and show great circles as more obviously curved.",
+    },
+    {
+      q: "Are rhumb lines obsolete?",
+      a: "Not entirely. Short maritime legs are still plotted as rhumb lines for navigation simplicity. Some published instrument flight procedures specify constant-bearing segments. But long-distance navigation is universally great-circle / geodesic today.",
+    },
+    {
+      q: "What's the formula for rhumb-line distance?",
+      a: "On a sphere, the rhumb-line distance is d = R · √(Δφ² + (Δψ · cos φ_m)²) where Δψ is the Mercator-projected latitude difference and φ_m is the mid-latitude. On an ellipsoid the formula involves an integral that is usually evaluated numerically.",
+    },
+    {
+      q: "Does AirMilesCalc compute rhumb-line distance?",
+      a: "Not as a primary output — every number on the site is the geodesic distance. The comparison table on this page was computed for illustration. If you need rhumb-line distance for a specific maritime application, an open marine-navigation tool is the right place to look.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/methodology",
+      title: "Methodology umbrella",
+      description: "How AirMilesCalc handles the geodesic that aircraft fly.",
+    },
+    {
+      href: "/methodology/great-circle-distance",
+      title: "Great-circle distance, intuitively",
+      description:
+        "Why the shortest path bends north on a Mercator map.",
+    },
+    {
+      href: "/methodology/vincenty-formula",
+      title: "Vincenty's formula",
+      description:
+        "The ellipsoidal computation behind every AirMilesCalc answer.",
+    },
+    {
+      href: "/methodology/haversine-formula",
+      title: "Haversine — the spherical fallback",
+      description:
+        "When a sphere is good enough and when it is not.",
+    },
+  ]}
+/>

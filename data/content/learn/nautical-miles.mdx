@@ -1,0 +1,265 @@
+export const meta = {
+  title: "The nautical mile — exactly 1,852 metres",
+  description:
+    "Why aviation and maritime navigation use nautical miles, where 1,852 metres came from, and why the unit survives in a metric world.",
+  category: "Learn",
+  updated: "2026-06-01",
+  readingTime: "5 min",
+};
+
+<Sources
+  items={[
+    {
+      id: 1,
+      label: "First International Extraordinary Hydrographic Conference",
+      note: "Monaco 1929 conference that fixed the international nautical mile at exactly 1,852 metres",
+      venue: "Conference proceedings via International Hydrographic Organization",
+      date: "1929",
+      url: "https://iho.int/en/",
+    },
+    {
+      id: 2,
+      label: "BIPM SI Brochure (9th edition)",
+      note: "Lists the nautical mile as a non-SI unit accepted for use with SI",
+      venue: "Bureau International des Poids et Mesures",
+      date: "2019",
+      url: "https://www.bipm.org/en/publications/si-brochure",
+    },
+    {
+      id: 3,
+      label: "ICAO Annex 5 — Units of Measurement",
+      note: "Specifies the nautical mile as the primary unit for navigation distances in international civil aviation",
+      venue: "ICAO Annex 5 to the Chicago Convention",
+      date: "Fifth edition, July 2010",
+      url: "https://www.icao.int/Pages/freepublications.aspx",
+    },
+    {
+      id: 4,
+      label: "U.S. Federal Aviation Regulations 14 CFR 1.1",
+      note: "Defines distance units used in US flight rules; aligns with the international nautical mile",
+      venue: "U.S. Federal Aviation Administration",
+      date: "Current",
+      url: "https://www.ecfr.gov/current/title-14/chapter-I/subchapter-A/part-1/section-1.1",
+    },
+  ]}
+/>
+
+<Lede>
+  One nautical mile is exactly one minute of arc on a meridian — which is
+  why pilots and ship navigators use it: a single number on a chart
+  translates directly to a distance. The metric world has not been able to
+  retire it because nothing else is as convenient for working on the globe.
+</Lede>
+
+<KeyStats
+  stats={[
+    {
+      value: "1,852 m",
+      label: "Nautical mile, defined exactly",
+      source: "Monaco 1929 / BIPM",
+    },
+    {
+      value: "1 arc-min",
+      label: "One nautical mile equals one minute of arc on a meridian",
+      source: "By definition (close approximation)",
+    },
+    {
+      value: "1.151 mi",
+      label: "Statute miles in one nautical mile",
+      source: "Derived",
+    },
+    {
+      value: "1.852 km",
+      label: "Kilometres in one nautical mile",
+      source: "By definition",
+    },
+  ]}
+/>
+
+## Where 1,852 comes from
+
+In 1929 the First International Extraordinary Hydrographic Conference in
+Monaco fixed the international nautical mile at exactly 1,852 metres.
+The value derives from a historical metric convention: if Earth's
+quarter-circumference along a meridian is 10,000,000 metres (the
+historical definition of the metre), then a minute of arc is
+10,000,000 ÷ (90 × 60) = 1,851.85 m, rounded to 1,852.
+
+<Callout type="definition" term="Minute of arc">
+  1/60 of a degree. A meridian is divided into 90 degrees from equator to
+  pole; each degree into 60 minutes; each minute into 60 seconds. One
+  minute of arc on a meridian on Earth's surface is about 1,852 m — and
+  for almost all practical purposes, exactly one nautical mile.
+</Callout>
+
+## The Mercator chart and the navigation use case
+
+Gerardus Mercator's 1569 projection made the nautical mile the natural
+distance unit by accident. Mercator stretched the latitude axis non-
+linearly so that any constant-bearing course (a rhumb line) appears as
+a straight line on the chart. The latitude scale at the side of the
+chart is graduated in degrees, minutes, and seconds &mdash; and one minute
+of latitude is one nautical mile. A navigator wanting to measure a leg
+of a planned course simply walks a pair of dividers along the rhumb-line
+heading and counts ticks off the side scale, converting bearing into
+distance and back again with no unit conversion.
+
+This is why the unit survives in modern jet aviation despite the
+calculator on the flight deck doing all the math. The chart is still
+graduated in minutes of latitude, the autopilot still steers magnetic
+courses, and the airway distances published by Eurocontrol and the FAA
+are still in nautical miles. The historical advantage has compounded
+into an installed-base advantage.
+
+<Callout type="definition" term="Knots — speed in nautical miles per hour">
+  One knot equals one nautical mile per hour. The unit name comes from
+  the 17th-century *chip log*: a triangular board was thrown overboard
+  from a ship at the stern, paying out a knotted line at a known
+  spacing. Counting the knots that ran out in a fixed time interval
+  (measured with a sand-glass) gave the ship's speed. By the 18th
+  century the knot was standardised to one nautical mile per hour, and
+  it has been the maritime and aviation speed unit ever since.
+</Callout>
+
+## How fast in knots is a modern airliner?
+
+The standard cruise speeds expressed in knots are deeply familiar to
+pilots and dispatchers in a way that km/h are not. The cluster between
+440 and 490 knots is where almost every commercial passenger aircraft
+operates.
+
+<DataTable
+  caption="Cruise speed of common commercial aircraft in knots, km/h, and Mach"
+  source="Boeing, Airbus product pages; Mach derived at ISA FL370"
+  columns={["Aircraft", "Knots (KTAS)", "km/h", "Mach"]}
+  rows={[
+    ["Boeing 737-800", "≈ 454", "≈ 842", "0.789"],
+    ["Airbus A320neo", "≈ 449", "≈ 833", "0.78"],
+    ["Embraer E195-E2", "≈ 449", "≈ 833", "0.78"],
+    ["Boeing 787-9 / A350-900", "≈ 487", "≈ 903", "0.85"],
+    ["Boeing 777-300ER", "≈ 488", "≈ 905", "0.84"],
+    ["Airbus A380-800", "≈ 486", "≈ 900", "0.85"],
+  ]}
+/>
+
+## Why navigators love it
+
+A navigator looking at a chart can measure a distance directly with
+parallel rules off the latitude scale on the side: count the minutes of
+latitude between the two points and you have the nautical-mile distance,
+no calculator required. Statute miles or kilometres demand a separate
+distance scale and a unit conversion; nautical miles are baked into the
+chart.
+
+<DataTable
+  caption="Where nautical miles are required, allowed, or replaced"
+  source="ICAO Annex 5; FAA 14 CFR 1.1; IMO conventions"
+  columns={["Domain", "Primary unit", "Notes"]}
+  rows={[
+    [
+      "International civil aviation",
+      "Nautical miles",
+      "ICAO Annex 5 requires NM for navigation distance",
+    ],
+    [
+      "U.S. domestic aviation",
+      "Nautical miles",
+      "FAA 14 CFR 1.1, aligned with ICAO",
+    ],
+    [
+      "Maritime (international)",
+      "Nautical miles",
+      "International Maritime Organization conventions",
+    ],
+    ["Maritime (US inland)", "Statute miles", "Historically distinct from open-ocean NM"],
+    [
+      "Surface road / rail",
+      "km or statute miles",
+      "Nautical miles are not used on land",
+    ],
+    [
+      "Survey / geodesy",
+      "Metres",
+      "Nautical miles are an aviation/maritime artefact only",
+    ],
+  ]}
+/>
+
+## Knots are nautical miles per hour
+
+Aircraft and ships measure speed in **knots** — one knot is one nautical
+mile per hour. A Boeing 777 cruises at about Mach 0.84, which at FL370 is
+roughly 488 knots true airspeed. The unit aligns with the navigation-
+distance unit, so distance / speed gives time directly: 5,000 NM at
+500 knots = 10 hours, no unit conversion.
+
+<BarChart
+  title="The three distance units side by side, scaled to one nautical mile"
+  source="Definitions: BIPM SI Brochure, NIST"
+  unit="m"
+  data={[
+    { label: "1 nautical mile", value: 1852 },
+    { label: "1 statute mile", value: 1609.344 },
+    { label: "1 kilometre", value: 1000 },
+  ]}
+/>
+
+## Why a meter-based nautical mile would not help
+
+Aviation could in principle adopt kilometres for navigation distance —
+some Russian-fleet specifications already use km internally — but the
+existing global chart infrastructure, the trained pilot population, and
+the convenient one-minute-of-arc property of the nautical mile mean the
+unit will likely outlive most other "imperial" survivors. The BIPM has
+listed it as accepted-for-use-with-SI since the 1960s, which is metric-
+system endorsement in all but the strictest interpretation.
+
+<FAQ
+  items={[
+    {
+      q: "Is the nautical mile actually exactly one minute of latitude?",
+      a: "Almost. Because Earth is an ellipsoid, one minute of latitude varies from about 1,843 m at the equator to about 1,861 m at the poles. The 1,852 m international nautical mile is the round-number compromise fixed in 1929 — close enough to the local arc-minute that charts still work without correction.",
+    },
+    {
+      q: "What's the difference between a nautical mile and an air mile?",
+      a: "None. 'Air mile' is colloquial for nautical mile in aviation contexts. 'Statute mile' is the land mile (1,609.344 m). When you see 'miles' on an airline booking page, check the context — frequent-flyer 'miles' are usually statute miles, but the underlying distance is great-circle nautical miles.",
+    },
+    {
+      q: "Why does AirMilesCalc show all three units?",
+      a: "Aviation and maritime users expect nautical miles; consumer travelers expect statute miles; the rest of the metric world expects kilometres. The conversion is trivial but the convenience of seeing all three at once isn't, so we always emit the full row.",
+    },
+    {
+      q: "Is the U.S. survey mile relevant here?",
+      a: "No. The U.S. survey mile is a slightly different statute-mile definition used in land surveying. The aviation statute mile is the international 1,609.344 m. The difference (about 3 mm per mile) does not surface in flight-distance work.",
+    },
+  ]}
+/>
+
+<InternalLinks
+  links={[
+    {
+      href: "/methodology/wgs84-ellipsoid",
+      title: "WGS-84 ellipsoid",
+      description:
+        "Why one minute of arc varies slightly with latitude on the real Earth.",
+    },
+    {
+      href: "/methodology/great-circle-distance",
+      title: "Great-circle distance",
+      description:
+        "The distance that nautical miles measure.",
+    },
+    {
+      href: "/methodology",
+      title: "Methodology umbrella",
+      description:
+        "How AirMilesCalc converts between units.",
+    },
+    {
+      href: "/learn/aircraft-cruise-speeds",
+      title: "Aircraft cruise speeds",
+      description:
+        "Where knots show up in commercial aviation.",
+    },
+  ]}
+/>
