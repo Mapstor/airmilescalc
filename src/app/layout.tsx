@@ -335,34 +335,18 @@ const organizationSchema = {
   },
   "employee": {
     "@id": "https://airmilescalc.com/about#sam-k"
+  },
+  // Cross-reference the WebApplication node (defined in src/app/page.tsx)
+  // so the Organization → WebApplication arc is explicit in the @graph join.
+  "owns": {
+    "@id": "https://airmilescalc.com/#webapp"
   }
 };
 
-const webApplicationSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "AirMilesCalc Flight Distance Calculator",
-  "url": "https://airmilescalc.com",
-  "applicationCategory": "TravelApplication",
-  "operatingSystem": "All",
-  "browserRequirements": "Requires JavaScript",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "featureList": [
-    "Calculate flight distances between 3,000+ airports",
-    "Vincenty formula geodesic calculations (0.5mm accuracy)",
-    "Estimated flight times",
-    "CO2 emissions by cabin class (DEFRA 2024 factors)",
-    "Interactive 3D globe visualization",
-    "Time zone and jet lag information",
-    "Distance in miles, kilometers, and nautical miles"
-  ],
-  "softwareVersion": "1.0",
-  "description": "Free online calculator to find the exact air miles between any two airports worldwide using precise geodesic calculations."
-};
+// WebApplication schema is intentionally NOT emitted from the layout (which
+// would attach it to every page, implying every policy / learn / methodology
+// page IS the calculator). It now lives on src/app/page.tsx and is referenced
+// by @id from the Organization graph in this file.
 
 export default function RootLayout({
   children,
@@ -379,10 +363,6 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
         />
       </head>
       <body

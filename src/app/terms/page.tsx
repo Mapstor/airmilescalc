@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import TermsContent, { meta } from "@/data/content/terms.mdx";
 import { ContentPageLayout } from "@/components/content/ContentPageLayout";
-import { ogImageMeta, twitterMeta } from "@/lib/og";
+import { ogDefaults, ogImageMeta, twitterMeta } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: meta.title,
   description: meta.description,
   alternates: { canonical: "/terms" },
   openGraph: {
-    title: `${meta.title} — AirMilesCalc`,
+    ...ogDefaults(),
+    title: meta.title,
     description: meta.description,
     url: "/terms",
     type: "article",
@@ -29,6 +30,7 @@ export default function TermsPage() {
         updated: meta.updated,
         category: meta.category,
         readingTime: meta.readingTime,
+        pageType: "WebPage",
         breadcrumbs: [
           { name: "Home", href: "/" },
           { name: "Terms", href: "/terms" },

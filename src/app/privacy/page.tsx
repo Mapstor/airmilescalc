@@ -1,14 +1,15 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { InternalLinks, KeyStats, Sources, FAQ } from '@/components/content/blocks';
-import { ogImageMeta, twitterMeta } from '@/lib/og';
+import { ogDefaults, ogImageMeta, ogImageUrl, twitterMeta } from '@/lib/og';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description: "Privacy policy for AirMilesCalc: no first-party tracking, full Google AdSense disclosure, GDPR / CCPA / LGPD / UK GDPR rights, cookie inventory.",
   alternates: { canonical: '/privacy' },
   openGraph: {
-    title: 'Privacy Policy — AirMilesCalc',
+    ...ogDefaults(),
+    title: 'Privacy Policy',
     description: 'No first-party tracking. Full AdSense disclosure. GDPR / CCPA / LGPD / UK GDPR rights, cookie inventory.',
     url: '/privacy',
     type: 'article',
@@ -17,7 +18,32 @@ export const metadata: Metadata = {
   twitter: twitterMeta({ title: 'Privacy Policy', subtitle: 'No first-party tracking. Full AdSense disclosure. GDPR / CCPA / LGPD compliance.', category: 'Policy' }),
 };
 
-// JSON-LD structured data
+// JSON-LD structured data. /privacy is bespoke (does not use ContentPageLayout
+// because the rendering layout is custom); emits its own WebPage + Breadcrumb
+// blocks so the schema graph still joins via the WebSite and Organization @id
+// references that layout.tsx defines.
+const PRIVACY_LAST_UPDATED = "2026-05-01";
+
+const webPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://airmilescalc.com/privacy#page",
+  "name": "Privacy Policy",
+  "description": "Privacy policy for AirMilesCalc: no first-party tracking, full Google AdSense disclosure, GDPR / CCPA / LGPD / UK GDPR rights, cookie inventory.",
+  "url": "https://airmilescalc.com/privacy",
+  "inLanguage": "en",
+  "datePublished": PRIVACY_LAST_UPDATED,
+  "dateModified": PRIVACY_LAST_UPDATED,
+  "isPartOf": { "@id": "https://airmilescalc.com/#website" },
+  "about": { "@id": "https://airmilescalc.com/#organization" },
+  "primaryImageOfPage": {
+    "@type": "ImageObject",
+    "url": `https://airmilescalc.com${ogImageUrl({ title: "Privacy Policy", subtitle: "GDPR / CCPA / LGPD compliance", category: "Policy" })}`,
+    "width": 1200,
+    "height": 630
+  }
+};
+
 const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -40,6 +66,10 @@ const breadcrumbSchema = {
 export default function PrivacyPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}

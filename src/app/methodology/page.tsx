@@ -3,17 +3,18 @@ import MethodologyContent, {
   meta,
 } from "@/data/content/methodology/index.mdx";
 import { ContentPageLayout } from "@/components/content/ContentPageLayout";
-import { ogImageMeta, twitterMeta } from "@/lib/og";
+import { ogDefaults, ogImageMeta, twitterMeta } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: meta.title,
   description: meta.description,
   alternates: { canonical: "/methodology" },
   openGraph: {
-    title: `${meta.title} — AirMilesCalc`,
+    ...ogDefaults(),
+    title: meta.title,
     description: meta.description,
     url: "/methodology",
-    type: "article",
+    type: "website",
     images: ogImageMeta({ title: meta.title, subtitle: meta.description, category: meta.category }),
   },
   twitter: twitterMeta({ title: meta.title, subtitle: meta.description, category: meta.category }),
@@ -31,6 +32,7 @@ export default function MethodologyPage() {
         updated: meta.updated,
         category: meta.category,
         readingTime: meta.readingTime,
+        pageType: "CollectionPage",
         breadcrumbs: [
           { name: "Home", href: "/" },
           { name: "Methodology", href: "/methodology" },

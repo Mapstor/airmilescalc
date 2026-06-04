@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import ContactContent, { meta } from "@/data/content/contact.mdx";
 import { ContentPageLayout } from "@/components/content/ContentPageLayout";
-import { ogImageMeta, twitterMeta } from "@/lib/og";
+import { ogDefaults, ogImageMeta, twitterMeta } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: meta.title,
   description: meta.description,
   alternates: { canonical: "/contact" },
   openGraph: {
-    title: `${meta.title} — AirMilesCalc`,
+    ...ogDefaults(),
+    title: meta.title,
     description: meta.description,
     url: "/contact",
     type: "article",
@@ -29,6 +30,7 @@ export default function ContactPage() {
         updated: meta.updated,
         category: meta.category,
         readingTime: meta.readingTime,
+        pageType: "ContactPage",
         breadcrumbs: [
           { name: "Home", href: "/" },
           { name: "Contact", href: "/contact" },

@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import AboutContent, { meta } from "@/data/content/about.mdx";
 import { ContentPageLayout } from "@/components/content/ContentPageLayout";
-import { ogImageMeta, twitterMeta } from "@/lib/og";
+import { ogDefaults, ogImageMeta, twitterMeta } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: meta.title,
   description: meta.description,
   alternates: { canonical: "/about" },
   openGraph: {
-    title: `${meta.title} — AirMilesCalc`,
+    ...ogDefaults(),
+    title: meta.title,
     description: meta.description,
     url: "/about",
     type: "article",
@@ -63,6 +64,7 @@ export default function AboutPage() {
           updated: meta.updated,
           category: meta.category,
           readingTime: meta.readingTime,
+          pageType: "AboutPage",
           breadcrumbs: [
             { name: "Home", href: "/" },
             { name: "About", href: "/about" },

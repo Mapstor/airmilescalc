@@ -70,7 +70,7 @@ const META: Record<
   },
 };
 
-import { ogImageMeta, twitterMeta } from "@/lib/og";
+import { ogDefaults, ogImageMeta, twitterMeta } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: "Learn",
@@ -78,10 +78,11 @@ export const metadata: Metadata = {
     "Plain-English deep dives on aviation operations, flight emissions, sustainable aviation fuel, jet lag, and the world's busiest airports and longest flights.",
   alternates: { canonical: "/learn" },
   openGraph: {
-    title: "Learn — AirMilesCalc",
+    ...ogDefaults(),
+    title: "Learn",
     description: "Ten plain-English deep dives on aviation, emissions, and travel science.",
     url: "/learn",
-    type: "article",
+    type: "website",
     images: ogImageMeta({ title: "Learn", subtitle: "Ten plain-English deep dives on aviation, emissions, and travel science.", category: "Learn" }),
   },
   twitter: twitterMeta({ title: "Learn", subtitle: "Ten plain-English deep dives on aviation, emissions, and travel science.", category: "Learn" }),
@@ -99,6 +100,7 @@ export default function LearnIndex() {
           "Plain-English deep dives on flight operations, emissions science, sustainable aviation fuel, jet-lag chronobiology, and the airports and routes that anchor global aviation.",
         url: "/learn",
         category: "Learn",
+        pageType: "CollectionPage",
         breadcrumbs: [
           { name: "Home", href: "/" },
           { name: "Learn", href: "/learn" },

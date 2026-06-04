@@ -6,7 +6,42 @@ import { getTopAirportsByRouteCount } from '@/lib/queries';
 import { displayCountryName } from '@/lib/country';
 import { InternalLinks, Sources } from '@/components/content/blocks';
 
-// Homepage-specific JSON-LD structured data (WebSite, Organization, WebApplication are in layout.tsx)
+// Homepage-specific JSON-LD structured data. WebSite + Organization are in
+// layout.tsx (they apply site-wide). WebApplication lives HERE because the
+// homepage IS the calculator instance; emitting it on every policy / learn /
+// methodology page would misrepresent those content pages as the app itself.
+
+// WebApplication schema for the calculator. @id lets the Organization in
+// layout.tsx reference this node via "owns" so the @graph join is explicit.
+const webApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "@id": "https://airmilescalc.com/#webapp",
+  "name": "AirMilesCalc Flight Distance Calculator",
+  "url": "https://airmilescalc.com",
+  "applicationCategory": "TravelApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  },
+  "featureList": [
+    "Calculate flight distances between 3,000+ airports",
+    "Vincenty formula geodesic calculations (0.5mm accuracy)",
+    "Estimated flight times",
+    "CO2 emissions by cabin class (DEFRA 2024 factors)",
+    "Interactive 3D globe visualization",
+    "Time zone and jet lag information",
+    "Distance in miles, kilometers, and nautical miles"
+  ],
+  "softwareVersion": "1.0",
+  "description": "Free online calculator to find the exact air miles between any two airports worldwide using precise geodesic calculations.",
+  "publisher": { "@id": "https://airmilescalc.com/#organization" },
+  "isPartOf": { "@id": "https://airmilescalc.com/#website" }
+};
 
 // HowTo schema for calculator instructions
 const howToSchema = {
@@ -220,6 +255,10 @@ export default function Home() {
   return (
     <>
       {/* Homepage-specific JSON-LD (site-wide schemas in layout.tsx) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}

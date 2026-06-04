@@ -3,14 +3,15 @@ import EditorialContent, {
   meta,
 } from "@/data/content/editorial-process.mdx";
 import { ContentPageLayout } from "@/components/content/ContentPageLayout";
-import { ogImageMeta, twitterMeta } from "@/lib/og";
+import { ogDefaults, ogImageMeta, twitterMeta } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: meta.title,
   description: meta.description,
   alternates: { canonical: "/editorial-process" },
   openGraph: {
-    title: `${meta.title} — AirMilesCalc`,
+    ...ogDefaults(),
+    title: meta.title,
     description: meta.description,
     url: "/editorial-process",
     type: "article",

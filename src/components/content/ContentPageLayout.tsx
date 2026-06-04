@@ -12,13 +12,15 @@ const CONTENT_FIRST_PUBLISHED = "2026-01-26";
 // policy pages (privacy, terms, accessibility) and meta pages (about, contact)
 // pass a different value so their structured data joins the right Schema.org
 // hierarchy. AboutPage and ContactPage are recognised rich-result types;
-// WebPage is the safe generic for policy content.
+// WebPage is the safe generic for policy content; CollectionPage is for
+// umbrella index pages that list child entries (/learn, /methodology).
 export type ContentPageType =
   | "TechArticle"
   | "Article"
   | "AboutPage"
   | "ContactPage"
-  | "WebPage";
+  | "WebPage"
+  | "CollectionPage";
 
 export type ContentMeta = {
   title: string;
@@ -118,9 +120,19 @@ export function ContentPageLayout({
   // For Article-class pages (TechArticle, Article) emit the full Article
   // shape Google Rich Results requires: headline, datePublished, dateModified,
   // author, publisher, image, mainEntityOfPage. For non-article page types
-  // (WebPage, AboutPage, ContactPage) emit a simpler WebPage-class block that
-  // still joins the graph via isPartOf and about.
+  // (WebPage, AboutPage, ContactPage, CollectionPage) emit a WebPage-class
+  // block that still joins the graph via isPartOf and about; AboutPage and
+  // ContactPage additionally point mainEntity at the entity they describe
+  // (Sam K. and the Organization respectively).
   const isArticleType = pageType === "TechArticle" || pageType === "Article";
+  // mainEntity per Schema.org semantics: AboutPage describes Sam K.; ContactPage
+  // describes the Organization (whose contactPoint blocks live in layout.tsx).
+  const mainEntityRef =
+    pageType === "AboutPage"
+      ? { "@id": "https://airmilescalc.com/about#sam-k" }
+      : pageType === "ContactPage"
+        ? { "@id": "https://airmilescalc.com/#organization" }
+        : undefined;
   const ldArticle = isArticleType
     ? {
         "@context": "https://schema.org",
@@ -154,6 +166,7 @@ export function ContentPageLayout({
     : {
         "@context": "https://schema.org",
         "@type": pageType,
+        "@id": `${pageUrl}#page`,
         name: meta.title,
         headline: meta.title,
         description: meta.description,
@@ -162,6 +175,7 @@ export function ContentPageLayout({
         dateModified,
         about: { "@id": "https://airmilescalc.com/#organization" },
         isPartOf: { "@id": "https://airmilescalc.com/#website" },
+        ...(mainEntityRef && { mainEntity: mainEntityRef }),
         primaryImageOfPage: {
           "@type": "ImageObject",
           url: imageUrl,

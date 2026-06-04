@@ -3,14 +3,15 @@ import AccessibilityContent, {
   meta,
 } from "@/data/content/accessibility.mdx";
 import { ContentPageLayout } from "@/components/content/ContentPageLayout";
-import { ogImageMeta, twitterMeta } from "@/lib/og";
+import { ogDefaults, ogImageMeta, twitterMeta } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: meta.title,
   description: meta.description,
   alternates: { canonical: "/accessibility" },
   openGraph: {
-    title: `${meta.title} — AirMilesCalc`,
+    ...ogDefaults(),
+    title: meta.title,
     description: meta.description,
     url: "/accessibility",
     type: "article",
@@ -35,6 +36,7 @@ export default function AccessibilityPage() {
         updated: meta.updated,
         category: meta.category,
         readingTime: meta.readingTime,
+        pageType: "WebPage",
         breadcrumbs: [
           { name: "Home", href: "/" },
           { name: "Accessibility", href: "/accessibility" },
