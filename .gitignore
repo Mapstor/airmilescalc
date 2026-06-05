@@ -50,3 +50,13 @@ CLAUDE_CODE_PROMPT.md
 # agent / session
 .claude/
 dev.log
+
+# OpenNext
+.open-next
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+
+!.env.example
