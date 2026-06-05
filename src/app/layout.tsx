@@ -3,6 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import Link from "next/link";
 import "./globals.css";
+import { Analytics } from "@/components/Analytics";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://airmilescalc.com"),
@@ -59,12 +60,22 @@ export const metadata: Metadata = {
     description: "Calculate flight distances between airports worldwide with precise Vincenty geodesic + DEFRA 2024 emissions.",
     images: ["/api/og"],
   },
-  // Google Search Console verification — populate the string below with the
-  // value Google Search Console gives after adding airmilescalc.com as a
-  // property. Leave the placeholder if not yet registered; an empty string
-  // emits no meta tag.
+  // Search-engine ownership verification.
+  //
+  // Google Search Console uses the FILE method: the verification file
+  // /public/google12f8c2f9c03913a3.html serves at /google12f8c2f9c03913a3.html
+  // and proves ownership without a meta tag. The verification.google field
+  // below stays empty because the meta-tag method isn't in use.
+  //
+  // Bing Webmaster uses the META-tag method (msvalidate.01). Next.js's
+  // Metadata API exposes this via verification.other.
+  //
+  // Yandex / Pinterest / Norton etc. would also go under `other` if needed.
   verification: {
     google: "",
+    other: {
+      "msvalidate.01": "57C407E8336C4915E2D28EEA649C8078",
+    },
   },
 };
 
@@ -368,6 +379,10 @@ export default function RootLayout({
       <body
         className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
       >
+        {/* Google Analytics 4 (gtag.js) — loads after interactive to avoid
+            blocking the LCP. Fires page_view on every App Router client-side
+            navigation; see src/components/Analytics.tsx. */}
+        <Analytics />
         <Header />
         <main id="main">{children}</main>
         <Footer />
